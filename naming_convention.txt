@@ -1,0 +1,97 @@
+Naming convention Nothing Engine
+
+
+----------------------------------------------------------------------------------------------------------
+
+
+PascalCase -> nomi di classi, struct e funzioni
+
+camelCase -> variabili locali, globali e membro pubbliche di classe
+
+UPPER_CASE -> macro #define
+
+suffisso "_" -> variabili membro di classe PRIVATE (es. "private: int privateVar_")
+
+prefisso "_" -> argomenti di funzione (solo se interferiscono con nomi di variabili membro di una classe)
+
+prefisso "g" -> variabili globali (poco usato)
+
+
+//-----------------------------------------------------------
+// INFO UTILI
+//-----------------------------------------------------------
+
+- I commenti sono formattati come:
+
+// Con lettera maiuscola e uno spazio dai '//'
+
+
+//-----------------------------------------------------------
+
+
+- Preferire funzioni definite come:
+
+void funz()
+{
+
+	// Parentesi graffe in questo modo
+
+}
+
+
+//-----------------------------------------------------------
+
+
+- Preferire doppi spazi per separare meglio il codice, uno spazio dalle parentesi graffe
+
+es:
+
+int example(int a, float b)
+{
+
+	// Esempio:
+	if(a > 10)
+	{
+
+		return 10;
+
+	}
+	else
+	{
+
+		// Doppi spazi se necessario
+		float h = b + 0.1f;
+		h -= 0.05f;
+
+
+		printFn("Numero: " + h);
+
+	}
+
+}
+
+
+//-----------------------------------------------------------
+// USO DELLA LIBRERIA STANDARD C++
+//-----------------------------------------------------------
+
+Usare poche e semplici cose dalla STL di C++
+
+<vector> -> std::vector
+<string> -> std::string
+<fstream> -> std::ifstream / std::ofstream
+<functional> -> std::function (con cautela)
+<memory> -> std::unique_ptr / std::make_unique (dovrebbe già contenere std::move)
+<chrono> -> tempo
+<filesystem> -> file e percorsi
+
+
+//-----------------------------------------------------------
+// LIBRERIE di TERZE PARTI
+//-----------------------------------------------------------
+
+SDL3 -> finestra / input mouse-tastiera-controller
+GLAD -> funzioni OpenGL
+GLM -> matematica OpenGL
+OpenAL -> audio base
+EnTT -> ECS

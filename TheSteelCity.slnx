@@ -1,0 +1,12 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/Elementi di soluzione/">
+    <File Path="naming_convention.txt" />
+  </Folder>
+  <Project Path="src/engine/engine.vcxproj" Id="ede834dd-b061-4773-8f39-8cdef5627e6d" />
+  <Project Path="src/tsc/tsc.vcxproj" Id="4d5d9b31-b477-4c71-b747-a407a79f4d2f">
+    <BuildDependency Project="src/engine/engine.vcxproj" />
+  </Project>
+</Solution>
