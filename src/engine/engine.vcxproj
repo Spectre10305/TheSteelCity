@@ -131,7 +131,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)libs\SDL3\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\SDL3\include\;$(SolutionDir)libs\GLAD\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -156,7 +156,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)libs\SDL3\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\SDL3\include\;$(SolutionDir)libs\GLAD\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -174,11 +174,35 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="core\Engine.h" />
+    <ClInclude Include="core\WindowManager.h" />
+    <ClInclude Include="graphics\IMGUI\imconfig.h" />
+    <ClInclude Include="graphics\IMGUI\imgui.h" />
+    <ClInclude Include="graphics\IMGUI\imgui_impl_opengl3.h" />
+    <ClInclude Include="graphics\IMGUI\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="graphics\IMGUI\imgui_impl_sdl3.h" />
+    <ClInclude Include="graphics\IMGUI\imgui_internal.h" />
+    <ClInclude Include="graphics\IMGUI\imstb_rectpack.h" />
+    <ClInclude Include="graphics\IMGUI\imstb_textedit.h" />
+    <ClInclude Include="graphics\IMGUI\imstb_truetype.h" />
+    <ClInclude Include="graphics\RenderManager.h" />
+    <ClInclude Include="graphics\Shader.h" />
     <ClInclude Include="utils\Log.h" />
+    <ClInclude Include="utils\Time.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\Engine.cpp" />
+    <ClCompile Include="core\WindowManager.cpp" />
     <ClCompile Include="engine_main.cpp" />
+    <ClCompile Include="graphics\glad.c" />
+    <ClCompile Include="graphics\IMGUI\imgui.cpp" />
+    <ClCompile Include="graphics\IMGUI\imgui_demo.cpp" />
+    <ClCompile Include="graphics\IMGUI\imgui_draw.cpp" />
+    <ClCompile Include="graphics\IMGUI\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="graphics\IMGUI\imgui_impl_sdl3.cpp" />
+    <ClCompile Include="graphics\IMGUI\imgui_tables.cpp" />
+    <ClCompile Include="graphics\IMGUI\imgui_widgets.cpp" />
+    <ClCompile Include="graphics\RenderManager.cpp" />
+    <ClCompile Include="graphics\Shader.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

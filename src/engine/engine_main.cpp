@@ -12,7 +12,7 @@ struct LaunchOptions
 };
 
 
-// Questo viene esportatato verso tsc.exe per avviare pl'engine
+// Questo viene esportatato verso tsc.exe per avviare l'engine
 extern "C" __declspec(dllexport)
 void EngineMain(int args, char* argsv[])
 {
@@ -33,7 +33,15 @@ void EngineMain(int args, char* argsv[])
 
 
 	nothing::Engine e;
-	e.Init();
+
+
+	if (!e.Init())
+	{
+		nothing::LogError("Cannot initialize engine");
+		return;
+	}
+
+
 	e.Run();
 	e.Shutdown();
 

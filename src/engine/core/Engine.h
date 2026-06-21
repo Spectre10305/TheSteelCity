@@ -2,6 +2,10 @@
 #include <SDL3/SDL.h>
 
 
+#include "WindowManager.h"
+#include "../graphics/RenderManager.h"
+
+
 namespace nothing
 {
 
@@ -11,15 +15,20 @@ namespace nothing
 
 	public:
 
-		void Init();
+		bool Init();
 		void Run();
 		void Shutdown();
+
+
+		void HandleEvents(SDL_Event& event);
+
 
 		bool isRunning = true;
 
 	private:
 
-		SDL_Window* _mainWindow = nullptr;
+		WindowManager windowManager_;
+		RenderManager renderManager_;
 
 	};
 

@@ -1,38 +1,37 @@
 #include "Engine.h"
 #include "../utils/Log.h"
-#include <SDL3/SDL.h>
+#include "../utils/Time.h"
 
 
 // =================================================
 
 
-void nothing::Engine::Init()
+bool nothing::Engine::Init()
 {
 
 	nothing::LogInfo("Initializing engine...");
 
 
-	if (!SDL_Init(SDL_INIT_VIDEO))
+	nothing::StartTimer();
+
+
+	if (!windowManager_.Init())
 	{
 
-		SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
-		return;
+		nothing::LogInfo("Can't initialize WindowManager, shutting down everything...");
+		return false;
 
 	}
 
 
-	_mainWindow = SDL_CreateWindow("Nothing Engine DEMO", 1240, 720, SDL_WINDOW_OPENGL);
-	SDL_SetWindowResizable(_mainWindow, true);
+	renderManager_.Init();
 
 
-	if (_mainWindow == NULL)
-	{
+	double timeToInitialize = nothing::ElapsedMS();
+	nothing::LogInfo("Took: " + std::to_string(timeToInitialize) + " MS to initialize engine");
 
-		SDL_Log("Couldn't create window: %s", SDL_GetError());
-		SDL_Quit();
-		return;
 
-	}
+	return true;
 
 }
 
@@ -46,24 +45,23 @@ void nothing::Engine::Run()
 	nothing::LogInfo("Running...");
 
 
-	SDL_Event event;
-
-
 	while (isRunning)
 	{
 
-		// Poll for pending events
-		while (SDL_PollEvent(&event))
-		{
+		double deltaTime = nothing::CalcDeltaTime();
 
-			if (event.type == SDL_EVENT_QUIT)
-			{
 
-				isRunning = false;
+		SDL_Event event;
+		HandleEvents(event);
 
-			}
 
-		}
+		renderManager_.Update();
+
+
+		SDL_GL_SwapWindow(windowManager_.GetWindowPtr());
+
+
+		windowManager_.SetWindowTitle(("Nothing Engine DEMO - DeltaTime: " + std::to_string(deltaTime)).c_str());
 
 	}
 
@@ -79,8 +77,44 @@ void nothing::Engine::Shutdown()
 	nothing::LogInfo("Shutting down...");
 
 
-	SDL_DestroyWindow(_mainWindow);
-	SDL_Quit();
+	renderManager_.Shutdown();
+	windowManager_.Shutdown();
+
+}
+
+
+// =================================================
+
+
+void nothing::Engine::HandleEvents(SDL_Event& event)
+{
+
+	// Eventi SDL (finestra, tastiera, mouse)
+	while (SDL_PollEvent(&event))
+	{
+
+		switch (event.type)
+		{
+
+		case SDL_EVENT_WINDOW_RESIZED:
+			int w, h;
+			windowManager_.GetWindowSize(w, h);
+			renderManager_.ResizeGLViewport(w, h);
+			nothing::LogInfo("Window resized to: " + std::to_string(w) + "X" + std::to_string(h));
+			break;
+
+
+		case SDL_EVENT_QUIT:
+			isRunning = false;
+			break;
+			
+
+		default:
+			break;
+
+		}
+
+	}
 
 }
 
