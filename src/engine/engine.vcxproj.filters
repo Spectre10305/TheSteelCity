@@ -60,6 +60,9 @@
     <ClInclude Include="graphics\IMGUI\imstb_truetype.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="user_interface\UserInterface.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\Engine.cpp">
@@ -99,6 +102,9 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="graphics\IMGUI\imgui_widgets.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="user_interface\UserInterface.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

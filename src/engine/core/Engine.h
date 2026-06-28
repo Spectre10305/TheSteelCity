@@ -4,6 +4,7 @@
 
 #include "WindowManager.h"
 #include "../graphics/RenderManager.h"
+#include "../user_interface/UserInterface.h"
 
 
 namespace nothing
@@ -29,6 +30,7 @@ namespace nothing
 
 		WindowManager windowManager_;
 		RenderManager renderManager_;
+		UserInterface userInterface_;
 
 	};
 

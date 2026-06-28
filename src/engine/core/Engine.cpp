@@ -1,9 +1,7 @@
 #include "Engine.h"
 #include "../utils/Log.h"
 #include "../utils/Time.h"
-#include "../graphics/IMGUI/imgui.h"
-#include "../graphics/IMGUI/imgui_impl_sdl3.h"
-#include "../graphics/IMGUI/imgui_impl_opengl3.h"
+#include "../graphics/IMGUI/imgui_impl_sdl3.h" // ImGui_ImplSDL3_ProcessEvent() in HandleEvents()
 
 
 // =================================================
@@ -37,44 +35,11 @@ bool nothing::Engine::Init()
 	renderManager_.SetAspectRatio(wWidth, wHeight);
 
 
+	userInterface_.Init(windowManager_.GetWindowPtr(), windowManager_.GetGLContext());
+
+
 	double timeToInitialize = nothing::ElapsedMS();
 	nothing::LogInfo("Took: " + std::to_string(timeToInitialize) + " MS to initialize engine");
-
-
-	// INIT IMGUI
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui_ImplSDL3_InitForOpenGL(windowManager_.GetWindowPtr(), windowManager_.GetGLContext());
-	ImGui_ImplOpenGL3_Init();
-
-
-	ImGuiStyle& s = ImGui::GetStyle();
-	s.FontSizeBase = 15.0f;
-
-
-	s.Colors[ImGuiCol_WindowBg]      = ImVec4(0.15f, 0.15f, 0.15f, 1.0f);
-	s.Colors[ImGuiCol_TitleBg]       = ImVec4(0.10f, 0.10f, 0.10f, 1.0f);
-	s.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.20f, 0.20f, 0.20f, 1.0f);
-
-
-	s.Colors[ImGuiCol_Button]        = ImVec4(0.05f, 0.05f, 0.05f, 1.0f);
-	s.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.537f, 0.537f, 0.537f, 0.800);
-	s.Colors[ImGuiCol_ButtonActive]  = ImVec4(0.567f, 0.567f, 0.567f, 1.0);
-
-
-	s.Colors[ImGuiCol_Header]        = ImVec4(0.572f, 0.572f, 0.572f, 0.310f);
-	s.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.537f, 0.537f, 0.537f, 0.800);
-	s.Colors[ImGuiCol_HeaderActive]  = ImVec4(0.567f, 0.567f, 0.567f, 1.0);
-
-
-	s.Colors[ImGuiCol_ResizeGrip]        = ImVec4(0.05f, 0.05f, 0.05f, 1.0f);
-	s.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.537f, 0.537f, 0.537f, 0.800);
-	s.Colors[ImGuiCol_ResizeGripActive]  = ImVec4(0.567f, 0.567f, 0.567f, 1.0);
-
-
-	ImGuiIO& io = ImGui::GetIO();
-	io.Fonts->AddFontDefault();
-	io.IniFilename = "";
 
 
 	return true;
@@ -102,6 +67,7 @@ void nothing::Engine::Run()
 
 
 		renderManager_.Update();
+		userInterface_.Update();
 
 
 		SDL_GL_SwapWindow(windowManager_.GetWindowPtr());
@@ -121,11 +87,6 @@ void nothing::Engine::Shutdown()
 {
 
 	nothing::LogInfo("Shutting down...");
-
-
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplSDL3_Shutdown();
-	ImGui::DestroyContext();
 
 
 	renderManager_.Shutdown();
@@ -171,6 +132,31 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 		}
 
 	}
+
+
+
+	// -------------------------------------------------------------------------------------------------------------
+
+
+
+	// TEST eventi UI
+	switch (userInterface_.currentEvent)
+	{
+
+	case UIEvent::TestEvent:
+		nothing::LogInfo("TestEvent fired!");
+		break;
+
+
+	default:
+		break;
+
+	}
+
+
+	// Cancella gli eventi UI
+	userInterface_.ClearEvent();
+
 
 }
 

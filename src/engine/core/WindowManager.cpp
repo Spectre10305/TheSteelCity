@@ -45,11 +45,11 @@ bool nothing::WindowManager::Init()
 	}
 
 
-	SDL_SetWindowPosition(window_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-	
-
 	glContext_ = SDL_GL_CreateContext(window_);
 	SDL_GL_MakeCurrent(window_, glContext_);
+
+
+	SDL_SetWindowPosition(window_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 
 
 	return true;

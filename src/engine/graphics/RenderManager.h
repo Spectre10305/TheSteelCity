@@ -31,9 +31,6 @@ namespace nothing
 		Shader* testShader = nullptr;
 
 
-		float f = 0.0f;
-
-
 		float bgR_ = 1.0f;
 		float bgG_ = 1.0f;
 		float bgB_ = 1.0f;
