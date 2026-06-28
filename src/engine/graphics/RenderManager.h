@@ -18,6 +18,8 @@ namespace nothing
 
 
 		void ResizeGLViewport(int w, int h);
+		void SetBackgroundColor(float r, float g, float b);
+		void SetAspectRatio(int n, int d);
 
 	private:
 
@@ -27,6 +29,18 @@ namespace nothing
 
 
 		Shader* testShader = nullptr;
+
+
+		float f = 0.0f;
+
+
+		float bgR_ = 1.0f;
+		float bgG_ = 1.0f;
+		float bgB_ = 1.0f;
+
+
+		float aspectRatioN_ = 4.0f;
+		float aspectRatioD_ = 3.0f;
 		
 	};
 

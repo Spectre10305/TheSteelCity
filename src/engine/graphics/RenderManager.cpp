@@ -3,10 +3,11 @@
 #include <SDL3/SDL.h>
 #include "../utils/Log.h"
 
-
 #include "IMGUI/imgui.h"
 #include "IMGUI/imgui_impl_sdl3.h"
 #include "IMGUI/imgui_impl_opengl3.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 
 // =================================================
@@ -89,12 +90,44 @@ void nothing::RenderManager::Init()
 void nothing::RenderManager::Update()
 {
 
+	f += 0.5f;
 	glClear(GL_COLOR_BUFFER_BIT);
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	glClearColor(bgR_, bgG_, bgB_, 1.0f);
+
+
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::rotate(model, glm::radians(f), glm::vec3(1.0f, 1.0f, 1.0f));
+	glm::mat4 view = glm::mat4(1.0f);
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	glm::mat4 proj = glm::mat4(1.0f);
+	proj = glm::perspective(glm::radians(90.0f), aspectRatioN_ / aspectRatioD_, 0.1f, 10.0f);
+
+
+	glm::mat4 mvp = proj * view * model;
+
+
+	testShader->SetUniform("MVP", mvp);
 
 	
 	glBindVertexArray(VAO_);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplSDL3_NewFrame();
+	ImGui::NewFrame();
+
+
+	ImGui::ShowDemoWindow();
+
+
+	ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver);
+	ImGui::Begin("Testing");
+	ImGui::End();
+
+
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 }
 
@@ -117,6 +150,31 @@ void nothing::RenderManager::ResizeGLViewport(int w, int h)
 {
 
 	glViewport(0, 0, w, h);
+
+}
+
+
+// =================================================
+
+
+void nothing::RenderManager::SetBackgroundColor(float r, float g, float b)
+{
+
+	bgR_ = r;
+	bgG_ = g;
+	bgB_ = b;
+
+}
+
+
+// =================================================
+
+
+void nothing::RenderManager::SetAspectRatio(int n, int d)
+{
+
+	aspectRatioN_ = static_cast<float>(n);
+	aspectRatioD_ = static_cast<float>(d);
 
 }
 

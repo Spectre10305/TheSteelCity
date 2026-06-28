@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
 
 //=============================================================
@@ -140,6 +141,17 @@ void nothing::Shader::SetUniform(const char* unifName, double newVal)
 {
 
     glUniform1d(glGetUniformLocation(programID_, unifName), newVal);
+
+}
+
+
+//=============================================================
+
+
+void nothing::Shader::SetUniform(const char* unifName, glm::mat4 newVal)
+{
+
+    glUniformMatrix4fv(glGetUniformLocation(programID_, unifName), 1, GL_FALSE, glm::value_ptr(newVal));
 
 }
 
