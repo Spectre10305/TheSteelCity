@@ -131,7 +131,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)libs\SDL3\include\;$(SolutionDir)libs\GLAD\include\;$(SolutionDir)libs\GLM\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\SDL3\include\;$(SolutionDir)libs\GLAD\include\;$(SolutionDir)libs\GLM\;$(SolutionDir)libs\STB\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -156,7 +156,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)libs\SDL3\include\;$(SolutionDir)libs\GLAD\include\;$(SolutionDir)libs\GLM\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\SDL3\include\;$(SolutionDir)libs\GLAD\include\;$(SolutionDir)libs\GLM\;$(SolutionDir)libs\STB\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -186,12 +186,14 @@
     <ClInclude Include="graphics\IMGUI\imstb_truetype.h" />
     <ClInclude Include="graphics\RenderManager.h" />
     <ClInclude Include="graphics\Shader.h" />
+    <ClInclude Include="user_interface\UIStyleHelper.h" />
     <ClInclude Include="user_interface\UserInterface.h" />
     <ClInclude Include="utils\Log.h" />
     <ClInclude Include="utils\Time.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\Engine.cpp" />
+    <ClCompile Include="core\impl_stb_image.cpp" />
     <ClCompile Include="core\WindowManager.cpp" />
     <ClCompile Include="engine_main.cpp" />
     <ClCompile Include="graphics\glad.c" />
@@ -204,6 +206,7 @@
     <ClCompile Include="graphics\IMGUI\imgui_widgets.cpp" />
     <ClCompile Include="graphics\RenderManager.cpp" />
     <ClCompile Include="graphics\Shader.cpp" />
+    <ClCompile Include="user_interface\UIStyleHelper.cpp" />
     <ClCompile Include="user_interface\UserInterface.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -22,6 +22,7 @@ namespace nothing
 		void           SetWindowSize(int w, int h);
 		void           GetWindowSize(int& w, int& h);
 		void           SetWindowTitle(const char* newTitle);
+		void           SwapBuffers(); // Chiama SDL_GL_SwapWindow()
 
 	private:
 

@@ -50,6 +50,7 @@ bool nothing::WindowManager::Init()
 
 
 	SDL_SetWindowPosition(window_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	SDL_MaximizeWindow(window_);
 
 
 	return true;
@@ -141,6 +142,17 @@ void nothing::WindowManager::SetWindowTitle(const char* newTitle)
 {
 
 	SDL_SetWindowTitle(window_, newTitle);
+
+}
+
+
+// =================================================
+
+
+void nothing::WindowManager::SwapBuffers()
+{
+
+	SDL_GL_SwapWindow(window_);
 
 }
 

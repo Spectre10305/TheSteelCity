@@ -26,7 +26,7 @@ bool nothing::Engine::Init()
 
 
 	renderManager_.Init();
-	renderManager_.SetBackgroundColor(0.0f, 0.0f, 0.0f);
+	renderManager_.SetBackgroundColor(0.5f, 0.5f, 0.5f);
 
 
 	int wWidth = 0;
@@ -70,7 +70,7 @@ void nothing::Engine::Run()
 		userInterface_.Update();
 
 
-		SDL_GL_SwapWindow(windowManager_.GetWindowPtr());
+		windowManager_.SwapBuffers();
 
 
 		windowManager_.SetWindowTitle(("Nothing Engine DEMO - DeltaTime: " + std::to_string(deltaTime)).c_str());
@@ -143,8 +143,8 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 	switch (userInterface_.currentEvent)
 	{
 
-	case UIEvent::TestEvent:
-		nothing::LogInfo("TestEvent fired!");
+	case UIEvent::CloseGame:
+		isRunning = false;
 		break;
 
 
