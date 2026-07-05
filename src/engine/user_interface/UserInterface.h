@@ -20,7 +20,19 @@ namespace nothing
 
 		None,
 		BeginGame,
-		CloseGame
+		CloseGame,
+		ApplyOptions,
+		ResetOptions
+
+	};
+
+
+	enum class UIContext
+	{
+
+		None,
+		MainMenu,
+		Gameplay
 
 	};
 
@@ -40,6 +52,9 @@ namespace nothing
 		ImGuiWindowFlags flags;
 
 
+		UIContext currentContext = UIContext::None;
+
+
 		uint32_t currentStyle = 0;
 
 
@@ -47,7 +62,7 @@ namespace nothing
 		void     UpdateGameContext();
 		void     ClearEvent();
 		bool     MenuButton(const char* text, ImVec2 pos, ImVec2 size, int textYTolerance);
-		void     CenteredText(const char* text);
+		void     CenteredText(const char* text); // Helper per testo centrato
 		uint32_t CreateUITexture(const char* texturePath);
 
 
@@ -67,6 +82,7 @@ namespace nothing
 
 		// Texture UI
 		uint32_t uiTexture_Logo = 0;
+		uint32_t uiTexture_Health = 0;
 
 
 		UIEvent currentEvent = UIEvent::None;

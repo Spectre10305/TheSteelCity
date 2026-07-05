@@ -20,7 +20,7 @@ bool nothing::WindowManager::Init()
 
 	windowWidth_ = 1240;
 	windowHeight_ = 720;
-	windowTitle_ = "Nothing Engine DEMO";
+	windowTitle_ = "The Steel City";
 	windowFlags_ = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
 
 

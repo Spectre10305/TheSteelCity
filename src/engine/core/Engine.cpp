@@ -42,6 +42,16 @@ bool nothing::Engine::Init()
 	nothing::LogInfo("Took: " + std::to_string(timeToInitialize) + " MS to initialize engine");
 
 
+	inputManager_.BindKey(SDL_SCANCODE_W, GameAction::MoveForward);
+	inputManager_.BindKey(SDL_SCANCODE_A, GameAction::MoveLeft);
+	inputManager_.BindKey(SDL_SCANCODE_S, GameAction::MoveBackward);
+	inputManager_.BindKey(SDL_SCANCODE_D, GameAction::MoveRight);
+	inputManager_.BindKey(SDL_SCANCODE_LEFT, GameAction::RotateLeft);
+	inputManager_.BindKey(SDL_SCANCODE_RIGHT, GameAction::RotateRight);
+	inputManager_.BindKey(SDL_SCANCODE_UP, GameAction::RotateUp);
+	inputManager_.BindKey(SDL_SCANCODE_DOWN, GameAction::RotateDown);
+
+
 	return true;
 
 }
@@ -66,14 +76,19 @@ void nothing::Engine::Run()
 		HandleEvents(event);
 
 
-		renderManager_.Update();
+		renderManager_.Update(inputManager_);
 		userInterface_.Update();
 
 
 		windowManager_.SwapBuffers();
 
 
-		windowManager_.SetWindowTitle(("Nothing Engine DEMO - DeltaTime: " + std::to_string(deltaTime)).c_str());
+		// Cancelliamo lo stato dei tasti premuti per il frame successivo
+		inputManager_.ClearInput();
+
+
+		static double fps = 0.0;
+		fps = 1.0 / deltaTime;
 
 	}
 
@@ -109,6 +124,9 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 		ImGui_ImplSDL3_ProcessEvent(&event);
 
 
+		inputManager_.ProcessEvent(event);
+
+
 		switch (event.type)
 		{
 
@@ -117,7 +135,7 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 			windowManager_.   GetWindowSize(w, h);
 			renderManager_.ResizeGLViewport(w, h);
 			renderManager_.  SetAspectRatio(w, h);
-			nothing::LogInfo("Window resized to: " + std::to_string(w) + "X" + std::to_string(h));
+			nothing::LogInfo("Window resized to: " + std::to_string(w) + " X " + std::to_string(h));
 			break;
 
 
@@ -134,14 +152,24 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 	}
 
 
-
 	// -------------------------------------------------------------------------------------------------------------
 
 
-
-	// TEST eventi UI
+	// Eventi UI
 	switch (userInterface_.currentEvent)
 	{
+
+	case UIEvent::BeginGame:
+		break;
+
+
+	case UIEvent::ApplyOptions:
+		break;
+
+
+	case UIEvent::ResetOptions:
+		break;
+
 
 	case UIEvent::CloseGame:
 		isRunning = false;

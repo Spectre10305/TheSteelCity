@@ -86,6 +86,10 @@ void nothing::UserInterface::Init(SDL_Window* windowPtr, void* glContext)
 
 	// TEST TEXTURE
 	uiTexture_Logo = CreateUITexture("D:\\TheSteelCity\\assets\\game\\textures\\tex_ui_logo.png");
+	uiTexture_Health = CreateUITexture("D:\\TheSteelCity\\assets\\game\\textures\\tex_ui_health_symbol.png");
+
+
+	currentContext = UIContext::Gameplay;
 
 }
 
@@ -101,8 +105,23 @@ void nothing::UserInterface::Update()
 	ImGui::NewFrame();
 
 
-	//UpdateMainMenuContext();
-	UpdateGameContext();
+	switch (currentContext)
+	{
+
+	case UIContext::MainMenu:
+		UpdateMainMenuContext();
+		break;
+
+
+	case UIContext::Gameplay:
+		UpdateGameContext();
+		break;
+
+
+	default:
+		break;
+
+	}
 
 
 	ImGui::Render();
@@ -133,6 +152,10 @@ void nothing::UserInterface::UpdateMainMenuContext()
 	ImVec2 scrSz = ImGui::GetIO().DisplaySize;
 
 
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.FontScaleMain = fontScaleBase;
+
+
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 
 
@@ -150,13 +173,13 @@ void nothing::UserInterface::UpdateMainMenuContext()
 
 
 	buttonSpacingY = 0.0f;
-	if (MenuButton(">_NUOVA_PARTITA", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showNewGamePanel = true; }
+	if (MenuButton(">_NUOVA_PARTITA",  ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showNewGamePanel = true;  }
 	buttonSpacingY += buttonHeight + buttonSpacingOffset;
 	if (MenuButton(">_CARICA_PARTITA", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showLoadGamePanel = true; }
 	buttonSpacingY += buttonHeight + buttonSpacingOffset;
-	if (MenuButton(">_OPZIONI", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showOptionsPanel = true; }
+	if (MenuButton(">_OPZIONI",        ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showOptionsPanel = true;  }
 	buttonSpacingY += buttonHeight + buttonSpacingOffset;
-	MenuButton(">_CONTENUTI_EXTRA", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY);
+	MenuButton(">_CONTENUTI_EXTRA",    ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY);
 	buttonSpacingY += buttonHeight + buttonSpacingOffset;
 	if (MenuButton(">_ESCI_DAL_GIOCO", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { currentEvent = UIEvent::CloseGame; }
 
@@ -172,22 +195,18 @@ void nothing::UserInterface::UpdateMainMenuContext()
 
 
 	ImGui::PushItemWidth(90.0f);
-	ImGui::DragFloat("Button Width", &buttonWidth, 1.0f, 1.0f, 600.0f);
-	ImGui::DragFloat("Button Height", &buttonHeight, 1.0f, 1.0f, 600.0f);
-	ImGui::DragFloat("Button Offset X", &buttonOffsetX, 1.0f, 1.0f, 600.0f);
+	ImGui::DragFloat("Button Width",          &buttonWidth, 1.0f, 1.0f, 600.0f);
+	ImGui::DragFloat("Button Height",         &buttonHeight, 1.0f, 1.0f, 600.0f);
+	ImGui::DragFloat("Button Offset X",       &buttonOffsetX, 1.0f, 1.0f, 600.0f);
 	ImGui::DragFloat("Button Spacing offset", &buttonSpacingOffset, 1.0f, 1.0f, 600.0f);
-	ImGui::DragInt("Button Tolerance Y", &toleranceY, 1, 0, 600);
-	ImGui::DragFloat("Font Scale Base", &fontScaleBase, 0.1f, 0.1f, 40.0f);
+	ImGui::DragInt  ("Button Tolerance Y",    &toleranceY, 1, 0, 600);
+	ImGui::DragFloat("Font Scale Base",       &fontScaleBase, 0.1f, 0.1f, 40.0f);
 	ImGui::PopItemWidth();
 
 
-	if (ImGui::Button("Style TECH")) { currentStyle = NOTHING_WINSTYLE_TECH; }
+	if (ImGui::Button("Style TECH"))       { currentStyle = NOTHING_WINSTYLE_TECH;       }
 	if (ImGui::Button("Style INDUSTRIAL")) { currentStyle = NOTHING_WINSTYLE_INDUSTRIAL; }
-	if (ImGui::Button("Style EVIL")) { currentStyle = NOTHING_WINSTYLE_EVIL; }
-
-
-	ImGuiStyle& s = ImGui::GetStyle();
-	s.FontScaleMain = fontScaleBase;
+	if (ImGui::Button("Style EVIL"))       { currentStyle = NOTHING_WINSTYLE_EVIL;       }
 
 
 	ImGui::End();
@@ -306,7 +325,7 @@ void nothing::UserInterface::UpdateMainMenuContext()
 		ImGui::Checkbox("Corsa automatica", &autoRun);
 
 
-		static const char* languageItems[] = { "Italiano", "Inglese", "Francese", "Spagnolo" };
+		static const char* languageItems[] = { "Italiano", "English", "Français", "Español" };
 		static int currentLanguageItem = 0;
 		ImGui::Combo("Lingua", &currentLanguageItem, languageItems, IM_ARRAYSIZE(languageItems));
 
@@ -439,9 +458,9 @@ void nothing::UserInterface::UpdateMainMenuContext()
 		ImGui::Spacing();
 		ImGui::Spacing();
 		ImGui::Separator();
-		ImGui::Button("Applica", ImVec2(110, 0));
+		if (ImGui::Button("Applica", ImVec2(110, 0))) { currentEvent = UIEvent::ApplyOptions; }
 		ImGui::SameLine();
-		ImGui::Button("Ripristina", ImVec2(110, 0));
+		if (ImGui::Button("Ripristina", ImVec2(110, 0))) { currentEvent = UIEvent::ResetOptions; }
 
 
 		ImGui::End();
@@ -473,9 +492,6 @@ void nothing::UserInterface::UpdateGameContext()
 	ImGui::Begin("GameHUDPanel", nullptr, flags);
 
 
-	ImGui::Text("HUD di gioco in sviluppo...");
-
-
 	ImDrawList* dl = ImGui::GetForegroundDrawList();
 
 
@@ -486,20 +502,52 @@ void nothing::UserInterface::UpdateGameContext()
 
 
 	// Simbolo vita ("+")
-	dl->AddRectFilled(ImVec2(10, scrSz.y - 10), ImVec2(letterboxHeight - 10, (scrSz.y - letterboxHeight) + 10), IM_COL32(255, 0, 0, 255));
+	dl->AddImage(uiTexture_Health, ImVec2(10, scrSz.y - 10), ImVec2(letterboxHeight - 10, (scrSz.y - letterboxHeight) + 10));
 
-	static float x = 200;
-	static float width = 600;
+
+	static float x = 60;
+	static float y = 60;
+	static float width = 520;
+	static float width2 = 520;
 	static float height = 10;
-	dl->AddRectFilled(ImVec2(x, scrSz.y - letterboxHeight), ImVec2(width, scrSz.y - height), IM_COL32(90, 90, 90, 255));
+	dl->AddRectFilled(ImVec2(x, scrSz.y - letterboxHeight + y), ImVec2(width, scrSz.y - height), IM_COL32(90, 90, 90, 255));
+
+
+	ImU32 barColor = IM_COL32(0, 250, 250, 255);
+
+
+	if (width2 < 325.0f)
+	{
+
+		barColor = IM_COL32(255, 216, 0, 255);
+
+	}
+
+
+	if (width2 < 200.0f)
+	{
+
+		barColor = IM_COL32(255, 0, 0, 255);
+
+	}
+
+
+	dl->AddRectFilled(ImVec2(x, scrSz.y - letterboxHeight + y), ImVec2(width2, scrSz.y - height), barColor);
+
+
+	dl->AddText(ImVec2(20, 20), IM_COL32(255, 255, 255, 255), "HUD di gioco in sviluppo...");
+
 
 	ImGui::End();
 	ImGui::PopStyleVar(2);
 	ImGui::PopStyleColor();
 
+
 	ImGui::Begin("sasd");
 	ImGui::SliderFloat("X", &x, 0.0f, scrSz.x);
+	ImGui::SliderFloat("Y", &y, 0.0f, scrSz.y);
 	ImGui::SliderFloat("Width", &width, 0.0f, scrSz.x);
+	ImGui::SliderFloat("Width2", &width2, 125.0f, 520.0f);
 	ImGui::SliderFloat("Height", &height, 0.0f, scrSz.y);
 	ImGui::End();
 

@@ -2,6 +2,11 @@
 #include <glad/glad.h>
 #include <SDL3/SDL.h>
 #include "../utils/Log.h"
+#include <stb_image.h>
+
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/rotate_vector.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -29,53 +34,39 @@ void nothing::RenderManager::Init()
 	}
 
 
-	// TEST QUAD
-
-
-
-	float vertices[] =
-	{
-
-		 0.5f,  0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f,
-		-0.5f,  0.5f, 0.0f
-
-	};
-
-
-	unsigned int indices[] =
-	{
-
-		0, 1, 3,
-		1, 2, 3
-
-	};
-
-
-	glGenVertexArrays(1, &VAO_);
-	glGenBuffers(1, &VBO_);
-	glGenBuffers(1, &EBO_);
-	glBindVertexArray(VAO_);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	glEnable(GL_DEPTH_TEST);
 
 
 	const char* vsName = "D:\\TheSteelCity\\assets\\engine\\shaders\\test_shader_vert.glsl";
 	const char* fsName = "D:\\TheSteelCity\\assets\\engine\\shaders\\test_shader_frag.glsl";
 
 
-	testShader = new nothing::Shader(vsName, fsName);
-	testShader->Use();
-	testShader->SetUniform("colR", 0.5f);
-	testShader->SetUniform("colG", 0.6f);
-	testShader->SetUniform("colB", 0.3f);
+	testShader_ = new nothing::Shader(vsName, fsName);
+	testShader_->Use();
+	testShader_->SetUniform("colR", 0.5f);
+	testShader_->SetUniform("colG", 0.6f);
+	testShader_->SetUniform("colB", 0.3f);
+
+
+	uint32_t tex = CreateTexture("D:\\TheSteelCity\\assets\\game\\textures\\nothing_logo.png");
+	textures_.push_back(tex);
+
+	
+	for (int x = 0; x < 10; x++)
+	{
+
+		for (int z = 0; z < 10; z++)
+		{
+
+			Mesh m = CreateCubeMesh();
+			m.position = glm::vec3(static_cast<float>(x) * 2.0f, 0.0f, static_cast<float>(z) * 2.0f);
+			m.texture = textures_[0];
+			meshes_.emplace_back(m);
+
+		}
+
+	}
+	
 
 }
 
@@ -83,35 +74,125 @@ void nothing::RenderManager::Init()
 // =================================================
 
 
-void nothing::RenderManager::Update()
+void nothing::RenderManager::Update(InputManager& input)
 {
 
-	static float rot = 0.0f;
-	rot += 0.5f;
-
-
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(bgR_, bgG_, bgB_, 1.0f);
 
 
-	glm::mat4 model = glm::mat4(1.0f);
+	static glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+	static glm::vec3 cameraOrientation = glm::vec3(0.0f, 0.0f, -1.0f);
+	static glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+	static float cameraSpeed = 0.2f;
+
+
+#pragma region INPUT
+
+
+	if (input.IsActionHeld(GameAction::MoveForward))
+	{
+
+		cameraPos += cameraSpeed * cameraOrientation;
+
+	}
+
+
+	if (input.IsActionHeld(GameAction::MoveBackward))
+	{
+
+		cameraPos -= cameraSpeed * cameraOrientation;
+
+	}
+
+
+	if (input.IsActionHeld(GameAction::MoveLeft))
+	{
+
+		cameraPos += cameraSpeed * -glm::normalize(glm::cross(cameraOrientation, up));
+
+	}
+
+
+	if (input.IsActionHeld(GameAction::MoveRight))
+	{
+
+		cameraPos += cameraSpeed * glm::normalize(glm::cross(cameraOrientation, up));
+
+	}
+
+
+	if (input.IsActionHeld(GameAction::RotateUp))
+	{
+
+		cameraOrientation = glm::rotate(cameraOrientation, glm::radians(1.0f), glm::normalize(glm::cross(cameraOrientation, up)));
+
+	}
+
+
+	if (input.IsActionHeld(GameAction::RotateDown))
+	{
+
+		cameraOrientation = glm::rotate(cameraOrientation, glm::radians(-1.0f), glm::normalize(glm::cross(cameraOrientation, up)));
+
+	}
+
+
+	if (input.IsActionHeld(GameAction::RotateLeft))
+	{
+
+		cameraOrientation = glm::rotate(cameraOrientation, glm::radians(1.0f), up);
+
+	}
+
+
+	if (input.IsActionHeld(GameAction::RotateRight))
+	{
+
+		cameraOrientation = glm::rotate(cameraOrientation, glm::radians(-1.0f), up);
+
+	}
+
+
+#pragma endregion
+
+
+	testShader_->Use();
+	testShader_->SetUniform("tex", 0);
+
+	
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 proj = glm::mat4(1.0f);
 
 
-	model = glm::rotate(model, glm::radians(rot), glm::vec3(1.0f, 1.0f, 1.0f));
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-	proj = glm::perspective(glm::radians(90.0f), aspectRatioN_ / aspectRatioD_, 0.1f, 10.0f);
+	//model = glm::rotate(model, glm::radians(rot), glm::vec3(1.0f, 0.5f, 0.3f));
+	view = glm::lookAt(cameraPos, cameraPos + cameraOrientation, up);
+	proj = glm::perspective(glm::radians(90.0f), aspectRatioN_ / aspectRatioD_, 0.1f, 100.0f);
 
 
-	glm::mat4 mvp = proj * view * model;
+	testShader_->SetUniform("projection", proj);
+	testShader_->SetUniform("view", view);
 
 
-	testShader->SetUniform("MVP", mvp);
+	for (auto& mesh : meshes_)
+	{
 
-	
-	glBindVertexArray(VAO_);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glm::mat4 model = glm::mat4(1.0f);
+
+
+		model = glm::translate(model, mesh.position);
+		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+
+
+		testShader_->SetUniform("model", model);
+
+
+		glBindTexture(GL_TEXTURE_2D, mesh.texture);
+		glBindVertexArray(mesh.VAO);
+		glDrawElements(GL_TRIANGLES, mesh.numIndices, GL_UNSIGNED_INT, 0);
+
+	}
 
 }
 
@@ -122,7 +203,7 @@ void nothing::RenderManager::Update()
 void nothing::RenderManager::Shutdown()
 {
 
-	delete testShader;
+	delete testShader_;
 
 }
 
@@ -159,6 +240,170 @@ void nothing::RenderManager::SetAspectRatio(int n, int d)
 
 	aspectRatioN_ = static_cast<float>(n);
 	aspectRatioD_ = static_cast<float>(d);
+
+}
+
+
+// =================================================
+
+
+nothing::Mesh nothing::RenderManager::CreateCubeMesh()
+{
+
+	float vertices[] =
+	{
+
+		// FRONT (+Z)
+		-0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,   1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,   0.0f, 1.0f,
+
+		// BACK (-Z)
+		 0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,   1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
+
+		 // LEFT (-X)
+		 -0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
+		 -0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
+		 -0.5f,  0.5f,  0.5f,   1.0f, 1.0f,
+		 -0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
+
+		 // RIGHT (+X)
+		  0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
+		  0.5f, -0.5f, -0.5f,   1.0f, 0.0f,
+		  0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
+		  0.5f,  0.5f,  0.5f,   0.0f, 1.0f,
+
+		  // TOP (+Y)
+		  -0.5f,  0.5f,  0.5f,   0.0f, 0.0f,
+		   0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
+		   0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
+		  -0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
+
+		  // BOTTOM (-Y)
+		  -0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
+		   0.5f, -0.5f, -0.5f,   1.0f, 0.0f,
+		   0.5f, -0.5f,  0.5f,   1.0f, 1.0f,
+		  -0.5f, -0.5f,  0.5f,   0.0f, 1.0f
+
+	};
+
+
+	unsigned int indices[] =
+	{
+
+		0, 1, 2,  2, 3, 0,        // front
+		4, 5, 6,  6, 7, 4,        // back
+		8, 9, 10, 10, 11, 8,      // left
+		12, 13, 14, 14, 15, 12,   // right
+		16, 17, 18, 18, 19, 16,   // top
+		20, 21, 22, 22, 23, 20    // bottom
+
+	};
+
+
+	Mesh res{};
+
+
+	glGenVertexArrays(1, &res.VAO);
+	glGenBuffers(1, &res.VBO);
+	glGenBuffers(1, &res.EBO);
+	glBindVertexArray(res.VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, res.VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, res.EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+
+	// Hardcoded per ora
+	res.numIndices = 36;
+
+
+	return res;
+
+}
+
+
+// =================================================
+
+
+uint32_t nothing::RenderManager::CreateTexture(const char* texFileName)
+{
+
+	uint32_t res;
+
+
+	glGenTextures(1, &res);
+	glBindTexture(GL_TEXTURE_2D, res);
+
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+
+	stbi_set_flip_vertically_on_load(true);
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load(texFileName, &width, &height, &nrChannels, 0);
+
+
+	if (data)
+	{
+
+		switch (nrChannels)
+		{
+
+		case 3:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			break;
+
+
+		case 4:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			break;
+
+
+		default:
+			// Fallback a RGB
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			break;
+
+		}
+
+		
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+	}
+	else
+	{
+
+		nothing::LogError("Failed to load texture");
+
+	}
+
+
+	stbi_image_free(data);
+
+
+	return res;
 
 }
 
