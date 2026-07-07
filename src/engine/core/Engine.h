@@ -4,6 +4,7 @@
 
 #include "WindowManager.h"
 #include "InputManager.h"
+#include "ResourceManager.h"
 #include "../graphics/RenderManager.h"
 #include "../user_interface/UserInterface.h"
 
@@ -29,10 +30,11 @@ namespace nothing
 
 	private:
 
-		WindowManager windowManager_;
-		RenderManager renderManager_;
-		UserInterface userInterface_;
-		InputManager  inputManager_;
+		WindowManager   windowManager_;
+		RenderManager   renderManager_;
+		UserInterface   userInterface_;
+		InputManager    inputManager_;
+		ResourceManager resourceManager_;
 
 	};
 

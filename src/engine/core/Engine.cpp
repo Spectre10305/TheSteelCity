@@ -25,7 +25,7 @@ bool nothing::Engine::Init()
 	}
 
 
-	renderManager_.Init();
+	renderManager_.Init(resourceManager_);
 	renderManager_.SetBackgroundColor(0.5f, 0.5f, 0.5f);
 
 

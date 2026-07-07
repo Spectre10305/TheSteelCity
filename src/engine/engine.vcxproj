@@ -187,6 +187,7 @@
     <ClInclude Include="graphics\RenderManager.h" />
     <ClInclude Include="graphics\Shader.h" />
     <ClInclude Include="core\InputManager.h" />
+    <ClInclude Include="core\ResourceManager.h" />
     <ClInclude Include="user_interface\UIStyleHelper.h" />
     <ClInclude Include="user_interface\UserInterface.h" />
     <ClInclude Include="utils\Log.h" />
@@ -208,6 +209,7 @@
     <ClCompile Include="graphics\RenderManager.cpp" />
     <ClCompile Include="graphics\Shader.cpp" />
     <ClCompile Include="core\InputManager.cpp" />
+    <ClCompile Include="core\ResourceManager.cpp" />
     <ClCompile Include="user_interface\UIStyleHelper.cpp" />
     <ClCompile Include="user_interface\UserInterface.cpp" />
   </ItemGroup>

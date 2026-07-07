@@ -3,6 +3,7 @@
 #include <vector>
 #include "Shader.h"
 #include "../core/InputManager.h"
+#include "../core/ResourceManager.h"
 
 
 namespace nothing
@@ -28,7 +29,7 @@ namespace nothing
 
 	public:
 
-		void Init();
+		void Init(ResourceManager& resourcesManager);
 		void Update(InputManager& input);
 		void Shutdown();
 
@@ -40,7 +41,6 @@ namespace nothing
 
 		// Test creazione mesh 3D
 		Mesh CreateCubeMesh();
-		uint32_t CreateTexture(const char* texFileName);
 
 	private:
 
@@ -62,7 +62,6 @@ namespace nothing
 
 
 		std::vector<Mesh> meshes_;
-		std::vector<uint32_t> textures_;
 		
 	};
 

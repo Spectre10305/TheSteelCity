@@ -14,7 +14,7 @@
 // =================================================
 
 
-void nothing::RenderManager::Init()
+void nothing::RenderManager::Init(ResourceManager& resourcesManager)
 {
 
 	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
@@ -48,8 +48,8 @@ void nothing::RenderManager::Init()
 	testShader_->SetUniform("colB", 0.3f);
 
 
-	uint32_t tex = CreateTexture("D:\\TheSteelCity\\assets\\game\\textures\\nothing_logo.png");
-	textures_.push_back(tex);
+	resourcesManager.CreateTexture("D:\\TheSteelCity\\assets\\game\\textures\\nothing_logo.png");
+	resourcesManager.CreateTexture("D:\\TheSteelCity\\assets\\game\\textures\\tex_floor_wood_1.png");
 
 	
 	for (int x = 0; x < 10; x++)
@@ -58,9 +58,29 @@ void nothing::RenderManager::Init()
 		for (int z = 0; z < 10; z++)
 		{
 
+			static int i = 0;
+
+			i++;
+
+
 			Mesh m = CreateCubeMesh();
 			m.position = glm::vec3(static_cast<float>(x) * 2.0f, 0.0f, static_cast<float>(z) * 2.0f);
-			m.texture = textures_[0];
+
+
+			if (i % 2 == 0)
+			{
+
+				m.texture = resourcesManager.GetTextureIDFromName("nothing_logo");
+
+			}
+			else
+			{
+
+				m.texture = resourcesManager.GetTextureIDFromName("tex_floor_wood_1");
+
+			}
+
+			
 			meshes_.emplace_back(m);
 
 		}
@@ -337,75 +357,3 @@ nothing::Mesh nothing::RenderManager::CreateCubeMesh()
 	return res;
 
 }
-
-
-// =================================================
-
-
-uint32_t nothing::RenderManager::CreateTexture(const char* texFileName)
-{
-
-	uint32_t res;
-
-
-	glGenTextures(1, &res);
-	glBindTexture(GL_TEXTURE_2D, res);
-
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-
-	stbi_set_flip_vertically_on_load(true);
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load(texFileName, &width, &height, &nrChannels, 0);
-
-
-	if (data)
-	{
-
-		switch (nrChannels)
-		{
-
-		case 3:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-			break;
-
-
-		case 4:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-			break;
-
-
-		default:
-			// Fallback a RGB
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-			break;
-
-		}
-
-		
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-	}
-	else
-	{
-
-		nothing::LogError("Failed to load texture");
-
-	}
-
-
-	stbi_image_free(data);
-
-
-	return res;
-
-}
-
-
-// =================================================
