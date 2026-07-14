@@ -50,7 +50,7 @@ namespace nothing
 	//=============================================================
 
 
-	inline std::time_t PrintCurrentTime() //NOTA: questo è il tempo in ore, minuti e secondi
+	inline std::time_t GetCurrentTime() //NOTA: questo è il tempo in ore, minuti e secondi
 	{
 
 		std::time_t current = std::time(nullptr);

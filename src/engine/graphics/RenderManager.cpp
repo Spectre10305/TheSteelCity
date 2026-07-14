@@ -17,75 +17,70 @@
 void nothing::RenderManager::Init(ResourceManager& resourcesManager)
 {
 
-	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
-	{
-
-		nothing::LogError("Failed to initialize GLAD");
-		return;
-
-	}
-	else
-	{
-
-		nothing::LogInfo("GLAD initialized successfully");
-		nothing::LogInfo("OpenGL version: " + std::string((const char*)glGetString(GL_VERSION)));
-		nothing::LogInfo("Vendor: " + std::string((const char*)glGetString(GL_VENDOR)));
-
-	}
-
-
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_SCISSOR_TEST);
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CCW);
 
 
-	const char* vsName = "D:\\TheSteelCity\\assets\\engine\\shaders\\test_shader_vert.glsl";
-	const char* fsName = "D:\\TheSteelCity\\assets\\engine\\shaders\\test_shader_frag.glsl";
+	const char* vsName = "D:\\TheSteelCity\\assets\\engine\\shaders\\default_shader_vert.glsl";
+	const char* fsName = "D:\\TheSteelCity\\assets\\engine\\shaders\\default_shader_frag.glsl";
 
 
-	testShader_ = new nothing::Shader(vsName, fsName);
-	testShader_->Use();
-	testShader_->SetUniform("colR", 0.5f);
-	testShader_->SetUniform("colG", 0.6f);
-	testShader_->SetUniform("colB", 0.3f);
+	defaultShader_ = new nothing::Shader(vsName, fsName);
+	defaultShader_->Use();
+	defaultShader_->SetUniform("colR", 0.5f);
+	defaultShader_->SetUniform("colG", 0.6f);
+	defaultShader_->SetUniform("colB", 0.3f);
 
 
-	resourcesManager.CreateTexture("D:\\TheSteelCity\\assets\\game\\textures\\nothing_logo.png");
 	resourcesManager.CreateTexture("D:\\TheSteelCity\\assets\\game\\textures\\tex_floor_wood_1.png");
+	resourcesManager.CreateTexture("D:\\TheSteelCity\\assets\\game\\textures\\tex_wall_bricks_1.png");
 
-	
-	for (int x = 0; x < 10; x++)
+
+	int num = 20;
+	meshes_.reserve(20 * 20);
+
+
+	for (int x = 0; x < num; x++)
 	{
 
-		for (int z = 0; z < 10; z++)
+		for (int z = 0; z < num; z++)
 		{
 
 			static int i = 0;
 
+
 			i++;
 
 
-			Mesh m = CreateCubeMesh();
-			m.position = glm::vec3(static_cast<float>(x) * 2.0f, 0.0f, static_cast<float>(z) * 2.0f);
+			Mesh m = CreateCubeMesh(1.0f + static_cast<float>(i), 1.0f + static_cast<float>(i), 1.0f + static_cast<float>(i));
+			m.position = glm::vec3(static_cast<float>(x) * 2.0f + static_cast<float>(i), 0.0f, static_cast<float>(z) * 2.0f + static_cast<float>(i));
 
 
 			if (i % 2 == 0)
 			{
 
-				m.texture = resourcesManager.GetTextureIDFromName("nothing_logo");
+				m.texture = resourcesManager.GetTextureIDFromName("tex_floor_wood_1");
 
 			}
 			else
 			{
 
-				m.texture = resourcesManager.GetTextureIDFromName("tex_floor_wood_1");
+				m.texture = resourcesManager.GetTextureIDFromName("tex_wall_bricks_1");
 
 			}
-
+			
 			
 			meshes_.emplace_back(m);
 
 		}
 
 	}
+
+
+	size_t meshesSz = meshes_.size() * sizeof(Mesh);
+	nothing::LogInfo("Meshes size (KB): " + std::to_string(nothing::ToKilobytes(meshesSz)));
 	
 
 }
@@ -94,7 +89,7 @@ void nothing::RenderManager::Init(ResourceManager& resourcesManager)
 // =================================================
 
 
-void nothing::RenderManager::Update(InputManager& input)
+void nothing::RenderManager::Update(InputManager& input, double deltaTime)
 {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -104,7 +99,7 @@ void nothing::RenderManager::Update(InputManager& input)
 	static glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 	static glm::vec3 cameraOrientation = glm::vec3(0.0f, 0.0f, -1.0f);
 	static glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-	static float cameraSpeed = 0.2f;
+	static float     cameraSpeed = 0.05f;
 
 
 #pragma region INPUT
@@ -176,9 +171,9 @@ void nothing::RenderManager::Update(InputManager& input)
 
 #pragma endregion
 
-
-	testShader_->Use();
-	testShader_->SetUniform("tex", 0);
+	
+	defaultShader_->Use();
+	defaultShader_->SetUniform("tex", 0);
 
 	
 	glm::mat4 view = glm::mat4(1.0f);
@@ -190,8 +185,8 @@ void nothing::RenderManager::Update(InputManager& input)
 	proj = glm::perspective(glm::radians(90.0f), aspectRatioN_ / aspectRatioD_, 0.1f, 100.0f);
 
 
-	testShader_->SetUniform("projection", proj);
-	testShader_->SetUniform("view", view);
+	defaultShader_->SetUniform("projection", proj);
+	defaultShader_->SetUniform("view", view);
 
 
 	for (auto& mesh : meshes_)
@@ -205,7 +200,7 @@ void nothing::RenderManager::Update(InputManager& input)
 		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 
 
-		testShader_->SetUniform("model", model);
+		defaultShader_->SetUniform("model", model);
 
 
 		glBindTexture(GL_TEXTURE_2D, mesh.texture);
@@ -223,7 +218,7 @@ void nothing::RenderManager::Update(InputManager& input)
 void nothing::RenderManager::Shutdown()
 {
 
-	delete testShader_;
+	delete defaultShader_;
 
 }
 
@@ -267,48 +262,51 @@ void nothing::RenderManager::SetAspectRatio(int n, int d)
 // =================================================
 
 
-nothing::Mesh nothing::RenderManager::CreateCubeMesh()
+nothing::Mesh nothing::RenderManager::CreateCubeMesh(float width, float height, float depth)
 {
+
+	float W = width;
+	float H = height;
+	float D = depth;
+
 
 	float vertices[] =
 	{
-
 		// FRONT (+Z)
-		-0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,   1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,   0.0f, 1.0f,
+		0.0f, 0.0f, D,     0.0f, 0.0f,
+		W,    0.0f, D,     W,    0.0f,
+		W,    H,    D,     W,    H,
+		0.0f, H,    D,     0.0f, H,
 
 		// BACK (-Z)
-		 0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,   1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
+		W,    0.0f, 0.0f,  0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f,  W,    0.0f,
+		0.0f, H,    0.0f,  W,    H,
+		W,    H,    0.0f,  0.0f, H,
 
-		 // LEFT (-X)
-		 -0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
-		 -0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
-		 -0.5f,  0.5f,  0.5f,   1.0f, 1.0f,
-		 -0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
+		// LEFT (-X)
+		0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+		0.0f, 0.0f, D,     D,    0.0f,
+		0.0f, H,    D,     D,    H,
+		0.0f, H,    0.0f,  0.0f, H,
 
-		 // RIGHT (+X)
-		  0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
-		  0.5f, -0.5f, -0.5f,   1.0f, 0.0f,
-		  0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
-		  0.5f,  0.5f,  0.5f,   0.0f, 1.0f,
+		// RIGHT (+X)
+		W,    0.0f, D,     0.0f, 0.0f,
+		W,    0.0f, 0.0f,  D,    0.0f,
+		W,    H,    0.0f,  D,    H,
+		W,    H,    D,     0.0f, H,
 
-		  // TOP (+Y)
-		  -0.5f,  0.5f,  0.5f,   0.0f, 0.0f,
-		   0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
-		   0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
-		  -0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
+		// TOP (+Y)
+		0.0f, H,    D,     0.0f, 0.0f,
+		W,    H,    D,     W,    0.0f,
+		W,    H,    0.0f,  W,    D,
+		0.0f, H,    0.0f,  0.0f, D,
 
-		  // BOTTOM (-Y)
-		  -0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
-		   0.5f, -0.5f, -0.5f,   1.0f, 0.0f,
-		   0.5f, -0.5f,  0.5f,   1.0f, 1.0f,
-		  -0.5f, -0.5f,  0.5f,   0.0f, 1.0f
-
+		// BOTTOM (-Y)
+		0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+		W,    0.0f, 0.0f,  W,    0.0f,
+		W,    0.0f, D,     W,    D,
+		0.0f, 0.0f, D,     0.0f, D
 	};
 
 
@@ -357,3 +355,6 @@ nothing::Mesh nothing::RenderManager::CreateCubeMesh()
 	return res;
 
 }
+
+
+// =================================================

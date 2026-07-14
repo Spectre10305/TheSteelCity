@@ -23,6 +23,9 @@ bool nothing::Engine::Init()
 		return false;
 
 	}
+	
+
+	resourceManager_.InitDefaults();
 
 
 	renderManager_.Init(resourceManager_);
@@ -35,11 +38,10 @@ bool nothing::Engine::Init()
 	renderManager_.SetAspectRatio(wWidth, wHeight);
 
 
+	
+
+
 	userInterface_.Init(windowManager_.GetWindowPtr(), windowManager_.GetGLContext());
-
-
-	double timeToInitialize = nothing::ElapsedMS();
-	nothing::LogInfo("Took: " + std::to_string(timeToInitialize) + " MS to initialize engine");
 
 
 	inputManager_.BindKey(SDL_SCANCODE_W, GameAction::MoveForward);
@@ -50,6 +52,10 @@ bool nothing::Engine::Init()
 	inputManager_.BindKey(SDL_SCANCODE_RIGHT, GameAction::RotateRight);
 	inputManager_.BindKey(SDL_SCANCODE_UP, GameAction::RotateUp);
 	inputManager_.BindKey(SDL_SCANCODE_DOWN, GameAction::RotateDown);
+
+
+	double timeToInitialize = nothing::ElapsedMS();
+	nothing::LogInfo("Took: " + std::to_string(timeToInitialize) + " MS to initialize engine");
 
 
 	return true;
@@ -76,7 +82,7 @@ void nothing::Engine::Run()
 		HandleEvents(event);
 
 
-		renderManager_.Update(inputManager_);
+		renderManager_.Update(inputManager_, deltaTime);
 		userInterface_.Update();
 
 
@@ -87,8 +93,8 @@ void nothing::Engine::Run()
 		inputManager_.ClearInput();
 
 
-		static double fps = 0.0;
-		fps = 1.0 / deltaTime;
+		//static double fps = 0.0;
+		//fps = 1.0 / deltaTime;
 
 	}
 

@@ -11,7 +11,6 @@ namespace nothing
 	{
 
 		uint32_t    id;
-		std::string name;
 		int32_t     width;
 		int32_t     height;
 		int32_t     channels;
@@ -25,6 +24,7 @@ namespace nothing
 
 	public:
 
+		void        InitDefaults();
 		bool        CreateTexture(const char* filePath);
 		ResTexture& GetTextureFromName(const char* texName);
 		uint32_t    GetTextureIDFromName(const char* texName);

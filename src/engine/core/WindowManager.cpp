@@ -1,5 +1,6 @@
 #include "WindowManager.h"
 #include "../utils/Log.h"
+#include <glad/glad.h>
 
 
 // =================================================
@@ -47,6 +48,25 @@ bool nothing::WindowManager::Init()
 
 	glContext_ = SDL_GL_CreateContext(window_);
 	SDL_GL_MakeCurrent(window_, glContext_);
+
+
+	// Dobbiamo inizializzare GLAD nel WindowManager altrimenti ResourceManager::InitDefaults
+	// non può caricare le texture di default, dato che usa le funzioni OpenGL
+	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
+	{
+
+		nothing::LogError("Failed to initialize GLAD");
+		return false;
+
+	}
+	else
+	{
+
+		nothing::LogInfo("GLAD initialized successfully");
+		nothing::LogInfo("OpenGL version: " + std::string((const char*)glGetString(GL_VERSION)));
+		nothing::LogInfo("Vendor: " + std::string((const char*)glGetString(GL_VENDOR)));
+
+	}
 
 
 	SDL_SetWindowPosition(window_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);

@@ -50,4 +50,16 @@ namespace nothing
 
 	// =================================================
 
+
+	inline float ToKilobytes(size_t bytes)
+	{
+
+		double res = bytes / 1024.0;
+		return static_cast<float>(res);
+
+	}
+
+
+	// =================================================
+
 }

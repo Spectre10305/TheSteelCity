@@ -4,6 +4,7 @@
 #include "Shader.h"
 #include "../core/InputManager.h"
 #include "../core/ResourceManager.h"
+#include <entt.hpp>
 
 
 namespace nothing
@@ -23,6 +24,17 @@ namespace nothing
 	};
 
 
+	struct Mesh_t
+	{
+
+		uint32_t VAO;
+		uint32_t numIndices;
+		uint32_t textureID;
+		glm::vec3 position;
+
+	};
+
+
 	// SCOPO: Gestione rendering principale
 	class RenderManager
 	{
@@ -30,7 +42,7 @@ namespace nothing
 	public:
 
 		void Init(ResourceManager& resourcesManager);
-		void Update(InputManager& input);
+		void Update(InputManager& input, double deltaTime);
 		void Shutdown();
 
 
@@ -40,16 +52,11 @@ namespace nothing
 
 
 		// Test creazione mesh 3D
-		Mesh CreateCubeMesh();
+		Mesh CreateCubeMesh(float width, float height, float depth);
 
 	private:
 
-		uint32_t VBO_;
-		uint32_t VAO_;
-		uint32_t EBO_;
-
-
-		Shader* testShader_ = nullptr;
+		Shader* defaultShader_ = nullptr;
 
 
 		float bgR_ = 1.0f;
@@ -62,6 +69,9 @@ namespace nothing
 
 
 		std::vector<Mesh> meshes_;
+
+
+		entt::registry registry_;
 		
 	};
 

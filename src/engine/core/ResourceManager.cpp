@@ -8,8 +8,40 @@
 // =================================================
 
 
+void nothing::ResourceManager::InitDefaults()
+{
+
+	if (!CreateTexture("D:\\TheSteelCity\\assets\\game\\textures\\nothing_logo.png"))
+	{
+
+		nothing::LogWarning("Can't initialize default texture. Some visuals may be broken");
+
+	}
+
+}
+
+
+// =================================================
+
+
 bool nothing::ResourceManager::CreateTexture(const char* filePath)
 {
+
+	// Prende solo il nome del file.
+	// Es: "D:\TheSteelCity\..\tex.png" -> "tex"
+	auto fp = std::filesystem::path(filePath);
+	std::string texName = fp.stem().string();
+
+
+	if (allTextures_.find(texName) != allTextures_.end())
+	{
+
+		// La texture esiste già
+		nothing::LogInfo("Texture: " + texName + " already exists.");
+		return true;
+
+	}
+
 
 	ResTexture res{};
 
@@ -58,19 +90,13 @@ bool nothing::ResourceManager::CreateTexture(const char* filePath)
 	else
 	{
 
-		nothing::LogError("Failed to load texture");
+		nothing::LogError("Failed to load texture: " + texName);
 		return false;
 
 	}
 
 
 	stbi_image_free(data);
-
-
-	// Prende solo il nome del file.
-	// Es: "D:\TheSteelCity\..\tex.png" -> "tex"
-	auto fp = std::filesystem::path(filePath);
-	std::string texName = fp.stem().string();
 
 
 	allTextures_.emplace(texName, res);
@@ -94,6 +120,15 @@ nothing::ResTexture& nothing::ResourceManager::GetTextureFromName(const char* te
 		return tex;
 
 	}
+	else
+	{
+
+		// Texture di default
+		nothing::LogWarning("GetTextureFromName can't find texture: " + std::string(texName) + ". Using default texture");
+		auto& defTex = allTextures_.at("nothing_logo");
+		return defTex;
+
+	}
 
 }
 
@@ -108,6 +143,14 @@ uint32_t nothing::ResourceManager::GetTextureIDFromName(const char* texName)
 	{
 
 		return allTextures_.at(texName).id;
+
+	}
+	else
+	{
+
+		// Texture di default
+		nothing::LogWarning("GetTextureIDFromName can't find texture: " + std::string(texName) + ". Using default texture");
+		return allTextures_.at("nothing_logo").id;
 
 	}
 
