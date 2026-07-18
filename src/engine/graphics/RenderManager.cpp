@@ -48,7 +48,7 @@ void nothing::RenderManager::Update(double deltaTime)
 
 	
 	defaultShader_->Use();
-	//defaultShader_->SetUniform("tex", 0);
+	defaultShader_->SetUniform("tex", 0);
 
 
 	auto& cam = ctx_->sceneManager->GetCompFromCtx<Camera>();

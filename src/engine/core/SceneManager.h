@@ -52,13 +52,28 @@ namespace nothing
 	struct SolidCubeInfo
 	{
 
-		glm::vec3   position  = glm::vec3(0.0f, 0.0f, 0.0f);
-		glm::vec3   rotation  = glm::vec3(0.0f, 0.0f, 0.0f);
-		float       width     = 1.0f;
-		float       height    = 1.0f;
-		float       depth     = 1.0f;
-		uint32_t    textureID = 0;
-		bool        doNotMove = false;
+		glm::vec3   position      = glm::vec3(0.0f, 0.0f, 0.0f);
+		glm::vec3   rotation      = glm::vec3(0.0f, 0.0f, 0.0f);
+		float       width         = 1.0f;
+		float       height        = 1.0f;
+		float       depth         = 1.0f;
+		uint32_t    textureID     = 0;
+		bool        isDoubleTiled = false;
+		bool        doNotMove     = false;
+
+	};
+
+
+	struct SolidPlaneInfo
+	{
+
+		glm::vec3   position      = glm::vec3(0.0f, 0.0f, 0.0f);
+		glm::vec3   rotation      = glm::vec3(0.0f, 0.0f, 0.0f);
+		float       width         = 1.0f;
+		float       height        = 1.0f;
+		uint32_t    textureID     = 0;
+		bool        isDoubleTiled = false;
+		bool        doNotMove     = false;
 
 	};
 
@@ -86,8 +101,10 @@ namespace nothing
 		void Shutdown();
 
 
-		WorldMesh CreateCubeWorldMesh(float width, float height, float depth);
+		WorldMesh CreateCubeWorldMesh(float width, float height, float depth, bool isDoubleTiled);
+		WorldMesh CreatePlaneWorldMesh(float width, float height, bool isDoubleTiled);
 		void CreateWorldSolidCube(const SolidCubeInfo& cubeInfo);
+		void CreateWorldSolidPlane(const SolidPlaneInfo& planeInfo);
 
 
 		template<typename T>
