@@ -2,6 +2,7 @@
 #include <SDL3/SDL.h>
 #include <unordered_map>
 #include "../graphics/IMGUI/imgui.h"
+#include "../core/EngineContext.h"
 
 
 #define NEW_GAME_PANEL_WIDTH   500.0f
@@ -44,7 +45,7 @@ namespace nothing
 
 	public:
 
-		void Init(SDL_Window* windowPtr, void* glContext);
+		void Init(EngineContext& ctx);
 		void Update();
 		void Shutdown();
 
@@ -86,6 +87,11 @@ namespace nothing
 
 
 		UIEvent currentEvent = UIEvent::None;
+
+
+	private:
+
+		EngineContext* ctx_ = nullptr;
 
 	};
 

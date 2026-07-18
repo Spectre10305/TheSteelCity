@@ -28,9 +28,10 @@ bool nothing::WindowManager::Init()
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
-
+	
 
 	window_ = SDL_CreateWindow(windowTitle_.c_str(), windowWidth_, windowHeight_, windowFlags_);
 
@@ -68,6 +69,22 @@ bool nothing::WindowManager::Init()
 
 	}
 
+
+	int32_t ctxFlags = 0;
+	glGetIntegerv(GL_CONTEXT_FLAGS, &ctxFlags);
+
+
+	if (ctxFlags & GL_CONTEXT_FLAG_DEBUG_BIT)
+	{
+
+		nothing::LogInfo("Using OpenGL debug context");
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glDebugMessageCallback(nothing::GlDebugOutput, nullptr);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+
+	}
+	
 
 	SDL_SetWindowPosition(window_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	SDL_MaximizeWindow(window_);

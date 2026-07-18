@@ -24,6 +24,7 @@ void nothing::ResourceManager::InitDefaults()
 // =================================================
 
 
+// Restituisce VERO se la texture è stata creata, FALSO se non è stata creata oppure esiste già
 bool nothing::ResourceManager::CreateTexture(const char* filePath)
 {
 
@@ -38,7 +39,7 @@ bool nothing::ResourceManager::CreateTexture(const char* filePath)
 
 		// La texture esiste già
 		nothing::LogInfo("Texture: " + texName + " already exists.");
-		return true;
+		return false;
 
 	}
 

@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <iostream>
+#include <glad/glad.h> // per GlDebugOutput
 
 
 namespace nothing
@@ -56,6 +57,18 @@ namespace nothing
 
 		double res = bytes / 1024.0;
 		return static_cast<float>(res);
+
+	}
+
+
+	// =================================================
+
+
+	inline void GLAPIENTRY GlDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+	{
+
+		if (id == 131185 || id == 131169) return;
+		LogInfo("[GL message]" + std::string(message));
 
 	}
 

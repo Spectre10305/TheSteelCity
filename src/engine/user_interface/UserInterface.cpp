@@ -6,18 +6,22 @@
 #include "UIStyleHelper.h"
 #include <glad/glad.h>
 #include <stb_image.h>
+#include "../core/WindowManager.h"
 
 
 //=============================================================
 
 
-void nothing::UserInterface::Init(SDL_Window* windowPtr, void* glContext)
+void nothing::UserInterface::Init(EngineContext& ctx)
 {
+	
+	ctx_ = &ctx;
+	
 
 	// INIT IMGUI
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGui_ImplSDL3_InitForOpenGL(windowPtr, glContext);
+	ImGui_ImplSDL3_InitForOpenGL(ctx_->windowManager->GetWindowPtr(), ctx_->windowManager->GetGLContext());
 	ImGui_ImplOpenGL3_Init();
 
 
@@ -89,7 +93,7 @@ void nothing::UserInterface::Init(SDL_Window* windowPtr, void* glContext)
 	uiTexture_Health = CreateUITexture("D:\\TheSteelCity\\assets\\game\\textures\\tex_ui_health_symbol.png");
 
 
-	currentContext = UIContext::Gameplay;
+	currentContext = UIContext::MainMenu;
 
 }
 
@@ -312,7 +316,7 @@ void nothing::UserInterface::UpdateMainMenuContext()
 
 
 		static bool fastAnimations = false;
-		ImGui::Checkbox("Animazioni veloci", &fastAnimations);
+		ImGui::Checkbox("Animazioni veloci (?)", &fastAnimations);
 		if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
 		{
 
@@ -377,7 +381,7 @@ void nothing::UserInterface::UpdateMainMenuContext()
 
 
 		static bool muteInBackground = false;
-		ImGui::Checkbox("Disattiva audio in background", &muteInBackground);
+		ImGui::Checkbox("Disattiva audio in background (?)", &muteInBackground);
 		if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
 		{
 
@@ -387,7 +391,7 @@ void nothing::UserInterface::UpdateMainMenuContext()
 
 
 		static bool useSteamAudio = true;
-		ImGui::Checkbox("Usa API Steam Audio", &useSteamAudio);
+		ImGui::Checkbox("Usa API Steam Audio (?)", &useSteamAudio);
 		if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
 		{
 
@@ -450,9 +454,21 @@ void nothing::UserInterface::UpdateMainMenuContext()
 		ImGui::Checkbox("Usa console di sviluppo", &useDevConsole);
 
 
-		ImGui::Button("Apri cartella di gioco", ImVec2(200, 0));
+		ImGui::Button("Apri cartella di gioco", ImVec2(300, 0));
 		ImGui::SameLine();
-		ImGui::Button("Apri cartella di salvataggi", ImVec2(200, 0));
+		ImGui::Button("Apri cartella di salvataggi", ImVec2(340, 0));
+
+
+		ImGui::Spacing();
+		ImGui::Spacing();
+
+
+		ImGui::Text("Stile dell'interfaccia utente");
+
+
+		if (ImGui::Button("Stile Tech",        ImVec2(300.0f, 0.0f))) { currentStyle = NOTHING_WINSTYLE_TECH; }
+		if (ImGui::Button("Stile Industriale", ImVec2(300.0f, 0.0f))) { currentStyle = NOTHING_WINSTYLE_INDUSTRIAL; }
+		if (ImGui::Button("Stile Cattivo",     ImVec2(300.0f, 0.0f))) { currentStyle = NOTHING_WINSTYLE_EVIL; }
 
 
 		ImGui::Spacing();
@@ -669,7 +685,7 @@ uint32_t nothing::UserInterface::CreateUITexture(const char* texturePath)
 
 
 	int width, height, nrChannels;
-	//stbi_set_flip_vertically_on_load(true);
+	stbi_set_flip_vertically_on_load(false);
 
 
 	unsigned char* data = stbi_load(texturePath, &width, &height, &nrChannels, 0);

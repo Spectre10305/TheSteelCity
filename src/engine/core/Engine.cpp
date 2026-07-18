@@ -16,6 +16,14 @@ bool nothing::Engine::Init()
 	nothing::StartTimer();
 
 
+	engineContext_.windowManager = &windowManager_;
+	engineContext_.resourcesManager = &resourceManager_;
+	engineContext_.sceneManager = &sceneManager_;
+	engineContext_.inputManager = &inputManager_;
+	engineContext_.renderManager = &renderManager_;
+	engineContext_.userInterface = &userInterface_;
+
+
 	if (!windowManager_.Init())
 	{
 
@@ -28,7 +36,10 @@ bool nothing::Engine::Init()
 	resourceManager_.InitDefaults();
 
 
-	renderManager_.Init(resourceManager_);
+	sceneManager_.Init(engineContext_);
+
+
+	renderManager_.Init(engineContext_);
 	renderManager_.SetBackgroundColor(0.5f, 0.5f, 0.5f);
 
 
@@ -38,10 +49,7 @@ bool nothing::Engine::Init()
 	renderManager_.SetAspectRatio(wWidth, wHeight);
 
 
-	
-
-
-	userInterface_.Init(windowManager_.GetWindowPtr(), windowManager_.GetGLContext());
+	userInterface_.Init(engineContext_);
 
 
 	inputManager_.BindKey(SDL_SCANCODE_W, GameAction::MoveForward);
@@ -82,7 +90,8 @@ void nothing::Engine::Run()
 		HandleEvents(event);
 
 
-		renderManager_.Update(inputManager_, deltaTime);
+		sceneManager_.Update();
+		renderManager_.Update(deltaTime);
 		userInterface_.Update();
 
 
@@ -111,6 +120,7 @@ void nothing::Engine::Shutdown()
 
 
 	renderManager_.Shutdown();
+	sceneManager_.Shutdown();
 	windowManager_.Shutdown();
 
 }

@@ -5,8 +5,12 @@
 #include "WindowManager.h"
 #include "InputManager.h"
 #include "ResourceManager.h"
+#include "SceneManager.h"
 #include "../graphics/RenderManager.h"
 #include "../user_interface/UserInterface.h"
+
+
+#include "EngineContext.h"
 
 
 namespace nothing
@@ -30,11 +34,16 @@ namespace nothing
 
 	private:
 
+		EngineContext   engineContext_{};
+
+
 		WindowManager   windowManager_;
 		RenderManager   renderManager_;
 		UserInterface   userInterface_;
 		InputManager    inputManager_;
 		ResourceManager resourceManager_;
+		SceneManager    sceneManager_;
+
 
 	};
 

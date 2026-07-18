@@ -72,6 +72,12 @@
     <ClInclude Include="core\ResourceManager.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="core\SceneManager.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="core\EngineContext.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\Engine.cpp">
@@ -126,6 +132,9 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="core\ResourceManager.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="core\SceneManager.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>
