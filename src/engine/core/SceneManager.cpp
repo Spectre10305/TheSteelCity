@@ -12,43 +12,6 @@ void nothing::SceneManager::Init(EngineContext& ctx)
 
 	ctx_ = &ctx;
 
-
-	ctx_->resourcesManager->CreateTexture("D:\\TheSteelCity\\assets\\game\\textures\\tex_wall_bricks_1.png");
-	ctx_->resourcesManager->CreateTexture("D:\\TheSteelCity\\assets\\game\\textures\\tex_floor_wood_1.png");
-
-
-	SolidCubeInfo scInfo{};
-	scInfo.position = glm::vec3(0.0f, 0.0f, 0.0f);
-	scInfo.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-	scInfo.width = 1.0f;
-	scInfo.height = 1.0f;
-	scInfo.depth = 1.0f;
-	scInfo.textureID = ctx_->resourcesManager->GetTextureIDFromName("tex_floor_wood_1");
-	scInfo.isDoubleTiled = true;
-	scInfo.doNotMove = true;
-
-
-	CreateWorldSolidCube(scInfo);
-
-
-
-	SolidPlaneInfo spInfo{};
-	spInfo.position = glm::vec3(2.0f, 0.0f, 0.0f);
-	spInfo.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-	spInfo.width = 1.0f;
-	spInfo.height = 1.0f;
-	spInfo.textureID = ctx_->resourcesManager->GetTextureIDFromName("tex_wall_bricks_1");
-	spInfo.isDoubleTiled = true;
-	spInfo.doNotMove = true;
-
-
-	CreateWorldSolidPlane(spInfo);
-
-
-	registry.ctx().emplace<Camera>();
-
-
-
 }
 
 
@@ -162,6 +125,50 @@ void nothing::SceneManager::Update()
 void nothing::SceneManager::Shutdown()
 {
 
+}
+
+void nothing::SceneManager::LoadScene()
+{
+
+	ctx_->resourcesManager->CreateTexture("D:\\TheSteelCity\\assets\\game\\textures\\tex_wall_bricks_1.png");
+	ctx_->resourcesManager->CreateTexture("D:\\TheSteelCity\\assets\\game\\textures\\tex_floor_wood_1.png");
+
+
+	SolidCubeInfo scInfo{};
+	scInfo.position = glm::vec3(0.0f, 0.0f, 0.0f);
+	scInfo.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	scInfo.width = 1.0f;
+	scInfo.height = 1.0f;
+	scInfo.depth = 1.0f;
+	scInfo.textureID = ctx_->resourcesManager->GetTextureIDFromName("tex_floor_wood_1");
+	scInfo.isDoubleTiled = true;
+	scInfo.doNotMove = true;
+
+
+	CreateWorldSolidCube(scInfo);
+
+
+
+	SolidPlaneInfo spInfo{};
+	spInfo.position = glm::vec3(2.0f, 0.0f, 0.0f);
+	spInfo.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	spInfo.width = 1.0f;
+	spInfo.height = 1.0f;
+	spInfo.textureID = ctx_->resourcesManager->GetTextureIDFromName("tex_wall_bricks_1");
+	spInfo.isDoubleTiled = true;
+	spInfo.doNotMove = true;
+
+
+	CreateWorldSolidPlane(spInfo);
+
+
+	registry.ctx().emplace<Camera>();
+
+}
+
+void nothing::SceneManager::UnloadScene()
+{
+
 	for (auto& wMesh : worldMeshes)
 	{
 
@@ -171,8 +178,10 @@ void nothing::SceneManager::Shutdown()
 
 	}
 
-	
+
 	worldMeshes.clear();
+	registry.clear();
+	registry.ctx().clear();
 
 }
 

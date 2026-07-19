@@ -1,16 +1,19 @@
 #pragma once
 #include <SDL3/SDL.h>
-#include <unordered_map>
+#include <vector>
+#include <string>
 #include "../graphics/IMGUI/imgui.h"
 #include "../core/EngineContext.h"
 
 
-#define NEW_GAME_PANEL_WIDTH   500.0f
-#define NEW_GAME_PANEL_HEIGHT  350.0f
-#define LOAD_GAME_PANEL_WIDTH  500.0f
-#define LOAD_GAME_PANEL_HEIGHT 350.0f
-#define OPTIONS_PANEL_WIDTH    800.0f
-#define OPTIONS_PANEL_HEIGHT   450.0f
+#define NEW_GAME_PANEL_WIDTH        500.0f
+#define NEW_GAME_PANEL_HEIGHT       350.0f
+#define LOAD_GAME_PANEL_WIDTH       500.0f
+#define LOAD_GAME_PANEL_HEIGHT      350.0f
+#define OPTIONS_PANEL_WIDTH         800.0f
+#define OPTIONS_PANEL_HEIGHT        450.0f
+#define BACK_TO_MENU_WARNING_WIDTH  500.0f
+#define BACK_TO_MENU_WARNING_HEIGHT 120.0f
 
 
 namespace nothing
@@ -21,6 +24,7 @@ namespace nothing
 
 		None,
 		BeginGame,
+		ReturnToMenu,
 		CloseGame,
 		ApplyOptions,
 		ResetOptions
@@ -61,10 +65,18 @@ namespace nothing
 
 		void     UpdateMainMenuContext();
 		void     UpdateGameContext();
+		void     SwitchContext(UIContext newContext);
 		void     ClearEvent();
 		bool     MenuButton(const char* text, ImVec2 pos, ImVec2 size, int textYTolerance);
 		void     CenteredText(const char* text); // Helper per testo centrato
 		uint32_t CreateUITexture(const char* texturePath);
+
+
+		void ShowNewGamePanel(ImVec2& scrSz);
+		void ShowLoadGamePanel(ImVec2& scrSz);
+		void ShowOptionsPanel(ImVec2& scrSz);
+		void ShowBackToMenuWarning(ImVec2& scrSz);
+		void ShowDevConsole(ImVec2& scrSz);
 
 
 		float buttonWidth         = 250.0f;
@@ -81,6 +93,13 @@ namespace nothing
 		bool showOptionsPanel  = false;
 
 
+		bool showPauseMenu = false;
+		bool showBackToMenuWarning = false;
+
+
+		bool showDevConsole = false;
+
+
 		// Texture UI
 		uint32_t uiTexture_Logo = 0;
 		uint32_t uiTexture_Health = 0;
@@ -92,6 +111,12 @@ namespace nothing
 	private:
 
 		EngineContext* ctx_ = nullptr;
+
+
+		// Dev console
+		std::vector<std::string> lines_;
+		char buf_[32];
+
 
 	};
 

@@ -24,10 +24,14 @@ namespace nothing
 
 	public:
 
-		void        InitDefaults();
+		void InitDefaults();
+
+
+		// Textures
 		bool        CreateTexture(const char* filePath);
 		ResTexture& GetTextureFromName(const char* texName);
 		uint32_t    GetTextureIDFromName(const char* texName);
+		void        DeleteAllTextures();
 
 	private:
 

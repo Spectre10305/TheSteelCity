@@ -159,3 +159,22 @@ uint32_t nothing::ResourceManager::GetTextureIDFromName(const char* texName)
 
 
 // =================================================
+
+
+void nothing::ResourceManager::DeleteAllTextures()
+{
+
+	for (auto& [texName, resTex] : allTextures_)
+	{
+
+		glDeleteTextures(1, &resTex.id);
+
+	}
+
+
+	allTextures_.clear();
+
+}
+
+
+// =================================================

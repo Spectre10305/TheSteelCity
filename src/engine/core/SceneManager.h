@@ -101,6 +101,10 @@ namespace nothing
 		void Shutdown();
 
 
+		void LoadScene();
+		void UnloadScene();
+
+
 		WorldMesh CreateCubeWorldMesh(float width, float height, float depth, bool isDoubleTiled);
 		WorldMesh CreatePlaneWorldMesh(float width, float height, bool isDoubleTiled);
 		void CreateWorldSolidCube(const SolidCubeInfo& cubeInfo);

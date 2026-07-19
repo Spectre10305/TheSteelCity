@@ -16,12 +16,12 @@ bool nothing::Engine::Init()
 	nothing::StartTimer();
 
 
-	engineContext_.windowManager = &windowManager_;
+	engineContext_.windowManager    = &windowManager_;
 	engineContext_.resourcesManager = &resourceManager_;
-	engineContext_.sceneManager = &sceneManager_;
-	engineContext_.inputManager = &inputManager_;
-	engineContext_.renderManager = &renderManager_;
-	engineContext_.userInterface = &userInterface_;
+	engineContext_.sceneManager     = &sceneManager_;
+	engineContext_.inputManager     = &inputManager_;
+	engineContext_.renderManager    = &renderManager_;
+	engineContext_.userInterface    = &userInterface_;
 
 
 	if (!windowManager_.Init())
@@ -51,15 +51,17 @@ bool nothing::Engine::Init()
 
 	userInterface_.Init(engineContext_);
 
-
-	inputManager_.BindKey(SDL_SCANCODE_W, GameAction::MoveForward);
-	inputManager_.BindKey(SDL_SCANCODE_A, GameAction::MoveLeft);
-	inputManager_.BindKey(SDL_SCANCODE_S, GameAction::MoveBackward);
-	inputManager_.BindKey(SDL_SCANCODE_D, GameAction::MoveRight);
-	inputManager_.BindKey(SDL_SCANCODE_LEFT, GameAction::RotateLeft);
-	inputManager_.BindKey(SDL_SCANCODE_RIGHT, GameAction::RotateRight);
-	inputManager_.BindKey(SDL_SCANCODE_UP, GameAction::RotateUp);
-	inputManager_.BindKey(SDL_SCANCODE_DOWN, GameAction::RotateDown);
+	
+	inputManager_.BindKey(SDL_SCANCODE_W,      GameAction::MoveForward);
+	inputManager_.BindKey(SDL_SCANCODE_A,      GameAction::MoveLeft);
+	inputManager_.BindKey(SDL_SCANCODE_S,      GameAction::MoveBackward);
+	inputManager_.BindKey(SDL_SCANCODE_D,      GameAction::MoveRight);
+	inputManager_.BindKey(SDL_SCANCODE_LEFT,   GameAction::RotateLeft);
+	inputManager_.BindKey(SDL_SCANCODE_RIGHT,  GameAction::RotateRight);
+	inputManager_.BindKey(SDL_SCANCODE_UP,     GameAction::RotateUp);
+	inputManager_.BindKey(SDL_SCANCODE_DOWN,   GameAction::RotateDown);
+	inputManager_.BindKey(SDL_SCANCODE_GRAVE,  GameAction::OpenDevConsole);
+	inputManager_.BindKey(SDL_SCANCODE_ESCAPE, GameAction::Exit);
 
 
 	double timeToInitialize = nothing::ElapsedMS();
@@ -90,9 +92,33 @@ void nothing::Engine::Run()
 		HandleEvents(event);
 
 
-		sceneManager_.Update();
-		renderManager_.Update(deltaTime);
-		userInterface_.Update();
+		switch (gameState_)
+		{
+
+		case GameState::MainMenu:
+			userInterface_.Update();
+			break;
+
+
+		case GameState::Gameplay:
+			sceneManager_.Update();
+			renderManager_.Update(deltaTime);
+			userInterface_.Update();
+			break;
+
+
+		default:
+			break;
+
+		}
+
+
+		if (inputManager_.IsActionTriggered(GameAction::OpenDevConsole))
+		{
+
+			nothing::LogInfo("Open Dev Console");
+
+		}
 
 
 		windowManager_.SwapBuffers();
@@ -117,6 +143,16 @@ void nothing::Engine::Shutdown()
 {
 
 	nothing::LogInfo("Shutting down...");
+
+
+	if (gameState_ == GameState::Gameplay)
+	{
+
+		nothing::LogInfo("Quitting from game state, cleaning up resources...");
+		sceneManager_.UnloadScene();
+		resourceManager_.DeleteAllTextures();
+
+	}
 
 
 	renderManager_.Shutdown();
@@ -176,6 +212,17 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 	{
 
 	case UIEvent::BeginGame:
+		sceneManager_.LoadScene();
+		userInterface_.SwitchContext(UIContext::Gameplay);
+		gameState_ = GameState::Gameplay;
+		break;
+
+
+	case UIEvent::ReturnToMenu:
+		sceneManager_.UnloadScene();
+		resourceManager_.DeleteAllTextures();
+		userInterface_.SwitchContext(UIContext::MainMenu);
+		gameState_ = GameState::MainMenu;
 		break;
 
 

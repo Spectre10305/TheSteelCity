@@ -24,6 +24,7 @@ namespace nothing
 		Reload,
 		CameraFovUP,
 		CamerFovDown,
+		OpenDevConsole,
 		Exit
 
 	};

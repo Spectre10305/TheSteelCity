@@ -7,6 +7,7 @@
 #include <glad/glad.h>
 #include <stb_image.h>
 #include "../core/WindowManager.h"
+#include "../core/InputManager.h"
 
 
 //=============================================================
@@ -128,6 +129,12 @@ void nothing::UserInterface::Update()
 	}
 
 
+	// Console di sviluppo
+	if (ctx_->inputManager->IsActionTriggered(GameAction::OpenDevConsole)) { showDevConsole = true; }
+	ShowDevConsole(ImGui::GetIO().DisplaySize);
+	//ImGui::ShowDemoWindow();
+
+
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -160,7 +167,7 @@ void nothing::UserInterface::UpdateMainMenuContext()
 	style.FontScaleMain = fontScaleBase;
 
 
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
 
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -188,15 +195,19 @@ void nothing::UserInterface::UpdateMainMenuContext()
 	if (MenuButton(">_ESCI_DAL_GIOCO", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { currentEvent = UIEvent::CloseGame; }
 
 
-
 	ImGui::End();
 	ImGui::PopStyleVar(2);
 	ImGui::PopStyleColor();
 
 
+	ShowNewGamePanel(scrSz);
+	ShowLoadGamePanel(scrSz);
+	ShowOptionsPanel(scrSz);
+
+
+	/*
 	ImGui::SetNextWindowSize(ImVec2(320, 260), ImGuiCond_FirstUseEver);
 	ImGui::Begin("DebugPanel");
-
 
 	ImGui::PushItemWidth(90.0f);
 	ImGui::DragFloat("Button Width",          &buttonWidth, 1.0f, 1.0f, 600.0f);
@@ -214,7 +225,339 @@ void nothing::UserInterface::UpdateMainMenuContext()
 
 
 	ImGui::End();
+	*/
 
+}
+
+
+//=============================================================
+
+
+void nothing::UserInterface::UpdateGameContext()
+{
+
+	ImVec2 scrSz = ImGui::GetIO().DisplaySize;
+
+
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+
+	ImGui::SetNextWindowPos(ImVec2(0, 0));
+	ImGui::SetNextWindowSize(ImVec2(scrSz.x, scrSz.y));
+
+
+	// Usiamo questi flags perchè altrimenti quelli di default interferiscono
+	// con l'interazione dei pulsanti
+	ImGuiWindowFlags mainHUDFlags =
+		ImGuiWindowFlags_NoTitleBar |
+		ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoScrollbar |
+		ImGuiWindowFlags_NoScrollWithMouse |
+		ImGuiWindowFlags_NoCollapse |
+		ImGuiWindowFlags_NoBringToFrontOnFocus |
+		ImGuiWindowFlags_NoNavFocus |
+		ImGuiWindowFlags_NoBackground |
+		ImGuiWindowFlags_NoDecoration |
+		ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoFocusOnAppearing;
+
+
+	ImGui::Begin("GameHUDPanel", nullptr, mainHUDFlags);
+
+
+	ImDrawList* dl = ImGui::GetForegroundDrawList();
+
+
+	// Letterbox
+	static float letterboxHeight = 90.0f;
+	dl->AddRectFilled(ImVec2(0, 0), ImVec2(scrSz.x, letterboxHeight), IM_COL32(0, 0, 0, 255));
+	dl->AddRectFilled(ImVec2(0, scrSz.y), ImVec2(scrSz.x, scrSz.y - letterboxHeight), IM_COL32(0, 0, 0, 255));
+
+
+	// Simbolo vita ("+")
+	dl->AddImage(uiTexture_Health, ImVec2(10, scrSz.y - 10), ImVec2(letterboxHeight - 10, (scrSz.y - letterboxHeight) + 10));
+
+
+	static float x = 60;
+	static float y = 60;
+	static float width = 520;
+	static float width2 = 520;
+	static float height = 10;
+	dl->AddRectFilled(ImVec2(x, scrSz.y - letterboxHeight + y), ImVec2(width, scrSz.y - height), IM_COL32(90, 90, 90, 255));
+
+
+	ImU32 barColor = IM_COL32(0, 250, 250, 255);
+
+
+	if (width2 < 325.0f)
+	{
+
+		barColor = IM_COL32(255, 216, 0, 255);
+
+	}
+
+
+	if (width2 < 200.0f)
+	{
+
+		barColor = IM_COL32(255, 0, 0, 255);
+
+	}
+
+
+	dl->AddRectFilled(ImVec2(x, scrSz.y - letterboxHeight + y), ImVec2(width2, scrSz.y - height), barColor);
+
+
+	dl->AddText(ImVec2(20, 20), IM_COL32(255, 255, 255, 255), "HUD di gioco in sviluppo...");
+
+
+	dl->AddRectFilled(ImVec2(scrSz.x - 100.0, scrSz.y - 100), ImVec2(scrSz.x - 20.0, scrSz.y - 10), IM_COL32(20, 194, 224, 150));
+
+
+	ImGui::End();
+	ImGui::PopStyleVar(2);
+	ImGui::PopStyleColor();
+
+
+	if (ctx_->inputManager->IsActionTriggered(GameAction::Exit)) { showPauseMenu = true; }
+
+
+	if (showPauseMenu)
+	{
+
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.5f));
+
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		ImGui::SetNextWindowSize(ImVec2(scrSz.x, scrSz.y));
+		ImGui::Begin("PauseMenuPanel", nullptr, flags);
+
+
+		ImGui::Image(uiTexture_Logo, ImVec2(800.0f, 600.0f));
+
+
+		buttonSpacingY = 0.0f;
+		if (MenuButton(">_RIPRENDI", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showPauseMenu = false; }
+		buttonSpacingY += buttonHeight + buttonSpacingOffset;
+		if (MenuButton(">_CARICA_PARTITA", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showLoadGamePanel = true; }
+		buttonSpacingY += buttonHeight + buttonSpacingOffset;
+		if (MenuButton(">_OPZIONI", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showOptionsPanel = true; }
+		buttonSpacingY += buttonHeight + buttonSpacingOffset;
+		if (MenuButton(">_TORNA_AL_MENU'", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showBackToMenuWarning = true; }
+
+
+		ImGui::End();
+		ImGui::PopStyleVar(2);
+		ImGui::PopStyleColor();
+
+
+		ShowLoadGamePanel(scrSz);
+		ShowOptionsPanel(scrSz);
+		ShowBackToMenuWarning(scrSz);
+
+	}
+
+
+	/*
+	ImGui::Begin("sasd");
+	ImGui::SliderFloat("X", &x, 0.0f, scrSz.x);
+	ImGui::SliderFloat("Y", &y, 0.0f, scrSz.y);
+	ImGui::SliderFloat("Width", &width, 0.0f, scrSz.x);
+	ImGui::SliderFloat("Width2", &width2, 125.0f, 520.0f);
+	ImGui::SliderFloat("Height", &height, 0.0f, scrSz.y);
+	ImGui::End();
+	*/
+
+}
+
+
+//=============================================================
+
+
+void nothing::UserInterface::SwitchContext(UIContext newContext)
+{
+
+	currentContext = newContext;
+
+}
+
+
+//=============================================================
+
+
+void nothing::UserInterface::ClearEvent()
+{
+
+	currentEvent = UIEvent::None;
+
+}
+
+
+//=============================================================
+
+
+bool nothing::UserInterface::MenuButton(const char* text, ImVec2 pos, ImVec2 size, int textYTolerance)
+{
+
+	ImDrawList* draw = ImGui::GetForegroundDrawList();
+
+
+	ImGui::SetCursorScreenPos(pos);
+	ImGui::InvisibleButton(text, size);
+
+
+	bool hovered = ImGui::IsItemHovered();
+	bool clicked = ImGui::IsItemClicked();
+
+
+	ImU32 col = 0;
+
+
+	switch (currentStyle)
+	{
+
+		case NOTHING_WINSTYLE_TECH:
+			col = hovered ? IM_COL32(0, 245, 245, 240) : IM_COL32(0, 245, 245, 120);
+			break;
+
+
+		case NOTHING_WINSTYLE_INDUSTRIAL:
+			col = hovered ? IM_COL32(240, 240, 240, 240) : IM_COL32(240, 240, 240, 120);
+			break;
+
+
+		case NOTHING_WINSTYLE_EVIL:
+			col = hovered ? IM_COL32(245, 0, 0, 240) : IM_COL32(245, 0, 0, 120);
+			break;
+
+
+		default:
+			col = hovered ? IM_COL32(0, 245, 245, 240) : IM_COL32(0, 245, 245, 120);
+			break;
+
+	}	
+
+
+	// Rettangolo del bottone
+	draw->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y), col);
+
+
+	// Testo del bottone
+	draw->AddText(ImVec2(pos.x + 20, pos.y + size.y - (size.y / 2) - textYTolerance), IM_COL32(255, 255, 255, 255), text);
+
+
+	if (clicked)
+	{
+
+		return true;
+
+	}
+
+
+	return false;
+
+}
+
+
+//=============================================================
+
+
+void nothing::UserInterface::CenteredText(const char* text)
+{
+
+	auto windowWidth = ImGui::GetWindowSize().x;
+	auto textWidth = ImGui::CalcTextSize(text).x;
+
+
+	ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
+	ImGui::Text(text);
+
+}
+
+
+//=============================================================
+
+
+uint32_t nothing::UserInterface::CreateUITexture(const char* texturePath)
+{
+
+	uint32_t res;
+
+
+	glGenTextures(1, &res);
+	glBindTexture(GL_TEXTURE_2D, res);
+
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
+	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(false);
+
+
+	unsigned char* data = stbi_load(texturePath, &width, &height, &nrChannels, 0);
+
+
+	if (data)
+	{
+
+		switch (nrChannels)
+		{
+
+		case 3:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			break;
+
+
+		case 4:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			break;
+
+
+		default:
+			nothing::LogError("Unsupported number of channels in UI texture");
+			break;
+
+		}
+
+
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+	}
+	else
+	{
+
+		nothing::LogError("Failed to load UI texture");
+
+	}
+
+
+	stbi_image_free(data);
+
+
+	return res;
+
+}
+
+
+//=============================================================
+
+
+void nothing::UserInterface::ShowNewGamePanel(ImVec2& scrSz)
+{
 
 	if (showNewGamePanel)
 	{
@@ -228,27 +571,30 @@ void nothing::UserInterface::UpdateMainMenuContext()
 		ImGui::Begin("Nuova Partita", &showNewGamePanel, ImGuiWindowFlags_NoCollapse);
 
 
+		ImVec2 winSz = ImGui::GetWindowSize();
+
+
 		CenteredText("Capitolo 1");
 
 
 		ImGui::Separator();
 		CenteredText("Atto I - Lo Ierofante");
 		ImGui::Separator();
-		ImGui::Button("Scena 1 - L'edificio fantasma");
-		ImGui::Button("Scena 2 - La Città d'Acciaio");
-		ImGui::Button("Scena 3 - Attività illecita");
+		if (ImGui::Button("Scena 1 - L'edificio fantasma", ImVec2(winSz.x, 0))) { showNewGamePanel = false; showLoadGamePanel = false; showOptionsPanel = false; currentEvent = UIEvent::BeginGame; }
+		ImGui::Button("Scena 2 - La Città d'Acciaio", ImVec2(winSz.x, 0));
+		ImGui::Button("Scena 3 - Attività illecita", ImVec2(winSz.x, 0));
 		ImGui::Separator();
 		CenteredText("Atto II - Innaugurazione dell'Eroe");
 		ImGui::Separator();
-		ImGui::Button("Scena 1 - In buona compagnia");
-		ImGui::Button("Scena 2 - La fabbrica");
-		ImGui::Button("Scena 3 - La prigione");
+		ImGui::Button("Scena 1 - In buona compagnia", ImVec2(winSz.x, 0));
+		ImGui::Button("Scena 2 - La fabbrica", ImVec2(winSz.x, 0));
+		ImGui::Button("Scena 3 - La prigione", ImVec2(winSz.x, 0));
 		ImGui::Separator();
 		CenteredText("Atto III - L'ascesa dell'Impero");
 		ImGui::Separator();
-		ImGui::Button("Scena 1 - Nel cuore della cittadella");
-		ImGui::Button("Scena 2 - L'altro mondo");
-		ImGui::Button("Scena 3 - Silenzio radio");
+		ImGui::Button("Scena 1 - Nel cuore della cittadella", ImVec2(winSz.x, 0));
+		ImGui::Button("Scena 2 - L'altro mondo", ImVec2(winSz.x, 0));
+		ImGui::Button("Scena 3 - Silenzio radio", ImVec2(winSz.x, 0));
 
 
 		ImGui::Separator();
@@ -260,6 +606,14 @@ void nothing::UserInterface::UpdateMainMenuContext()
 
 	}
 
+}
+
+
+//=============================================================
+
+
+void nothing::UserInterface::ShowLoadGamePanel(ImVec2& scrSz)
+{
 
 	if (showLoadGamePanel)
 	{
@@ -292,6 +646,14 @@ void nothing::UserInterface::UpdateMainMenuContext()
 
 	}
 
+}
+
+
+//=============================================================
+
+
+void nothing::UserInterface::ShowOptionsPanel(ImVec2& scrSz)
+{
 
 	if (showOptionsPanel)
 	{
@@ -466,9 +828,9 @@ void nothing::UserInterface::UpdateMainMenuContext()
 		ImGui::Text("Stile dell'interfaccia utente");
 
 
-		if (ImGui::Button("Stile Tech",        ImVec2(300.0f, 0.0f))) { currentStyle = NOTHING_WINSTYLE_TECH; }
+		if (ImGui::Button("Stile Tech", ImVec2(300.0f, 0.0f))) { currentStyle = NOTHING_WINSTYLE_TECH; }
 		if (ImGui::Button("Stile Industriale", ImVec2(300.0f, 0.0f))) { currentStyle = NOTHING_WINSTYLE_INDUSTRIAL; }
-		if (ImGui::Button("Stile Cattivo",     ImVec2(300.0f, 0.0f))) { currentStyle = NOTHING_WINSTYLE_EVIL; }
+		if (ImGui::Button("Stile Cattivo", ImVec2(300.0f, 0.0f))) { currentStyle = NOTHING_WINSTYLE_EVIL; }
 
 
 		ImGui::Spacing();
@@ -490,245 +852,102 @@ void nothing::UserInterface::UpdateMainMenuContext()
 //=============================================================
 
 
-void nothing::UserInterface::UpdateGameContext()
+void nothing::UserInterface::ShowBackToMenuWarning(ImVec2& scrSz)
 {
 
-	ImVec2 scrSz = ImGui::GetIO().DisplaySize;
-
-
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-
-
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-
-
-	ImGui::SetNextWindowPos(ImVec2(0, 0));
-	ImGui::SetNextWindowSize(ImVec2(scrSz.x, scrSz.y));
-	ImGui::Begin("GameHUDPanel", nullptr, flags);
-
-
-	ImDrawList* dl = ImGui::GetForegroundDrawList();
-
-
-	// Letterbox
-	static float letterboxHeight = 90.0f;
-	dl->AddRectFilled(ImVec2(0, 0), ImVec2(scrSz.x, letterboxHeight), IM_COL32(0, 0, 0, 255));
-	dl->AddRectFilled(ImVec2(0, scrSz.y), ImVec2(scrSz.x, scrSz.y - letterboxHeight), IM_COL32(0, 0, 0, 255));
-
-
-	// Simbolo vita ("+")
-	dl->AddImage(uiTexture_Health, ImVec2(10, scrSz.y - 10), ImVec2(letterboxHeight - 10, (scrSz.y - letterboxHeight) + 10));
-
-
-	static float x = 60;
-	static float y = 60;
-	static float width = 520;
-	static float width2 = 520;
-	static float height = 10;
-	dl->AddRectFilled(ImVec2(x, scrSz.y - letterboxHeight + y), ImVec2(width, scrSz.y - height), IM_COL32(90, 90, 90, 255));
-
-
-	ImU32 barColor = IM_COL32(0, 250, 250, 255);
-
-
-	if (width2 < 325.0f)
+	if (showBackToMenuWarning)
 	{
 
-		barColor = IM_COL32(255, 216, 0, 255);
+		nothing::UIStyleHelper::AutoPushStyle(currentStyle);
+		static ImVec2 loadGamePanelPos = ImVec2(0.0f, 0.0f);
+		loadGamePanelPos.x = (scrSz.x / 2.0f) - (BACK_TO_MENU_WARNING_WIDTH / 2.0f);
+		loadGamePanelPos.y = (scrSz.y / 2.0f) - (BACK_TO_MENU_WARNING_HEIGHT / 2.0f);
+		ImGui::SetNextWindowPos(loadGamePanelPos, ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(BACK_TO_MENU_WARNING_WIDTH, BACK_TO_MENU_WARNING_HEIGHT), ImGuiCond_FirstUseEver);
+		ImGui::Begin("Torna al menù principale", &showLoadGamePanel, ImGuiWindowFlags_NoCollapse);
 
-	}
 
+		CenteredText("Sei sicuro di voler tornare al menù principale?");
+		CenteredText("(I progressi non salvati andranno PERSI!)");
 
-	if (width2 < 200.0f)
-	{
 
-		barColor = IM_COL32(255, 0, 0, 255);
-
-	}
-
-
-	dl->AddRectFilled(ImVec2(x, scrSz.y - letterboxHeight + y), ImVec2(width2, scrSz.y - height), barColor);
-
-
-	dl->AddText(ImVec2(20, 20), IM_COL32(255, 255, 255, 255), "HUD di gioco in sviluppo...");
-
-
-	ImGui::End();
-	ImGui::PopStyleVar(2);
-	ImGui::PopStyleColor();
-
-
-	ImGui::Begin("sasd");
-	ImGui::SliderFloat("X", &x, 0.0f, scrSz.x);
-	ImGui::SliderFloat("Y", &y, 0.0f, scrSz.y);
-	ImGui::SliderFloat("Width", &width, 0.0f, scrSz.x);
-	ImGui::SliderFloat("Width2", &width2, 125.0f, 520.0f);
-	ImGui::SliderFloat("Height", &height, 0.0f, scrSz.y);
-	ImGui::End();
-
-}
-
-
-//=============================================================
-
-
-void nothing::UserInterface::ClearEvent()
-{
-
-	currentEvent = UIEvent::None;
-
-}
-
-
-//=============================================================
-
-
-bool nothing::UserInterface::MenuButton(const char* text, ImVec2 pos, ImVec2 size, int textYTolerance)
-{
-
-	ImDrawList* draw = ImGui::GetForegroundDrawList();
-
-
-	ImGui::SetCursorScreenPos(pos);
-	ImGui::InvisibleButton(text, size);
-
-
-	bool hovered = ImGui::IsItemHovered();
-	bool clicked = ImGui::IsItemClicked();
-
-
-	ImU32 col = 0;
-
-
-	switch (currentStyle)
-	{
-
-		case NOTHING_WINSTYLE_TECH:
-			col = hovered ? IM_COL32(0, 245, 245, 240) : IM_COL32(0, 245, 245, 120);
-			break;
-
-
-		case NOTHING_WINSTYLE_INDUSTRIAL:
-			col = hovered ? IM_COL32(240, 240, 240, 240) : IM_COL32(240, 240, 240, 120);
-			break;
-
-
-		case NOTHING_WINSTYLE_EVIL:
-			col = hovered ? IM_COL32(245, 0, 0, 240) : IM_COL32(245, 0, 0, 120);
-			break;
-
-
-		default:
-			col = hovered ? IM_COL32(0, 245, 245, 240) : IM_COL32(0, 245, 245, 120);
-			break;
-
-	}	
-
-
-	// Rettangolo del bottone
-	draw->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y), col);
-
-
-	// Testo del bottone
-	draw->AddText(ImVec2(pos.x + 20, pos.y + size.y - (size.y / 2) - textYTolerance), IM_COL32(255, 255, 255, 255), text);
-
-
-	if (clicked)
-	{
-
-		return true;
-
-	}
-
-
-	return false;
-
-}
-
-
-//=============================================================
-
-
-void nothing::UserInterface::CenteredText(const char* text)
-{
-
-	auto windowWidth = ImGui::GetWindowSize().x;
-	auto textWidth = ImGui::CalcTextSize(text).x;
-
-
-	ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
-	ImGui::Text(text);
-
-}
-
-
-//=============================================================
-
-
-uint32_t nothing::UserInterface::CreateUITexture(const char* texturePath)
-{
-
-	uint32_t res;
-
-
-	glGenTextures(1, &res);
-	glBindTexture(GL_TEXTURE_2D, res);
-
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-
-	int width, height, nrChannels;
-	stbi_set_flip_vertically_on_load(false);
-
-
-	unsigned char* data = stbi_load(texturePath, &width, &height, &nrChannels, 0);
-
-
-	if (data)
-	{
-
-		switch (nrChannels)
+		if (ImGui::Button("Sì", ImVec2(50.0f, 0.0f)))
 		{
 
-		case 3:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-			break;
+			// Chiude tutte le finestre della UI
+			showNewGamePanel = false;
+			showLoadGamePanel = false;
+			showOptionsPanel = false;
+			showPauseMenu = false;
 
 
-		case 4:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-			break;
-
-
-		default:
-			nothing::LogError("Unsupported number of channels in UI texture");
-			break;
+			currentEvent = UIEvent::ReturnToMenu;
 
 		}
 
 
-		glGenerateMipmap(GL_TEXTURE_2D);
+		ImGui::SameLine();
+
+
+		if (ImGui::Button("No", ImVec2(50.0f, 0.0f)))
+		{
+
+			showBackToMenuWarning = false;
+
+		}
+
+
+		ImGui::End();
+		nothing::UIStyleHelper::PopStyle();
 
 	}
-	else
+
+}
+
+
+//=============================================================
+
+
+void nothing::UserInterface::ShowDevConsole(ImVec2& scrSz)
+{
+
+	if (showDevConsole)
 	{
 
-		nothing::LogError("Failed to load UI texture");
+		ImGui::SetNextWindowPos(ImVec2(scrSz.x - 800 - 50, 50), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
+		ImGui::Begin("Development console", &showDevConsole);
+
+		
+		if (ImGui::InputText("Command line", buf_, IM_ARRAYSIZE(buf_), ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+
+			if (std::strcmp(buf_, "sas") == 0)
+			{
+
+				lines_.push_back("sas command invoked");
+
+			}
+
+		}
+
+
+		ImGui::SameLine();
+		if (ImGui::Button("Clear log")) { lines_.clear(); }
+
+
+		for (auto& str : lines_)
+		{
+
+			std::string outLine = "[INFO]: " + str;
+			ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), outLine.c_str());
+
+		}
+
+
+		ImGui::End();
 
 	}
-
-
-	stbi_image_free(data);
-
-
-	return res;
 
 }
 

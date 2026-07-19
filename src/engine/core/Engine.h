@@ -16,6 +16,16 @@
 namespace nothing
 {
 
+	enum class GameState
+	{
+
+		MainMenu,
+		Gameplay
+
+	};
+
+
+
 	// SCOPO: Gestione principale engine
 	class Engine
 	{
@@ -44,6 +54,8 @@ namespace nothing
 		ResourceManager resourceManager_;
 		SceneManager    sceneManager_;
 
+
+		GameState gameState_ = GameState::MainMenu;
 
 	};
 
