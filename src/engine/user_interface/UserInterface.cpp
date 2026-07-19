@@ -914,7 +914,7 @@ void nothing::UserInterface::ShowDevConsole(ImVec2& scrSz)
 	if (showDevConsole)
 	{
 
-		ImGui::SetNextWindowPos(ImVec2(scrSz.x - 800 - 50, 50), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowPos(ImVec2(scrSz.x - 800 - 50, 150), ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
 		ImGui::Begin("Development console", &showDevConsole);
 
