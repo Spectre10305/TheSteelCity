@@ -8,7 +8,7 @@
 // =================================================
 
 
-bool nothing::Engine::Init()
+bool nothing::Engine::Init(LaunchOptions& lopts)
 {
 
 	nothing::LogInfo("Initializing engine...");
@@ -72,6 +72,22 @@ bool nothing::Engine::Init()
 
 	double timeToInitialize = nothing::ElapsedMS();
 	nothing::LogInfo("Took: " + std::to_string(timeToInitialize) + " MS to initialize engine");
+
+
+	if (lopts.noSplash == true)
+	{
+
+		gameState_ = GameState::MainMenu;
+		userInterface_.SwitchContext(UIContext::MainMenu);
+
+	}
+	else
+	{
+
+		gameState_ = GameState::SplashScreen;
+		userInterface_.SwitchContext(UIContext::SplashScreen);
+
+	}
 
 
 	return true;

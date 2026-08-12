@@ -90,13 +90,10 @@ void nothing::UserInterface::Init(EngineContext& ctx)
 	currentStyle = NOTHING_WINSTYLE_TECH;
 
 
-	// TEST TEXTURE
+	// Texture UI
 	uiTexture_Logo = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_logo.png").c_str(), false);
 	uiTexture_Health = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_health_symbol.png").c_str(), false);
 	uiTexture_NothingLogo = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("nothing_logo.png").c_str(), true);
-
-
-	currentContext = UIContext::SplashScreen;
 
 }
 

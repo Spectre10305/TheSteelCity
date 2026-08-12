@@ -20,12 +20,22 @@ namespace nothing
 	enum class GameState
 	{
 
+		None,
 		SplashScreen,
 		MainMenu,
 		Gameplay
 
 	};
 
+
+	// SCOPO: Contiene i dati degli argomenti di
+	// avvio della riga di comando
+	struct LaunchOptions
+	{
+
+		bool noSplash = false;
+
+	};
 
 
 	// SCOPO: Gestione principale engine
@@ -34,7 +44,7 @@ namespace nothing
 
 	public:
 
-		bool Init();
+		bool Init(LaunchOptions& lopts);
 		void Run();
 		void Shutdown();
 
@@ -58,7 +68,7 @@ namespace nothing
 		SceneManager    sceneManager_;
 
 
-		GameState gameState_ = GameState::SplashScreen;
+		GameState gameState_ = GameState::None;
 
 	};
 
