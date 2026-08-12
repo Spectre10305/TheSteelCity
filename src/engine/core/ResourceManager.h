@@ -2,6 +2,8 @@
 #include <cstdint>
 #include <string>
 #include <unordered_map>
+#include "EngineContext.h"
+#include "Filesystem.h"
 
 
 namespace nothing
@@ -24,7 +26,7 @@ namespace nothing
 
 	public:
 
-		void InitDefaults();
+		void InitDefaults(EngineContext& ctx);
 
 
 		// Textures
@@ -36,6 +38,9 @@ namespace nothing
 	private:
 
 		std::unordered_map<std::string, ResTexture> allTextures_;
+
+
+		EngineContext* ctx_ = nullptr;
 
 	};
 

@@ -8,10 +8,13 @@
 // =================================================
 
 
-void nothing::ResourceManager::InitDefaults()
+void nothing::ResourceManager::InitDefaults(EngineContext& ctx)
 {
 
-	if (!CreateTexture("D:\\TheSteelCity\\assets\\game\\textures\\nothing_logo.png"))
+	ctx_ = &ctx;
+
+
+	if (!CreateTexture(ctx_->filesystem->GetTexturePathFromName("nothing_logo.png").c_str()))
 	{
 
 		nothing::LogWarning("Can't initialize default texture. Some visuals may be broken");
@@ -125,7 +128,7 @@ nothing::ResTexture& nothing::ResourceManager::GetTextureFromName(const char* te
 	{
 
 		// Texture di default
-		nothing::LogWarning("GetTextureFromName can't find texture: " + std::string(texName) + ". Using default texture");
+		nothing::LogWarning("GetTextureFromName can't find texture: " + std::string(texName) + ". Using default texture.");
 		auto& defTex = allTextures_.at("nothing_logo");
 		return defTex;
 
@@ -150,7 +153,7 @@ uint32_t nothing::ResourceManager::GetTextureIDFromName(const char* texName)
 	{
 
 		// Texture di default
-		nothing::LogWarning("GetTextureIDFromName can't find texture: " + std::string(texName) + ". Using default texture");
+		nothing::LogWarning("GetTextureIDFromName can't find texture: " + std::string(texName) + ". Using default texture.");
 		return allTextures_.at("nothing_logo").id;
 
 	}

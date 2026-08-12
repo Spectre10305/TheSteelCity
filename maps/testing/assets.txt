@@ -1,0 +1,6 @@
+_TEXTURES
+tex_floor_tiles_1.png
+tex_wall_plaster_2.png
+_MODELS3D
+props_industrial_electric_box_floor.obj
+props_industrial_electric_box_wall.obj

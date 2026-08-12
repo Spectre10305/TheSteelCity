@@ -6,6 +6,7 @@
 #include "InputManager.h"
 #include "ResourceManager.h"
 #include "SceneManager.h"
+#include "Filesystem.h"
 #include "../graphics/RenderManager.h"
 #include "../user_interface/UserInterface.h"
 
@@ -47,6 +48,7 @@ namespace nothing
 		EngineContext   engineContext_{};
 
 
+		Filesystem      fileSystem_;
 		WindowManager   windowManager_;
 		RenderManager   renderManager_;
 		UserInterface   userInterface_;

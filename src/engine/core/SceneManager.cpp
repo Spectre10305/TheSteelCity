@@ -2,6 +2,9 @@
 #include <glad/glad.h>
 #include "ResourceManager.h"
 #include "InputManager.h"
+#include <fstream>
+#include <sstream>
+#include "../utils/Log.h"
 
 
 // =================================================
@@ -97,25 +100,6 @@ void nothing::SceneManager::Update()
 
 #pragma endregion
 
-
-	auto view = registry.view<Transform>();
-
-
-	for (auto [ent, tr] : view.each())
-	{
-
-		if (registry.all_of<DoNotMoveTag>(ent))
-		{
-
-			continue;
-
-		}
-
-
-		tr.rotation += 0.1f;
-
-	}
-
 }
 
 
@@ -127,44 +111,137 @@ void nothing::SceneManager::Shutdown()
 
 }
 
+
+// =================================================
+
+
 void nothing::SceneManager::LoadScene()
 {
 
-	ctx_->resourcesManager->CreateTexture("D:\\TheSteelCity\\assets\\game\\textures\\tex_wall_bricks_1.png");
-	ctx_->resourcesManager->CreateTexture("D:\\TheSteelCity\\assets\\game\\textures\\tex_floor_wood_1.png");
+	// Esempio tattico nucleare
+	std::string testMapPath = ctx_->filesystem->GetMapPath("testing");
+	std::string mapFile = testMapPath + "\\testing.notmap";
+	std::string assetFile = testMapPath + "\\assets.txt";
 
 
-	SolidCubeInfo scInfo{};
-	scInfo.position = glm::vec3(0.0f, 0.0f, 0.0f);
-	scInfo.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-	scInfo.width = 1.0f;
-	scInfo.height = 1.0f;
-	scInfo.depth = 1.0f;
-	scInfo.textureID = ctx_->resourcesManager->GetTextureIDFromName("tex_floor_wood_1");
-	scInfo.isDoubleTiled = true;
-	scInfo.doNotMove = true;
+	std::vector<std::string> allTexturesFiles;
+	std::vector<std::string> allModels3DFiles;
+	std::vector<std::string> allAudioFiles;
 
 
-	CreateWorldSolidCube(scInfo);
+	LoadAssetFile(assetFile.c_str(), allTexturesFiles, allModels3DFiles, allAudioFiles);
 
 
+	for (auto& texFile : allTexturesFiles)
+	{
 
-	SolidPlaneInfo spInfo{};
-	spInfo.position = glm::vec3(2.0f, 0.0f, 0.0f);
-	spInfo.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-	spInfo.width = 1.0f;
-	spInfo.height = 1.0f;
-	spInfo.textureID = ctx_->resourcesManager->GetTextureIDFromName("tex_wall_bricks_1");
-	spInfo.isDoubleTiled = true;
-	spInfo.doNotMove = true;
+		ctx_->resourcesManager->CreateTexture(ctx_->filesystem->GetTexturePathFromName(texFile.c_str()).c_str());
+
+	}
 
 
-	CreateWorldSolidPlane(spInfo);
+	std::fstream mapFileStream(mapFile, std::ios::in | std::ios::binary);
+
+
+	if (mapFileStream.is_open())
+	{
+
+		char magic[4];
+		mapFileStream.read(magic, 4);
+
+
+		if (std::strncmp(magic, "NTGH", 4) == 0)
+		{
+			
+			nothing::LogInfo("Valid magic number");
+
+		}
+
+		uint32_t version;
+		mapFileStream.read(reinterpret_cast<char*>(&version), 4);
+
+
+		if (version == 1)
+		{
+
+			nothing::LogInfo("Valid version: 1");
+
+		}
+
+
+		uint32_t objectsCount;
+		mapFileStream.read(reinterpret_cast<char*>(&objectsCount), 4);
+
+
+		if (objectsCount > 1000)
+		{
+
+			nothing::LogError("Too many objects in this map file, check for possible corruptions");
+
+		}
+
+
+		for (int i = 0; i < objectsCount; i++)
+		{
+
+			uint32_t objIDByte;
+			mapFileStream.read(reinterpret_cast<char*>(&objIDByte), 4);
+
+
+			if (objIDByte == 0x01)
+			{
+
+				float_t x, y, z, p, ya, r, w, h;
+				mapFileStream.read(reinterpret_cast<char*>(&x), 4);
+				mapFileStream.read(reinterpret_cast<char*>(&y), 4);
+				mapFileStream.read(reinterpret_cast<char*>(&z), 4);
+				mapFileStream.read(reinterpret_cast<char*>(&p), 4);
+				mapFileStream.read(reinterpret_cast<char*>(&ya), 4);
+				mapFileStream.read(reinterpret_cast<char*>(&r), 4);
+				mapFileStream.read(reinterpret_cast<char*>(&w), 4);
+				mapFileStream.read(reinterpret_cast<char*>(&h), 4);
+
+
+				uint32_t texNameLenght;
+				mapFileStream.read(reinterpret_cast<char*>(&texNameLenght), 4);
+
+
+				std::string texName(texNameLenght, '\0');
+				mapFileStream.read(texName.data(), texNameLenght);
+
+
+				uint32_t isDoubleTiled;
+				mapFileStream.read(reinterpret_cast<char*>(&isDoubleTiled), 4);
+
+
+				SolidPlaneInfo spInfo{};
+				spInfo.position = glm::vec3(x, y, z);
+				spInfo.rotation = glm::vec3(p, ya, r);
+				spInfo.width = w;
+				spInfo.height = h;
+				spInfo.textureID = ctx_->resourcesManager->GetTextureIDFromName(texName.c_str());
+				spInfo.isDoubleTiled = isDoubleTiled ? 1 : 0;
+
+
+				CreateWorldSolidPlane(spInfo);
+				
+			}
+
+		}
+
+
+		mapFileStream.close();
+
+	}
 
 
 	registry.ctx().emplace<Camera>();
 
 }
+
+
+// =================================================
+
 
 void nothing::SceneManager::UnloadScene()
 {
@@ -370,14 +447,6 @@ void nothing::SceneManager::CreateWorldSolidCube(const SolidCubeInfo& cubeInfo)
 	registry.emplace<Object3D>(cubeEnt, worldMeshes.back().VAO, worldMeshes.back().numIndices, cubeInfo.textureID);
 	registry.emplace<Transform>(cubeEnt, cubeInfo.position, cubeInfo.rotation);
 
-
-	if (cubeInfo.doNotMove)
-	{
-
-		registry.emplace<DoNotMoveTag>(cubeEnt);
-
-	}
-
 }
 
 
@@ -396,13 +465,117 @@ void nothing::SceneManager::CreateWorldSolidPlane(const SolidPlaneInfo& planeInf
 	registry.emplace<Object3D>(planeEnt, worldMeshes.back().VAO, worldMeshes.back().numIndices, planeInfo.textureID);
 	registry.emplace<Transform>(planeEnt, planeInfo.position, planeInfo.rotation);
 
+}
 
-	if (planeInfo.doNotMove)
+
+// =================================================
+
+
+bool nothing::SceneManager::LoadAssetFile(const char* assetFile, std::vector<std::string>& allTexturesFiles, std::vector<std::string>& allModels3DFiles, std::vector<std::string>& allAudioFiles)
+{
+
+	std::fstream testAssetsFile(assetFile, std::ios::in);
+
+
+	if (testAssetsFile.is_open())
 	{
 
-		registry.emplace<DoNotMoveTag>(planeEnt);
+		std::string line;
+
+
+		int sectionToCheck = 0; // 0=Textures, 1=Modelli 3D, 2=Audio
+
+
+		while (std::getline(testAssetsFile, line))
+		{
+
+			if (line == "_TEXTURES")
+			{
+
+				sectionToCheck = 0;
+
+			}
+			else if (line == "_MODELS3D")
+			{
+
+				sectionToCheck = 1;
+
+			}
+			else if (line == "_AUDIOS")
+			{
+
+				sectionToCheck = 2;
+
+			}
+			else
+			{
+
+				switch (sectionToCheck)
+				{
+
+				case 0:
+					allTexturesFiles.push_back(line);
+					break;
+
+
+				case 1:
+					allModels3DFiles.push_back(line);
+					break;
+
+
+				case 2:
+					allAudioFiles.push_back(line);
+					break;
+
+
+				default:
+					break;
+
+				}
+
+			}
+
+		}
+
+
+#pragma region CHECK ASSETS
+		nothing::LogInfo("All Textures evaluated");
+
+
+		for (auto tex : allTexturesFiles)
+		{
+
+			nothing::LogInfo(tex);
+
+		}
+
+
+		nothing::LogInfo("All 3D Models evaluated");
+
+
+		for (auto mod : allModels3DFiles)
+		{
+
+			nothing::LogInfo(mod);
+
+		}
+
+
+		nothing::LogInfo("All Audios evaluated");
+
+
+		for (auto aud : allAudioFiles)
+		{
+
+			nothing::LogInfo(aud);
+
+		}
+#pragma endregion
 
 	}
+
+
+	return true;
 
 }
 

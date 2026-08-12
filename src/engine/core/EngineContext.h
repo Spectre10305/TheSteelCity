@@ -11,6 +11,7 @@ namespace nothing
 	class InputManager;
 	class RenderManager;
 	class UserInterface;
+	class Filesystem;
 
 
 	// SCOPO: Provvede l'accesso ai sistemi dell'engine sottoforma di riferimenti,
@@ -24,6 +25,7 @@ namespace nothing
 		InputManager*    inputManager     = nullptr;
 		RenderManager*   renderManager    = nullptr;
 		UserInterface*   userInterface    = nullptr;
+		Filesystem*      filesystem       = nullptr;
 
 	};
 

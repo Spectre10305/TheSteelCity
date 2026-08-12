@@ -1,0 +1,3 @@
+_TEXTURES
+tex_dev_creator.png
+_MODELS3D

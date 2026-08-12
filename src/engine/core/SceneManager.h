@@ -45,9 +45,6 @@ namespace nothing
 	};
 
 
-	struct DoNotMoveTag{};
-
-
 	// TEST "InfoObjects", strutture temporanee per la creazione delle entità EnTT
 	struct SolidCubeInfo
 	{
@@ -59,7 +56,6 @@ namespace nothing
 		float       depth         = 1.0f;
 		uint32_t    textureID     = 0;
 		bool        isDoubleTiled = false;
-		bool        doNotMove     = false;
 
 	};
 
@@ -73,7 +69,6 @@ namespace nothing
 		float       height        = 1.0f;
 		uint32_t    textureID     = 0;
 		bool        isDoubleTiled = false;
-		bool        doNotMove     = false;
 
 	};
 
@@ -130,6 +125,9 @@ namespace nothing
 	private:
 
 		EngineContext* ctx_ = nullptr;
+
+
+		bool LoadAssetFile(const char* assetFile, std::vector<std::string>& allTexturesFiles, std::vector<std::string>& allModels3DFiles, std::vector<std::string>& allAudioFiles);
 
 	};
 

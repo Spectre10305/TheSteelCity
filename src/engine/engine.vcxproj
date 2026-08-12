@@ -176,6 +176,7 @@
     <ClInclude Include="core\Engine.h" />
     <ClInclude Include="core\EngineContext.h" />
     <ClInclude Include="core\WindowManager.h" />
+    <ClInclude Include="core\Filesystem.h" />
     <ClInclude Include="graphics\IMGUI\imconfig.h" />
     <ClInclude Include="graphics\IMGUI\imgui.h" />
     <ClInclude Include="graphics\IMGUI\imgui_impl_opengl3.h" />
@@ -200,6 +201,7 @@
     <ClCompile Include="core\impl_stb_image.cpp" />
     <ClCompile Include="core\WindowManager.cpp" />
     <ClCompile Include="engine_main.cpp" />
+    <ClCompile Include="core\Filesystem.cpp" />
     <ClCompile Include="graphics\glad.c" />
     <ClCompile Include="graphics\IMGUI\imgui.cpp" />
     <ClCompile Include="graphics\IMGUI\imgui_demo.cpp" />

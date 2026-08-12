@@ -22,6 +22,10 @@ bool nothing::Engine::Init()
 	engineContext_.inputManager     = &inputManager_;
 	engineContext_.renderManager    = &renderManager_;
 	engineContext_.userInterface    = &userInterface_;
+	engineContext_.filesystem       = &fileSystem_;
+
+
+	fileSystem_.Init();
 
 
 	if (!windowManager_.Init())
@@ -33,7 +37,7 @@ bool nothing::Engine::Init()
 	}
 	
 
-	resourceManager_.InitDefaults();
+	resourceManager_.InitDefaults(engineContext_);
 
 
 	sceneManager_.Init(engineContext_);
