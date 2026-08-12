@@ -2,6 +2,7 @@
 #include "../utils/Log.h"
 #include "../utils/Time.h"
 #include "../graphics/IMGUI/imgui_impl_sdl3.h" // ImGui_ImplSDL3_ProcessEvent() in HandleEvents()
+#include <thread>
 
 
 // =================================================
@@ -60,6 +61,7 @@ bool nothing::Engine::Init()
 	inputManager_.BindKey(SDL_SCANCODE_A,      GameAction::MoveLeft);
 	inputManager_.BindKey(SDL_SCANCODE_S,      GameAction::MoveBackward);
 	inputManager_.BindKey(SDL_SCANCODE_D,      GameAction::MoveRight);
+	inputManager_.BindKey(SDL_SCANCODE_SPACE,  GameAction::Jump);
 	inputManager_.BindKey(SDL_SCANCODE_LEFT,   GameAction::RotateLeft);
 	inputManager_.BindKey(SDL_SCANCODE_RIGHT,  GameAction::RotateRight);
 	inputManager_.BindKey(SDL_SCANCODE_UP,     GameAction::RotateUp);
@@ -109,6 +111,40 @@ void nothing::Engine::Run()
 			renderManager_.Update(deltaTime);
 			userInterface_.Update();
 			break;
+
+
+		case GameState::SplashScreen:
+		{
+
+			static double time = 0;
+
+
+			time += deltaTime;
+
+
+			if (inputManager_.IsActionTriggered(GameAction::Jump))
+			{
+
+				userInterface_.SwitchContext(UIContext::MainMenu);
+				gameState_ = GameState::MainMenu;
+
+			}
+
+
+			if (time > 5.0)
+			{
+
+				userInterface_.SwitchContext(UIContext::MainMenu);
+				gameState_ = GameState::MainMenu;
+
+			}
+
+
+			userInterface_.Update();
+
+			break;
+		}
+			
 
 
 		default:

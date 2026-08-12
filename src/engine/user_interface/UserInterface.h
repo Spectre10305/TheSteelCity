@@ -37,7 +37,8 @@ namespace nothing
 
 		None,
 		MainMenu,
-		Gameplay
+		Gameplay,
+		SplashScreen
 
 	};
 
@@ -65,11 +66,12 @@ namespace nothing
 
 		void     UpdateMainMenuContext();
 		void     UpdateGameContext();
+		void     UpdateSplashScreenContext();
 		void     SwitchContext(UIContext newContext);
 		void     ClearEvent();
 		bool     MenuButton(const char* text, ImVec2 pos, ImVec2 size, int textYTolerance);
 		void     CenteredText(const char* text); // Helper per testo centrato
-		uint32_t CreateUITexture(const char* texturePath);
+		uint32_t CreateUITexture(const char* texturePath, bool flipVert);
 
 
 		void ShowNewGamePanel(ImVec2& scrSz);
@@ -103,6 +105,7 @@ namespace nothing
 		// Texture UI
 		uint32_t uiTexture_Logo = 0;
 		uint32_t uiTexture_Health = 0;
+		uint32_t uiTexture_NothingLogo = 0;
 
 
 		UIEvent currentEvent = UIEvent::None;

@@ -20,6 +20,7 @@ namespace nothing
 	enum class GameState
 	{
 
+		SplashScreen,
 		MainMenu,
 		Gameplay
 
@@ -57,7 +58,7 @@ namespace nothing
 		SceneManager    sceneManager_;
 
 
-		GameState gameState_ = GameState::MainMenu;
+		GameState gameState_ = GameState::SplashScreen;
 
 	};
 

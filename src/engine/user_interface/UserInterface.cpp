@@ -8,6 +8,7 @@
 #include <stb_image.h>
 #include "../core/WindowManager.h"
 #include "../core/InputManager.h"
+#include "../core/Filesystem.h"
 
 
 //=============================================================
@@ -90,11 +91,12 @@ void nothing::UserInterface::Init(EngineContext& ctx)
 
 
 	// TEST TEXTURE
-	uiTexture_Logo = CreateUITexture("D:\\TheSteelCity\\assets\\game\\textures\\tex_ui_logo.png");
-	uiTexture_Health = CreateUITexture("D:\\TheSteelCity\\assets\\game\\textures\\tex_ui_health_symbol.png");
+	uiTexture_Logo = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_logo.png").c_str(), false);
+	uiTexture_Health = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_health_symbol.png").c_str(), false);
+	uiTexture_NothingLogo = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("nothing_logo.png").c_str(), true);
 
 
-	currentContext = UIContext::MainMenu;
+	currentContext = UIContext::SplashScreen;
 
 }
 
@@ -120,6 +122,11 @@ void nothing::UserInterface::Update()
 
 	case UIContext::Gameplay:
 		UpdateGameContext();
+		break;
+
+
+	case UIContext::SplashScreen:
+		UpdateSplashScreenContext();
 		break;
 
 
@@ -382,6 +389,67 @@ void nothing::UserInterface::UpdateGameContext()
 //=============================================================
 
 
+void nothing::UserInterface::UpdateSplashScreenContext()
+{
+
+	ImVec2 scrSz = ImGui::GetIO().DisplaySize;
+
+
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+
+	ImGui::SetNextWindowPos(ImVec2(0, 0));
+	ImGui::SetNextWindowSize(ImVec2(scrSz.x, scrSz.y));
+
+
+	// Usiamo questi flags perchè altrimenti quelli di default interferiscono
+	// con l'interazione dei pulsanti
+	ImGuiWindowFlags mainHUDFlags =
+		ImGuiWindowFlags_NoTitleBar |
+		ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoScrollbar |
+		ImGuiWindowFlags_NoScrollWithMouse |
+		ImGuiWindowFlags_NoCollapse |
+		ImGuiWindowFlags_NoBringToFrontOnFocus |
+		ImGuiWindowFlags_NoNavFocus |
+		ImGuiWindowFlags_NoBackground |
+		ImGuiWindowFlags_NoDecoration |
+		ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoFocusOnAppearing;
+
+
+	ImGui::Begin("SplashScreen", nullptr, mainHUDFlags);
+
+
+	ImDrawList* dl = ImGui::GetForegroundDrawList();
+
+
+	float scrCenterX = scrSz.x / 2;
+	float scrCenterY = scrSz.y / 2;
+	ImVec2 scrCenterPoint = ImVec2(scrCenterX, scrCenterY);
+
+
+	ImVec2 imgP1 = ImVec2(scrCenterPoint.x - 70, scrCenterPoint.y + 70);
+	ImVec2 imgP2 = ImVec2(scrCenterPoint.x + 70, scrCenterPoint.y - 70);
+
+	
+	dl->AddImage(uiTexture_NothingLogo, imgP1, imgP2);
+
+
+	ImGui::End();
+	ImGui::PopStyleVar(2);
+	ImGui::PopStyleColor();
+
+}
+
+
+//=============================================================
+
+
 void nothing::UserInterface::SwitchContext(UIContext newContext)
 {
 
@@ -486,7 +554,10 @@ void nothing::UserInterface::CenteredText(const char* text)
 //=============================================================
 
 
-uint32_t nothing::UserInterface::CreateUITexture(const char* texturePath)
+/* "bool flipVert" serve per flippare verticalmente la texture al caricamento(stbi_set_flip_vertically_on_load(true)).
+*	Per qualche motivo alcune texture si vedono bene anche se stbi_set_flip_vertically_on_load è FALSO altre no
+*/
+uint32_t nothing::UserInterface::CreateUITexture(const char* texturePath, bool flipVert)
 {
 
 	uint32_t res;
@@ -505,7 +576,7 @@ uint32_t nothing::UserInterface::CreateUITexture(const char* texturePath)
 
 
 	int width, height, nrChannels;
-	stbi_set_flip_vertically_on_load(false);
+	stbi_set_flip_vertically_on_load(flipVert);
 
 
 	unsigned char* data = stbi_load(texturePath, &width, &height, &nrChannels, 0);
