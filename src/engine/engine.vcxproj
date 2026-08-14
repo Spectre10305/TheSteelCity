@@ -131,7 +131,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)libs\SDL3\include\;$(SolutionDir)libs\GLAD\include\;$(SolutionDir)libs\GLM\;$(SolutionDir)libs\STB\;$(SolutionDir)libs\ENTT\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\SDL3\include\;$(SolutionDir)libs\GLAD\include\;$(SolutionDir)libs\GLM\;$(SolutionDir)libs\STB\;$(SolutionDir)libs\ENTT\;$(SolutionDir)libs\OBJ\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -156,7 +156,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)libs\SDL3\include\;$(SolutionDir)libs\GLAD\include\;$(SolutionDir)libs\GLM\;$(SolutionDir)libs\STB\;$(SolutionDir)libs\ENTT\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\SDL3\include\;$(SolutionDir)libs\GLAD\include\;$(SolutionDir)libs\GLM\;$(SolutionDir)libs\STB\;$(SolutionDir)libs\ENTT\;$(SolutionDir)libs\OBJ\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -199,6 +199,7 @@
   <ItemGroup>
     <ClCompile Include="core\Engine.cpp" />
     <ClCompile Include="core\impl_stb_image.cpp" />
+    <ClCompile Include="core\impl_tinyobj.cpp" />
     <ClCompile Include="core\WindowManager.cpp" />
     <ClCompile Include="engine_main.cpp" />
     <ClCompile Include="core\Filesystem.cpp" />

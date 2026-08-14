@@ -33,7 +33,7 @@ void nothing::Filesystem::Init()
 // =================================================
 
 
-std::string nothing::Filesystem::GetTexturePathFromName(const char* name)
+std::string nothing::Filesystem::GetTexturePathFromName(const std::string& name)
 {
 
 	std::string res = texturesFolderPath_.string() + std::string(name);
@@ -45,7 +45,7 @@ std::string nothing::Filesystem::GetTexturePathFromName(const char* name)
 // =================================================
 
 
-std::string nothing::Filesystem::GetModel3DPathFromName(const char* name)
+std::string nothing::Filesystem::GetModel3DPathFromName(const std::string& name)
 {
 
 	std::string res = models3DFolderPath_.string() + std::string(name);
@@ -57,7 +57,7 @@ std::string nothing::Filesystem::GetModel3DPathFromName(const char* name)
 // =================================================
 
 
-std::string nothing::Filesystem::GetAudioPathFromName(const char* name)
+std::string nothing::Filesystem::GetAudioPathFromName(const std::string& name)
 {
 
 	std::string res = audiosFolderPath_.string() + std::string(name);
@@ -69,7 +69,7 @@ std::string nothing::Filesystem::GetAudioPathFromName(const char* name)
 // =================================================
 
 
-std::string nothing::Filesystem::GetMapPath(const char* name)
+std::string nothing::Filesystem::GetMapPath(const std::string& name)
 {
 
 	std::string res = mapsFolderPath_.string() + std::string(name);

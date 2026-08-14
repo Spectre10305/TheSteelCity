@@ -135,7 +135,27 @@ void nothing::SceneManager::LoadScene()
 	for (auto& texFile : allTexturesFiles)
 	{
 
-		ctx_->resourcesManager->CreateTexture(ctx_->filesystem->GetTexturePathFromName(texFile.c_str()).c_str());
+		ctx_->resourcesManager->CreateTexture(ctx_->filesystem->GetTexturePathFromName(texFile));
+
+	}
+
+
+	// Questo serve per dopo, per caricare la texture del modello 3D durante la creazione del prop
+	std::unordered_map<std::string, std::string> modelTextureMap;
+
+
+	for (auto& modFile : allModels3DFiles)
+	{
+
+		ctx_->resourcesManager->CreateModel3D(ctx_->filesystem->GetModel3DPathFromName(modFile));
+
+
+		std::string modName = modFile.erase(modFile.size() - 4); // Cancella ".obj"
+		nothing::ResModel3D mod3D = ctx_->resourcesManager->GetModel3DFromName(modName);
+		std::string modelTextureFileName = mod3D.modelTextureFileName;
+		ctx_->resourcesManager->CreateTexture(ctx_->filesystem->GetTexturePathFromName(modelTextureFileName));
+		modelTextureFileName.erase(modelTextureFileName.size() - 4); // Cancella ".png"
+		modelTextureMap[modName] = modelTextureFileName;
 
 	}
 
@@ -215,16 +235,54 @@ void nothing::SceneManager::LoadScene()
 
 
 				SolidPlaneInfo spInfo{};
-				spInfo.position = glm::vec3(x, y, z);
-				spInfo.rotation = glm::vec3(p, ya, r);
-				spInfo.width = w;
-				spInfo.height = h;
-				spInfo.textureID = ctx_->resourcesManager->GetTextureIDFromName(texName.c_str());
+				spInfo.position      = glm::vec3(x, y, z);
+				spInfo.rotation      = glm::vec3(p, ya, r);
+				spInfo.width         = w;
+				spInfo.height        = h;
+				spInfo.textureID     = ctx_->resourcesManager->GetTextureIDFromName(texName);
 				spInfo.isDoubleTiled = isDoubleTiled ? 1 : 0;
 
 
 				CreateWorldSolidPlane(spInfo);
 				
+			}
+
+
+			if (objIDByte == 0x02)
+			{
+
+				float_t x, y, z, p, ya, r;
+				mapFileStream.read(reinterpret_cast<char*>(&x), 4);
+				mapFileStream.read(reinterpret_cast<char*>(&y), 4);
+				mapFileStream.read(reinterpret_cast<char*>(&z), 4);
+				mapFileStream.read(reinterpret_cast<char*>(&p), 4);
+				mapFileStream.read(reinterpret_cast<char*>(&ya), 4);
+				mapFileStream.read(reinterpret_cast<char*>(&r), 4);
+
+
+				uint32_t modNameLenght;
+				mapFileStream.read(reinterpret_cast<char*>(&modNameLenght), 4);
+
+
+				std::string modName(modNameLenght, '\0');
+				mapFileStream.read(modName.data(), modNameLenght);
+
+
+				uint32_t usePhysics;
+				mapFileStream.read(reinterpret_cast<char*>(&usePhysics), 4);
+
+
+				PropInfo propInfo{};
+				propInfo.position          = glm::vec3(x, y, z);
+				propInfo.rotation          = glm::vec3(p, ya, r);
+				propInfo.modelVAO          = ctx_->resourcesManager->GetModel3DVAOFromName(modName);
+				propInfo.modelIndicesCount = ctx_->resourcesManager->GetModel3DIndicesCountFromName(modName);
+				propInfo.textureID         = ctx_->resourcesManager->GetTextureIDFromName(modelTextureMap[modName]);
+				propInfo.usePhysics        = usePhysics ? 1 : 0;
+
+
+				CreatePropObject(propInfo);
+
 			}
 
 		}
@@ -464,6 +522,19 @@ void nothing::SceneManager::CreateWorldSolidPlane(const SolidPlaneInfo& planeInf
 	auto planeEnt = registry.create();
 	registry.emplace<Object3D>(planeEnt, worldMeshes.back().VAO, worldMeshes.back().numIndices, planeInfo.textureID);
 	registry.emplace<Transform>(planeEnt, planeInfo.position, planeInfo.rotation);
+
+}
+
+
+// =================================================
+
+
+void nothing::SceneManager::CreatePropObject(const PropInfo& propInfo)
+{
+
+	auto propEnt = registry.create();
+	registry.emplace<Object3D>(propEnt, propInfo.modelVAO, propInfo.modelIndicesCount, propInfo.textureID);
+	registry.emplace<Transform>(propEnt, propInfo.position, propInfo.rotation);
 
 }
 

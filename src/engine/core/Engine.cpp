@@ -158,6 +158,7 @@ void nothing::Engine::Run()
 
 			userInterface_.Update();
 
+
 			break;
 		}
 			
@@ -206,6 +207,7 @@ void nothing::Engine::Shutdown()
 
 		nothing::LogInfo("Quitting from game state, cleaning up resources...");
 		sceneManager_.UnloadScene();
+		resourceManager_.DeleteAllModels3D();
 		resourceManager_.DeleteAllTextures();
 
 	}
@@ -276,6 +278,7 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 
 	case UIEvent::ReturnToMenu:
 		sceneManager_.UnloadScene();
+		resourceManager_.DeleteAllModels3D();
 		resourceManager_.DeleteAllTextures();
 		userInterface_.SwitchContext(UIContext::MainMenu);
 		gameState_ = GameState::MainMenu;

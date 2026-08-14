@@ -73,6 +73,19 @@ namespace nothing
 	};
 
 
+	struct PropInfo
+	{
+
+		glm::vec3   position          = glm::vec3(0.0f, 0.0f, 0.0f);
+		glm::vec3   rotation          = glm::vec3(0.0f, 0.0f, 0.0f);
+		uint32_t    modelVAO          = 0;
+		uint32_t    modelIndicesCount = 0;
+		uint32_t    textureID         = 0;
+		bool        usePhysics        = false;
+
+	};
+
+
 	// Queste sono quelle mesh generate per il mondo come cubi o piani
 	struct WorldMesh
 	{
@@ -104,6 +117,7 @@ namespace nothing
 		WorldMesh CreatePlaneWorldMesh(float width, float height, bool isDoubleTiled);
 		void CreateWorldSolidCube(const SolidCubeInfo& cubeInfo);
 		void CreateWorldSolidPlane(const SolidPlaneInfo& planeInfo);
+		void CreatePropObject(const PropInfo& propInfo);
 
 
 		template<typename T>
