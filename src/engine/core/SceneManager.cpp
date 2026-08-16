@@ -2,9 +2,9 @@
 #include <glad/glad.h>
 #include "ResourceManager.h"
 #include "InputManager.h"
-#include <fstream>
 #include <sstream>
 #include "../utils/Log.h"
+
 
 
 // =================================================
@@ -15,6 +15,41 @@ void nothing::SceneManager::Init(EngineContext& ctx)
 
 	ctx_ = &ctx;
 
+
+	gameDLL_ = LoadLibraryA("game.dll");
+
+
+	initGameCode_ = GetProcAddress(gameDLL_, "TestGameInit");
+
+
+	using UpdateGameFn = void(*)(entt::registry&);
+	UpdateGameFn updateGameFn = reinterpret_cast<UpdateGameFn>(GetProcAddress(gameDLL_, "TestGameUpdate"));
+	updateGameCode_ = updateGameFn;
+
+
+	shutdownGameCode_ = GetProcAddress(gameDLL_, "TestGameShutdown");
+	
+
+	if (!initGameCode_ || !updateGameCode_ || !shutdownGameCode_)
+	{
+
+		nothing::LogInfo("Can't initialize game library");
+
+
+#ifndef _DEBUG
+
+
+		MessageBoxA(NULL, "Can't initialize game library", "The Steel City", 0);
+
+
+#endif
+
+
+	}
+
+
+	initGameCode_();
+
 }
 
 
@@ -24,81 +59,24 @@ void nothing::SceneManager::Init(EngineContext& ctx)
 void nothing::SceneManager::Update()
 {
 
-	static glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-	static float cameraSpeed = 0.05f;
-
-
-	auto& cam = GetCompFromCtx<Camera>();
+	auto& inp = GetCompFromCtx<components::PlayerInput>();
 
 
 #pragma region INPUT
 
-
-	if (ctx_->inputManager->IsActionHeld(GameAction::MoveForward))
-	{
-
-		cam.position += cam.speed * cam.rotation;
-
-	}
-
-
-	if (ctx_->inputManager->IsActionHeld(GameAction::MoveBackward))
-	{
-
-		cam.position -= cam.speed * cam.rotation;
-
-	}
-
-
-	if (ctx_->inputManager->IsActionHeld(GameAction::MoveLeft))
-	{
-
-		cam.position += cam.speed * -glm::normalize(glm::cross(cam.rotation, up));
-
-	}
-
-
-	if (ctx_->inputManager->IsActionHeld(GameAction::MoveRight))
-	{
-
-		cam.position += cam.speed * glm::normalize(glm::cross(cam.rotation, up));
-
-	}
-
-
-	if (ctx_->inputManager->IsActionHeld(GameAction::RotateUp))
-	{
-
-		cam.rotation = glm::rotate(cam.rotation, glm::radians(cam.rotSens), glm::normalize(glm::cross(cam.rotation, up)));
-
-	}
-
-
-	if (ctx_->inputManager->IsActionHeld(GameAction::RotateDown))
-	{
-
-		cam.rotation = glm::rotate(cam.rotation, glm::radians(-cam.rotSens), glm::normalize(glm::cross(cam.rotation, up)));
-
-	}
-
-
-	if (ctx_->inputManager->IsActionHeld(GameAction::RotateLeft))
-	{
-
-		cam.rotation = glm::rotate(cam.rotation, glm::radians(cam.rotSens), up);
-
-	}
-
-
-	if (ctx_->inputManager->IsActionHeld(GameAction::RotateRight))
-	{
-
-		cam.rotation = glm::rotate(cam.rotation, glm::radians(-cam.rotSens), up);
-
-	}
-
+	inp.moveForward   = ctx_->inputManager->IsActionHeld(GameAction::MoveForward)  ? 1.0f : 0.0f;
+	inp.moveBackwards = ctx_->inputManager->IsActionHeld(GameAction::MoveBackward) ? 1.0f : 0.0f;
+	inp.moveLeft      = ctx_->inputManager->IsActionHeld(GameAction::MoveLeft)     ? 1.0f : 0.0f;
+	inp.moveRight     = ctx_->inputManager->IsActionHeld(GameAction::MoveRight)    ? 1.0f : 0.0f;
+	inp.rotateUp      = ctx_->inputManager->IsActionHeld(GameAction::RotateUp)     ? 1.0f : 0.0f;
+	inp.rotateDown    = ctx_->inputManager->IsActionHeld(GameAction::RotateDown)   ? 1.0f : 0.0f;
+	inp.rotateLeft    = ctx_->inputManager->IsActionHeld(GameAction::RotateLeft)   ? 1.0f : 0.0f;
+	inp.rotateRight   = ctx_->inputManager->IsActionHeld(GameAction::RotateRight)  ? 1.0f : 0.0f;
 
 #pragma endregion
+
+	
+	updateGameCode_(registry);
 
 }
 
@@ -108,6 +86,9 @@ void nothing::SceneManager::Update()
 
 void nothing::SceneManager::Shutdown()
 {
+
+	shutdownGameCode_();
+	FreeLibrary(gameDLL_);
 
 }
 
@@ -177,6 +158,7 @@ void nothing::SceneManager::LoadScene()
 
 		}
 
+		
 		uint32_t version;
 		mapFileStream.read(reinterpret_cast<char*>(&version), 4);
 
@@ -208,80 +190,21 @@ void nothing::SceneManager::LoadScene()
 			mapFileStream.read(reinterpret_cast<char*>(&objIDByte), 4);
 
 
-			if (objIDByte == 0x01)
+			switch (objIDByte)
 			{
 
-				float_t x, y, z, p, ya, r, w, h;
-				mapFileStream.read(reinterpret_cast<char*>(&x), 4);
-				mapFileStream.read(reinterpret_cast<char*>(&y), 4);
-				mapFileStream.read(reinterpret_cast<char*>(&z), 4);
-				mapFileStream.read(reinterpret_cast<char*>(&p), 4);
-				mapFileStream.read(reinterpret_cast<char*>(&ya), 4);
-				mapFileStream.read(reinterpret_cast<char*>(&r), 4);
-				mapFileStream.read(reinterpret_cast<char*>(&w), 4);
-				mapFileStream.read(reinterpret_cast<char*>(&h), 4);
+			case 0x01:
+				ReadPlaneDataFromFile(mapFileStream);
+				break;
 
 
-				uint32_t texNameLenght;
-				mapFileStream.read(reinterpret_cast<char*>(&texNameLenght), 4);
+			case 0x02:
+				ReadPropDataFromFile(mapFileStream, modelTextureMap);
+				break;
 
 
-				std::string texName(texNameLenght, '\0');
-				mapFileStream.read(texName.data(), texNameLenght);
-
-
-				uint32_t isDoubleTiled;
-				mapFileStream.read(reinterpret_cast<char*>(&isDoubleTiled), 4);
-
-
-				SolidPlaneInfo spInfo{};
-				spInfo.position      = glm::vec3(x, y, z);
-				spInfo.rotation      = glm::vec3(p, ya, r);
-				spInfo.width         = w;
-				spInfo.height        = h;
-				spInfo.textureID     = ctx_->resourcesManager->GetTextureIDFromName(texName);
-				spInfo.isDoubleTiled = isDoubleTiled ? 1 : 0;
-
-
-				CreateWorldSolidPlane(spInfo);
-				
-			}
-
-
-			if (objIDByte == 0x02)
-			{
-
-				float_t x, y, z, p, ya, r;
-				mapFileStream.read(reinterpret_cast<char*>(&x), 4);
-				mapFileStream.read(reinterpret_cast<char*>(&y), 4);
-				mapFileStream.read(reinterpret_cast<char*>(&z), 4);
-				mapFileStream.read(reinterpret_cast<char*>(&p), 4);
-				mapFileStream.read(reinterpret_cast<char*>(&ya), 4);
-				mapFileStream.read(reinterpret_cast<char*>(&r), 4);
-
-
-				uint32_t modNameLenght;
-				mapFileStream.read(reinterpret_cast<char*>(&modNameLenght), 4);
-
-
-				std::string modName(modNameLenght, '\0');
-				mapFileStream.read(modName.data(), modNameLenght);
-
-
-				uint32_t usePhysics;
-				mapFileStream.read(reinterpret_cast<char*>(&usePhysics), 4);
-
-
-				PropInfo propInfo{};
-				propInfo.position          = glm::vec3(x, y, z);
-				propInfo.rotation          = glm::vec3(p, ya, r);
-				propInfo.modelVAO          = ctx_->resourcesManager->GetModel3DVAOFromName(modName);
-				propInfo.modelIndicesCount = ctx_->resourcesManager->GetModel3DIndicesCountFromName(modName);
-				propInfo.textureID         = ctx_->resourcesManager->GetTextureIDFromName(modelTextureMap[modName]);
-				propInfo.usePhysics        = usePhysics ? 1 : 0;
-
-
-				CreatePropObject(propInfo);
+			default:
+				break;
 
 			}
 
@@ -293,7 +216,8 @@ void nothing::SceneManager::LoadScene()
 	}
 
 
-	registry.ctx().emplace<Camera>();
+	registry.ctx().emplace<components::Camera>();
+	registry.ctx().emplace<components::PlayerInput>();
 
 }
 
@@ -502,8 +426,8 @@ void nothing::SceneManager::CreateWorldSolidCube(const SolidCubeInfo& cubeInfo)
 
 
 	auto cubeEnt = registry.create();
-	registry.emplace<Object3D>(cubeEnt, worldMeshes.back().VAO, worldMeshes.back().numIndices, cubeInfo.textureID);
-	registry.emplace<Transform>(cubeEnt, cubeInfo.position, cubeInfo.rotation);
+	registry.emplace<components::Object3D>(cubeEnt, worldMeshes.back().VAO, worldMeshes.back().numIndices, cubeInfo.textureID);
+	registry.emplace<components::Transform>(cubeEnt, cubeInfo.position, cubeInfo.rotation);
 
 }
 
@@ -520,8 +444,8 @@ void nothing::SceneManager::CreateWorldSolidPlane(const SolidPlaneInfo& planeInf
 
 
 	auto planeEnt = registry.create();
-	registry.emplace<Object3D>(planeEnt, worldMeshes.back().VAO, worldMeshes.back().numIndices, planeInfo.textureID);
-	registry.emplace<Transform>(planeEnt, planeInfo.position, planeInfo.rotation);
+	registry.emplace<components::Object3D>(planeEnt, worldMeshes.back().VAO, worldMeshes.back().numIndices, planeInfo.textureID);
+	registry.emplace<components::Transform>(planeEnt, planeInfo.position, planeInfo.rotation);
 
 }
 
@@ -533,8 +457,8 @@ void nothing::SceneManager::CreatePropObject(const PropInfo& propInfo)
 {
 
 	auto propEnt = registry.create();
-	registry.emplace<Object3D>(propEnt, propInfo.modelVAO, propInfo.modelIndicesCount, propInfo.textureID);
-	registry.emplace<Transform>(propEnt, propInfo.position, propInfo.rotation);
+	registry.emplace<components::Object3D>(propEnt, propInfo.modelVAO, propInfo.modelIndicesCount, propInfo.textureID);
+	registry.emplace<components::Transform>(propEnt, propInfo.position, propInfo.rotation);
 
 }
 
@@ -647,6 +571,90 @@ bool nothing::SceneManager::LoadAssetFile(const char* assetFile, std::vector<std
 
 
 	return true;
+
+}
+
+
+// =================================================
+
+
+void nothing::SceneManager::ReadPlaneDataFromFile(std::fstream& f)
+{
+
+	float_t x, y, z, p, ya, r, w, h;
+	f.read(reinterpret_cast<char*>(&x), 4);
+	f.read(reinterpret_cast<char*>(&y), 4);
+	f.read(reinterpret_cast<char*>(&z), 4);
+	f.read(reinterpret_cast<char*>(&p), 4);
+	f.read(reinterpret_cast<char*>(&ya), 4);
+	f.read(reinterpret_cast<char*>(&r), 4);
+	f.read(reinterpret_cast<char*>(&w), 4);
+	f.read(reinterpret_cast<char*>(&h), 4);
+
+
+	uint32_t texNameLenght;
+	f.read(reinterpret_cast<char*>(&texNameLenght), 4);
+
+
+	std::string texName(texNameLenght, '\0');
+	f.read(texName.data(), texNameLenght);
+
+
+	uint32_t isDoubleTiled;
+	f.read(reinterpret_cast<char*>(&isDoubleTiled), 4);
+
+
+	SolidPlaneInfo spInfo{};
+	spInfo.position = glm::vec3(x, y, z);
+	spInfo.rotation = glm::vec3(p, ya, r);
+	spInfo.width = w;
+	spInfo.height = h;
+	spInfo.textureID = ctx_->resourcesManager->GetTextureIDFromName(texName);
+	spInfo.isDoubleTiled = isDoubleTiled ? 1 : 0;
+
+
+	CreateWorldSolidPlane(spInfo);
+
+}
+
+
+// =================================================
+
+
+void nothing::SceneManager::ReadPropDataFromFile(std::fstream& f, std::unordered_map<std::string, std::string>& modelTextureMap)
+{
+
+	float_t x, y, z, p, ya, r;
+	f.read(reinterpret_cast<char*>(&x), 4);
+	f.read(reinterpret_cast<char*>(&y), 4);
+	f.read(reinterpret_cast<char*>(&z), 4);
+	f.read(reinterpret_cast<char*>(&p), 4);
+	f.read(reinterpret_cast<char*>(&ya), 4);
+	f.read(reinterpret_cast<char*>(&r), 4);
+
+
+	uint32_t modNameLenght;
+	f.read(reinterpret_cast<char*>(&modNameLenght), 4);
+
+
+	std::string modName(modNameLenght, '\0');
+	f.read(modName.data(), modNameLenght);
+
+
+	uint32_t usePhysics;
+	f.read(reinterpret_cast<char*>(&usePhysics), 4);
+
+
+	PropInfo propInfo{};
+	propInfo.position = glm::vec3(x, y, z);
+	propInfo.rotation = glm::vec3(p, ya, r);
+	propInfo.modelVAO = ctx_->resourcesManager->GetModel3DVAOFromName(modName);
+	propInfo.modelIndicesCount = ctx_->resourcesManager->GetModel3DIndicesCountFromName(modName);
+	propInfo.textureID = ctx_->resourcesManager->GetTextureIDFromName(modelTextureMap[modName]);
+	propInfo.usePhysics = usePhysics ? 1 : 0;
+
+
+	CreatePropObject(propInfo);
 
 }
 

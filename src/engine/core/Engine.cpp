@@ -45,7 +45,7 @@ bool nothing::Engine::Init(LaunchOptions& lopts)
 
 
 	renderManager_.Init(engineContext_);
-	renderManager_.SetBackgroundColor(0.5f, 0.5f, 0.5f);
+	renderManager_.SetBackgroundColor(0.1f, 0.1f, 0.1f);
 
 
 	int wWidth = 0;

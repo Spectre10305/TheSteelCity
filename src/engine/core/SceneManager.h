@@ -1,49 +1,19 @@
 #pragma once
+#include <Windows.h>
 #include <vector>
+#include <fstream>
+#include <functional>
 #include <entt.hpp>
 #include <glm/glm.hpp>
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/rotate_vector.hpp>
 #include "EngineContext.h"
+#include <components/Object3D.h>
+#include <components/Transform.h>
+#include <components/Camera.h>
+#include <components/PlayerInput.h>
 
 
 namespace nothing
 {
-
-	// TEST Componenti
-	struct Object3D
-	{
-
-		uint32_t meshVAO     = 0;
-		uint32_t numVertices = 0;
-		uint32_t textureID   = 0;
-
-	};
-
-
-	struct Transform
-	{
-
-		glm::vec3 position    = glm::vec3(0.0f, 0.0f, 0.0f);
-		glm::vec3 rotation    = glm::vec3(0.0f, 0.0f, 0.0f);
-
-	};
-
-
-	struct Camera
-	{
-
-		glm::vec3 position         = glm::vec3(0.0f, 0.0f, 3.0f);
-		glm::vec3 rotation         = glm::vec3(0.0f, 0.0f, -1.0f);
-		glm::mat4 viewMatrix       = glm::mat4(1.0f);
-		glm::mat4 projectionMatrix = glm::mat4(1.0f);
-
-
-		float speed = 0.05f;
-		float rotSens = 1.0f;
-
-	};
-
 
 	// TEST "InfoObjects", strutture temporanee per la creazione delle entità EnTT
 	struct SolidCubeInfo
@@ -142,6 +112,19 @@ namespace nothing
 
 
 		bool LoadAssetFile(const char* assetFile, std::vector<std::string>& allTexturesFiles, std::vector<std::string>& allModels3DFiles, std::vector<std::string>& allAudioFiles);
+
+
+		void ReadPlaneDataFromFile(std::fstream& f);
+		void ReadPropDataFromFile(std::fstream& f, std::unordered_map<std::string, std::string>& modelTextureMap);
+
+
+		// Function pointers per il codice di gioco
+		std::function<void()> initGameCode_;
+		std::function<void(entt::registry&)> updateGameCode_;
+		std::function<void()> shutdownGameCode_;
+
+
+		HMODULE gameDLL_;
 
 	};
 

@@ -5,7 +5,10 @@
   <Folder Name="/Elementi di soluzione/">
     <File Path="naming_convention.txt" />
   </Folder>
-  <Project Path="src/engine/engine.vcxproj" Id="ede834dd-b061-4773-8f39-8cdef5627e6d" />
+  <Project Path="src/engine/engine.vcxproj" Id="ede834dd-b061-4773-8f39-8cdef5627e6d">
+    <BuildDependency Project="src/game/game.vcxproj" />
+  </Project>
+  <Project Path="src/game/game.vcxproj" Id="edf13a6f-ebaa-4510-9ef7-490133106198" />
   <Project Path="src/tsc/tsc.vcxproj" Id="4d5d9b31-b477-4c71-b747-a407a79f4d2f">
     <BuildDependency Project="src/engine/engine.vcxproj" />
   </Project>

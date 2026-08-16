@@ -5,6 +5,9 @@
 #include <stb_image.h>
 #include "../core/InputManager.h"
 #include "../core/SceneManager.h"
+#include <components/Object3D.h>
+#include <components/Transform.h>
+#include <components/Camera.h>
 
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -51,7 +54,7 @@ void nothing::RenderManager::Update(double deltaTime)
 	defaultShader_->SetUniform("tex", 0);
 
 
-	auto& cam = ctx_->sceneManager->GetCompFromCtx<Camera>();
+	auto& cam = ctx_->sceneManager->GetCompFromCtx<nothing::components::Camera>();
 
 
 	cam.viewMatrix       = glm::mat4(1.0f);
@@ -62,7 +65,7 @@ void nothing::RenderManager::Update(double deltaTime)
 	defaultShader_->SetUniform("view", cam.viewMatrix);
 
 
-	auto objtrview = ctx_->sceneManager->registry.view<nothing::Object3D, nothing::Transform>();
+	auto objtrview = ctx_->sceneManager->registry.view<nothing::components::Object3D, nothing::components::Transform>();
 
 
 	for (auto [ent, obj3D, tr] : objtrview.each())
