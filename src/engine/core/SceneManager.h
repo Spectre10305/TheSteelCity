@@ -6,10 +6,7 @@
 #include <entt.hpp>
 #include <glm/glm.hpp>
 #include "EngineContext.h"
-#include <components/Object3D.h>
-#include <components/Transform.h>
-#include <components/Camera.h>
-#include <components/PlayerInput.h>
+#include "../game/basic/BaseCustomBehaviour.h"
 
 
 namespace nothing
@@ -75,7 +72,7 @@ namespace nothing
 	public:
 
 		void Init(EngineContext& ctx);
-		void Update();
+		void Update(double deltaTime);
 		void Shutdown();
 
 
@@ -109,6 +106,7 @@ namespace nothing
 	private:
 
 		EngineContext* ctx_ = nullptr;
+		EngineServices engineServices_;
 
 
 		bool LoadAssetFile(const char* assetFile, std::vector<std::string>& allTexturesFiles, std::vector<std::string>& allModels3DFiles, std::vector<std::string>& allAudioFiles);
@@ -118,13 +116,7 @@ namespace nothing
 		void ReadPropDataFromFile(std::fstream& f, std::unordered_map<std::string, std::string>& modelTextureMap);
 
 
-		// Function pointers per il codice di gioco
-		std::function<void()> initGameCode_;
-		std::function<void(entt::registry&)> updateGameCode_;
-		std::function<void()> shutdownGameCode_;
-
-
-		HMODULE gameDLL_;
+		void CreatePlayer();
 
 	};
 

@@ -123,7 +123,7 @@ void nothing::Engine::Run()
 
 
 		case GameState::Gameplay:
-			sceneManager_.Update();
+			sceneManager_.Update(deltaTime);
 			renderManager_.Update(deltaTime);
 			userInterface_.Update();
 			break;

@@ -88,6 +88,7 @@ bool nothing::WindowManager::Init()
 
 	SDL_SetWindowPosition(window_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	SDL_MaximizeWindow(window_);
+	//SDL_SetWindowFullscreen(window_, true);
 
 
 	return true;

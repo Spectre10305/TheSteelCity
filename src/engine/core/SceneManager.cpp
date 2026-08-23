@@ -4,7 +4,15 @@
 #include "InputManager.h"
 #include <sstream>
 #include "../utils/Log.h"
-
+#include "../game/components/Object3D.h"
+#include "../game/components/Transform.h"
+#include "../game/components/Camera.h"
+#include "../game/components/PlayerInput.h"
+#include "../game/components/CustomBehaviour.h"
+#include "../game/components/TestingComponent.h"
+#include "../game/components/Tags.h"
+#include "../game/custom_behaviours/CameraBehaviour.h"
+#include "../game/custom_behaviours/PlayerBehaviour.h"
 
 
 // =================================================
@@ -14,41 +22,7 @@ void nothing::SceneManager::Init(EngineContext& ctx)
 {
 
 	ctx_ = &ctx;
-
-
-	gameDLL_ = LoadLibraryA("game.dll");
-
-
-	initGameCode_ = GetProcAddress(gameDLL_, "TestGameInit");
-
-
-	using UpdateGameFn = void(*)(entt::registry&);
-	UpdateGameFn updateGameFn = reinterpret_cast<UpdateGameFn>(GetProcAddress(gameDLL_, "TestGameUpdate"));
-	updateGameCode_ = updateGameFn;
-
-
-	shutdownGameCode_ = GetProcAddress(gameDLL_, "TestGameShutdown");
-	
-
-	if (!initGameCode_ || !updateGameCode_ || !shutdownGameCode_)
-	{
-
-		nothing::LogInfo("Can't initialize game library");
-
-
-#ifndef _DEBUG
-
-
-		MessageBoxA(NULL, "Can't initialize game library", "The Steel City", 0);
-
-
-#endif
-
-
-	}
-
-
-	initGameCode_();
+	engineServices_.PrintInfoMessage = nothing::LogInfo;
 
 }
 
@@ -56,7 +30,7 @@ void nothing::SceneManager::Init(EngineContext& ctx)
 // =================================================
 
 
-void nothing::SceneManager::Update()
+void nothing::SceneManager::Update(double deltaTime)
 {
 
 	auto& inp = GetCompFromCtx<components::PlayerInput>();
@@ -73,10 +47,22 @@ void nothing::SceneManager::Update()
 	inp.rotateLeft    = ctx_->inputManager->IsActionHeld(GameAction::RotateLeft)   ? 1.0f : 0.0f;
 	inp.rotateRight   = ctx_->inputManager->IsActionHeld(GameAction::RotateRight)  ? 1.0f : 0.0f;
 
+
+	ctx_->inputManager->GetMouseDelta(inp.mouseXDelta, inp.mouseYDelta);
+
 #pragma endregion
 
-	
-	updateGameCode_(registry);
+
+	auto customBehView = registry.view<nothing::components::CustomBehaviour>();
+
+
+	for (auto [ent, beh] : customBehView.each())
+	{
+
+		beh.customBehaviour->Update(deltaTime);
+		beh.customBehaviour->LateUpdate(deltaTime);
+
+	}
 
 }
 
@@ -86,9 +72,6 @@ void nothing::SceneManager::Update()
 
 void nothing::SceneManager::Shutdown()
 {
-
-	shutdownGameCode_();
-	FreeLibrary(gameDLL_);
 
 }
 
@@ -216,8 +199,22 @@ void nothing::SceneManager::LoadScene()
 	}
 
 
-	registry.ctx().emplace<components::Camera>();
 	registry.ctx().emplace<components::PlayerInput>();
+
+
+	CreatePlayer();
+
+
+	auto customBehView = registry.view<nothing::components::CustomBehaviour>();
+
+
+	for (auto [ent, beh] : customBehView.each())
+	{
+
+		beh.customBehaviour->engineServices_ = &engineServices_;
+		beh.customBehaviour->Create();
+
+	}
 
 }
 
@@ -227,6 +224,18 @@ void nothing::SceneManager::LoadScene()
 
 void nothing::SceneManager::UnloadScene()
 {
+
+	auto customBehView = registry.view<nothing::components::CustomBehaviour>();
+
+
+	for (auto [ent, beh] : customBehView.each())
+	{
+
+		beh.customBehaviour->Destroy();
+		beh.customBehaviour.reset();
+
+	}
+
 
 	for (auto& wMesh : worldMeshes)
 	{
@@ -239,8 +248,8 @@ void nothing::SceneManager::UnloadScene()
 
 
 	worldMeshes.clear();
-	registry.clear();
 	registry.ctx().clear();
+	registry.clear();
 
 }
 
@@ -459,7 +468,7 @@ void nothing::SceneManager::CreatePropObject(const PropInfo& propInfo)
 	auto propEnt = registry.create();
 	registry.emplace<components::Object3D>(propEnt, propInfo.modelVAO, propInfo.modelIndicesCount, propInfo.textureID);
 	registry.emplace<components::Transform>(propEnt, propInfo.position, propInfo.rotation);
-
+	
 }
 
 
@@ -655,6 +664,37 @@ void nothing::SceneManager::ReadPropDataFromFile(std::fstream& f, std::unordered
 
 
 	CreatePropObject(propInfo);
+
+}
+
+
+// =================================================
+
+
+void nothing::SceneManager::CreatePlayer()
+{
+
+	using namespace nothing::components;
+
+
+	ctx_->resourcesManager->CreateModel3D(ctx_->filesystem->GetModel3DPathFromName("props_testing_marty.obj"));
+	nothing::ResModel3D martyModRef = ctx_->resourcesManager->GetModel3DFromName("props_testing_marty");
+	ctx_->resourcesManager->CreateTexture(ctx_->filesystem->GetTexturePathFromName(martyModRef.modelTextureFileName));
+
+
+	auto charMartyEnt = registry.create();
+	registry.emplace<Object3D>(charMartyEnt, martyModRef.vao, martyModRef.indicesCount, ctx_->resourcesManager->GetTextureIDFromName(martyModRef.modelTextureFileName.erase(martyModRef.modelTextureFileName.size() - 4)));
+	registry.emplace<Transform>(charMartyEnt, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	registry.emplace<Camera>(charMartyEnt, glm::vec3(0.0f, 0.0f, 3.0), glm::vec3(0.0f, 0.0f, 0.0f));
+
+
+	auto playerBeh = std::make_unique<nothing::PlayerBehaviour>();
+	playerBeh->SetRegistry(registry);
+	playerBeh->SetEntity(charMartyEnt);
+	registry.emplace<CustomBehaviour>(charMartyEnt, std::move(playerBeh));
+
+
+	registry.emplace<MainCameraTag>(charMartyEnt);
 
 }
 

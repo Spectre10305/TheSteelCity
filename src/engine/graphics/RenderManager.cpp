@@ -5,9 +5,10 @@
 #include <stb_image.h>
 #include "../core/InputManager.h"
 #include "../core/SceneManager.h"
-#include <components/Object3D.h>
-#include <components/Transform.h>
-#include <components/Camera.h>
+#include "../game/components/Object3D.h"
+#include "../game/components/Transform.h"
+#include "../game/components/Camera.h"
+#include "../game/components/Tags.h"
 
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -46,6 +47,9 @@ void nothing::RenderManager::Init(EngineContext& ctx)
 void nothing::RenderManager::Update(double deltaTime)
 {
 
+	using namespace nothing::components;
+
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(bgR_, bgG_, bgB_, 1.0f);
 
@@ -54,15 +58,20 @@ void nothing::RenderManager::Update(double deltaTime)
 	defaultShader_->SetUniform("tex", 0);
 
 
-	auto& cam = ctx_->sceneManager->GetCompFromCtx<nothing::components::Camera>();
+	auto mainCamView = ctx_->sceneManager->registry.view<Camera, MainCameraTag>();
+	
 
+	for (auto [ent, cam] : mainCamView.each())
+	{
 
-	cam.viewMatrix       = glm::mat4(1.0f);
-	cam.projectionMatrix = glm::mat4(1.0f);
-	cam.viewMatrix       = glm::lookAt(cam.position, cam.position + cam.rotation, glm::vec3(0.0f, 1.0f, 0.0f));
-	cam.projectionMatrix = glm::perspective(glm::radians(90.0f), aspectRatioN_ / aspectRatioD_, 0.1f, 100.0f);
-	defaultShader_->SetUniform("projection", cam.projectionMatrix);
-	defaultShader_->SetUniform("view", cam.viewMatrix);
+		cam.viewMatrix = glm::mat4(1.0f);
+		cam.projectionMatrix = glm::mat4(1.0f);
+		cam.viewMatrix = glm::lookAt(cam.position, cam.position + cam.rotation, glm::vec3(0.0f, 1.0f, 0.0f));
+		cam.projectionMatrix = glm::perspective(glm::radians(cam.fov), aspectRatioN_ / aspectRatioD_, 0.1f, 100.0f);
+		defaultShader_->SetUniform("projection", cam.projectionMatrix);
+		defaultShader_->SetUniform("view", cam.viewMatrix);
+
+	}
 
 
 	auto objtrview = ctx_->sceneManager->registry.view<nothing::components::Object3D, nothing::components::Transform>();

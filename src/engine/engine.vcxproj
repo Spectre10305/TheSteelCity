@@ -132,6 +132,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)libs\SDL3\include\;$(SolutionDir)libs\GLAD\include\;$(SolutionDir)libs\GLM\;$(SolutionDir)libs\STB\;$(SolutionDir)libs\ENTT\;$(SolutionDir)libs\OBJ\;$(SolutionDir)src\game\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -177,6 +178,19 @@
     <ClInclude Include="core\EngineContext.h" />
     <ClInclude Include="core\WindowManager.h" />
     <ClInclude Include="core\Filesystem.h" />
+    <ClInclude Include="game\basic\BaseCustomBehaviour.h" />
+    <ClInclude Include="game\components\Camera.h" />
+    <ClInclude Include="game\components\CustomBehaviour.h" />
+    <ClInclude Include="game\components\Object3D.h" />
+    <ClInclude Include="game\components\PlayerInput.h" />
+    <ClInclude Include="game\components\Tags.h" />
+    <ClInclude Include="game\components\TestingComponent.h" />
+    <ClInclude Include="game\components\Transform.h" />
+    <ClInclude Include="game\custom_behaviours\CameraBehaviour.h" />
+    <ClInclude Include="game\custom_behaviours\PlayerBehaviour.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="graphics\IMGUI\imconfig.h" />
     <ClInclude Include="graphics\IMGUI\imgui.h" />
     <ClInclude Include="graphics\IMGUI\imgui_impl_opengl3.h" />

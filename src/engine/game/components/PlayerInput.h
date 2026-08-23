@@ -16,6 +16,8 @@ namespace nothing
 			float rotateDown    = 0.0f;
 			float rotateLeft    = 0.0f;
 			float rotateRight   = 0.0f;
+			float mouseXDelta   = 0.0f;
+			float mouseYDelta   = 0.0f;
 
 		};
 	}

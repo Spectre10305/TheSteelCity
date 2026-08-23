@@ -41,15 +41,19 @@ namespace nothing
 		void ClearInput();
 
 
-		//binding
+		// Binding
 		void BindKey(SDL_Scancode key, GameAction action);
 		void UnBindKey(GameAction action);
 
 
-		//controllo tasti
+		// Controllo tasti
 		bool IsActionTriggered(GameAction action) const;
 		bool IsActionHeld(GameAction action) const;
 		bool IsActionReleased(GameAction action) const;
+
+
+		// Controllo mouse
+		void GetMouseDelta(float& mx, float& my);
 
 	private:
 
@@ -62,6 +66,10 @@ namespace nothing
 
 		std::set<GameAction> actionsPressed;
 		std::set<GameAction> actionsReleased;
+
+
+		float mouseXDelta = 0.0f;
+		float mouseYDelta = 0.0f;
 
 
 	};

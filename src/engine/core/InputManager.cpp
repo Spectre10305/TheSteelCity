@@ -43,8 +43,7 @@ void nothing::InputManager::ProcessEvent(const SDL_Event& evt)
 
 	currentKeyStates = SDL_GetKeyboardState(nullptr);
 
-
-	/*
+	
 	if (evt.type == SDL_EVENT_MOUSE_MOTION)
 	{
 
@@ -52,7 +51,7 @@ void nothing::InputManager::ProcessEvent(const SDL_Event& evt)
 		mouseYDelta = evt.motion.yrel;
 
 	}
-	*/
+	
 
 }
 
@@ -65,6 +64,10 @@ void nothing::InputManager::ClearInput()
 
 	actionsPressed.clear();
 	actionsReleased.clear();
+
+
+	mouseXDelta = 0.0f;
+	mouseYDelta = 0.0f;
 
 }
 
@@ -141,6 +144,18 @@ bool nothing::InputManager::IsActionReleased(GameAction action) const
 {
 
 	return actionsReleased.find(action) != actionsReleased.end();
+
+}
+
+
+//=============================================================
+
+
+void nothing::InputManager::GetMouseDelta(float& mx, float& my)
+{
+
+	mx = mouseXDelta;
+	my = mouseYDelta;
 
 }
 

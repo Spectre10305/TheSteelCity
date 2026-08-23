@@ -13,9 +13,9 @@ namespace nothing
 	public:
 
 		void Init();
-		std::string GetTexturePathFromName(const std::string& name);
-		std::string GetModel3DPathFromName(const std::string& name);
-		std::string GetAudioPathFromName(const std::string& name);
+		std::string GetTexturePathFromName(const std::string& name); // Nome + ".png"
+		std::string GetModel3DPathFromName(const std::string& name); // Nome + ".obj"
+		std::string GetAudioPathFromName(const std::string& name); // Nome + ".ogg" / ".wav"
 		std::string GetMapPath(const std::string& name);
 
 	private:

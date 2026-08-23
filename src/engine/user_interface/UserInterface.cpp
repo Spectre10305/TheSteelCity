@@ -183,8 +183,8 @@ void nothing::UserInterface::UpdateMainMenuContext()
 	ImGui::Begin("MainMenuPanel", nullptr, flags);
 
 
-
-	ImGui::Image(uiTexture_Logo, ImVec2(800, 600));
+	float logoScaleFac = std::min(scrSz.x / 1920, scrSz.y / 1080);
+	ImGui::Image(uiTexture_Logo, ImVec2(900 * logoScaleFac, 700 * logoScaleFac));
 
 
 	buttonSpacingY = 0.0f;
@@ -278,7 +278,7 @@ void nothing::UserInterface::UpdateGameContext()
 
 	// Letterbox
 	static float letterboxHeight = 90.0f;
-	dl->AddRectFilled(ImVec2(0, 0), ImVec2(scrSz.x, letterboxHeight), IM_COL32(0, 0, 0, 255));
+	dl->AddRectFilled(ImVec2(0, 0), ImVec2(scrSz.x - 1.0, letterboxHeight), IM_COL32(0, 0, 0, 255));
 	dl->AddRectFilled(ImVec2(0, scrSz.y), ImVec2(scrSz.x, scrSz.y - letterboxHeight), IM_COL32(0, 0, 0, 255));
 
 
@@ -345,7 +345,8 @@ void nothing::UserInterface::UpdateGameContext()
 		ImGui::Begin("PauseMenuPanel", nullptr, flags);
 
 
-		ImGui::Image(uiTexture_Logo, ImVec2(800.0f, 600.0f));
+		float logoScaleFac = std::min(scrSz.x / 1920, scrSz.y / 1080);
+		ImGui::Image(uiTexture_Logo, ImVec2(900 * logoScaleFac, 700 * logoScaleFac));
 
 
 		buttonSpacingY = 0.0f;
@@ -943,10 +944,11 @@ void nothing::UserInterface::ShowBackToMenuWarning(ImVec2& scrSz)
 		{
 
 			// Chiude tutte le finestre della UI
-			showNewGamePanel = false;
-			showLoadGamePanel = false;
-			showOptionsPanel = false;
-			showPauseMenu = false;
+			showNewGamePanel      = false;
+			showLoadGamePanel     = false;
+			showOptionsPanel      = false;
+			showPauseMenu         = false;
+			showBackToMenuWarning = false;
 
 
 			currentEvent = UIEvent::ReturnToMenu;
