@@ -27,6 +27,9 @@ namespace nothing
 		UserInterface*   userInterface    = nullptr;
 		Filesystem*      filesystem       = nullptr;
 
+
+		bool isGamePaused = false;
+
 	};
 
 }

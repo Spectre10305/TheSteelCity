@@ -8,6 +8,7 @@ namespace nothing
 	{
 
 		struct MainCameraTag {};
+		struct PlayerTag {};
 
 	}
 

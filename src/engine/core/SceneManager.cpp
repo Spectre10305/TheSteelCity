@@ -46,6 +46,7 @@ void nothing::SceneManager::Update(double deltaTime)
 	inp.rotateDown    = ctx_->inputManager->IsActionHeld(GameAction::RotateDown)   ? 1.0f : 0.0f;
 	inp.rotateLeft    = ctx_->inputManager->IsActionHeld(GameAction::RotateLeft)   ? 1.0f : 0.0f;
 	inp.rotateRight   = ctx_->inputManager->IsActionHeld(GameAction::RotateRight)  ? 1.0f : 0.0f;
+	inp.running       = ctx_->inputManager->IsActionHeld(GameAction::Run)          ? 1.0f : 0.0f;
 
 
 	ctx_->inputManager->GetMouseDelta(inp.mouseXDelta, inp.mouseYDelta);
@@ -53,14 +54,19 @@ void nothing::SceneManager::Update(double deltaTime)
 #pragma endregion
 
 
-	auto customBehView = registry.view<nothing::components::CustomBehaviour>();
-
-
-	for (auto [ent, beh] : customBehView.each())
+	if (!ctx_->isGamePaused)
 	{
 
-		beh.customBehaviour->Update(deltaTime);
-		beh.customBehaviour->LateUpdate(deltaTime);
+		auto customBehView = registry.view<nothing::components::CustomBehaviour>();
+
+
+		for (auto [ent, beh] : customBehView.each())
+		{
+
+			beh.customBehaviour->Update(deltaTime);
+			beh.customBehaviour->LateUpdate(deltaTime);
+
+		}
 
 	}
 
@@ -682,19 +688,20 @@ void nothing::SceneManager::CreatePlayer()
 	ctx_->resourcesManager->CreateTexture(ctx_->filesystem->GetTexturePathFromName(martyModRef.modelTextureFileName));
 
 
-	auto charMartyEnt = registry.create();
-	registry.emplace<Object3D>(charMartyEnt, martyModRef.vao, martyModRef.indicesCount, ctx_->resourcesManager->GetTextureIDFromName(martyModRef.modelTextureFileName.erase(martyModRef.modelTextureFileName.size() - 4)));
-	registry.emplace<Transform>(charMartyEnt, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	registry.emplace<Camera>(charMartyEnt, glm::vec3(0.0f, 0.0f, 3.0), glm::vec3(0.0f, 0.0f, 0.0f));
+	auto playerEnt = registry.create();
+	registry.emplace<Object3D>(playerEnt, martyModRef.vao, martyModRef.indicesCount, ctx_->resourcesManager->GetTextureIDFromName(martyModRef.modelTextureFileName.erase(martyModRef.modelTextureFileName.size() - 4)));
+	registry.emplace<Transform>(playerEnt, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	registry.emplace<Camera>(playerEnt, glm::vec3(0.0f, 0.0f, 3.0), glm::vec3(0.0f, 0.0f, 0.0f));
 
 
 	auto playerBeh = std::make_unique<nothing::PlayerBehaviour>();
 	playerBeh->SetRegistry(registry);
-	playerBeh->SetEntity(charMartyEnt);
-	registry.emplace<CustomBehaviour>(charMartyEnt, std::move(playerBeh));
+	playerBeh->SetEntity(playerEnt);
+	registry.emplace<CustomBehaviour>(playerEnt, std::move(playerBeh));
 
 
-	registry.emplace<MainCameraTag>(charMartyEnt);
+	registry.emplace<MainCameraTag>(playerEnt);
+	registry.emplace<PlayerTag>(playerEnt);
 
 }
 

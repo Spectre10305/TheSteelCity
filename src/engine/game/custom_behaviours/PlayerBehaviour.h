@@ -17,7 +17,7 @@ namespace nothing
 	public:
 
 		glm::vec3 cameraOffset = glm::vec3(-3.0f, 6.0f, 3.0f);
-		float speed = 1.5f;
+		float speed = 0.0f;
 
 
 		void Create()
@@ -30,6 +30,7 @@ namespace nothing
 			auto& camera = GetComponent<Camera>();
 
 
+			// Posiziona le telecamera in alto e direziona la visione verso il giocatore
 			glm::vec3 posPlusYOffset = transform.position + glm::vec3(0.0f, 0.5f, 0.0f);
 			glm::vec3 dir = glm::normalize(posPlusYOffset - cameraOffset);
 			camera.rotation = dir;
@@ -58,6 +59,9 @@ namespace nothing
 			forward.y = 0.0f;
 			forward.z = cos(yaw);
 			
+
+			speed = input.running ? 2.0f : 1.5f;
+
 
 			if (input.moveForward == 1.0f)
 			{

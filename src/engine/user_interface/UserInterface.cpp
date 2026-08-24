@@ -327,7 +327,14 @@ void nothing::UserInterface::UpdateGameContext()
 	ImGui::PopStyleColor();
 
 
-	if (ctx_->inputManager->IsActionTriggered(GameAction::Exit)) { showPauseMenu = true; }
+	if (ctx_->inputManager->IsActionTriggered(GameAction::Exit))
+	{
+
+		showPauseMenu = true;
+		ctx_->windowManager->SetMouseVisible(true);
+		ctx_->isGamePaused = true;
+
+	}
 
 
 	if (showPauseMenu)
@@ -350,7 +357,7 @@ void nothing::UserInterface::UpdateGameContext()
 
 
 		buttonSpacingY = 0.0f;
-		if (MenuButton(">_RIPRENDI", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showPauseMenu = false; }
+		if (MenuButton(">_RIPRENDI", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showPauseMenu = false; ctx_->windowManager->SetMouseInvisible(); ctx_->isGamePaused = false; }
 		buttonSpacingY += buttonHeight + buttonSpacingOffset;
 		if (MenuButton(">_CARICA_PARTITA", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showLoadGamePanel = true; }
 		buttonSpacingY += buttonHeight + buttonSpacingOffset;
@@ -942,6 +949,11 @@ void nothing::UserInterface::ShowBackToMenuWarning(ImVec2& scrSz)
 
 		if (ImGui::Button("Sì", ImVec2(50.0f, 0.0f)))
 		{
+
+			// Forza ctx_->isGamePaused a FALSO per evitare che resti VERO
+			// anche nel contesto del menù
+			ctx_->isGamePaused = false;
+
 
 			// Chiude tutte le finestre della UI
 			showNewGamePanel      = false;

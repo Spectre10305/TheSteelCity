@@ -187,6 +187,47 @@ void nothing::WindowManager::SetWindowTitle(const char* newTitle)
 // =================================================
 
 
+void nothing::WindowManager::SetMouseInvisible()
+{
+
+	SDL_SetWindowRelativeMouseMode(window_, true);
+
+}
+
+
+// =================================================
+
+
+void nothing::WindowManager::SetMouseVisible(bool snapToWindowCenter)
+{
+
+	SDL_SetWindowRelativeMouseMode(window_, false);
+
+
+	if (snapToWindowCenter)
+	{
+
+		int w = 0;
+		int h = 0;
+
+
+		SDL_GetWindowSize(window_, &w, &h);
+
+
+		float windowXCenterPos = static_cast<float>(w / 2);
+		float windowYCenterPos = static_cast<float>(h / 2);
+
+
+		SDL_WarpMouseInWindow(window_, windowXCenterPos, windowYCenterPos);
+
+	}
+
+}
+
+
+// =================================================
+
+
 void nothing::WindowManager::SwapBuffers()
 {
 

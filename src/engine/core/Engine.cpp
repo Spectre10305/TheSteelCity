@@ -61,11 +61,18 @@ bool nothing::Engine::Init(LaunchOptions& lopts)
 	inputManager_.BindKey(SDL_SCANCODE_A,      GameAction::MoveLeft);
 	inputManager_.BindKey(SDL_SCANCODE_S,      GameAction::MoveBackward);
 	inputManager_.BindKey(SDL_SCANCODE_D,      GameAction::MoveRight);
+
+
+	inputManager_.BindKey(SDL_SCANCODE_LSHIFT, GameAction::Run);
 	inputManager_.BindKey(SDL_SCANCODE_SPACE,  GameAction::Jump);
+
+
 	inputManager_.BindKey(SDL_SCANCODE_LEFT,   GameAction::RotateLeft);
 	inputManager_.BindKey(SDL_SCANCODE_RIGHT,  GameAction::RotateRight);
 	inputManager_.BindKey(SDL_SCANCODE_UP,     GameAction::RotateUp);
 	inputManager_.BindKey(SDL_SCANCODE_DOWN,   GameAction::RotateDown);
+
+
 	inputManager_.BindKey(SDL_SCANCODE_GRAVE,  GameAction::OpenDevConsole);
 	inputManager_.BindKey(SDL_SCANCODE_ESCAPE, GameAction::Exit);
 
@@ -272,6 +279,7 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 	case UIEvent::BeginGame:
 		sceneManager_.LoadScene();
 		userInterface_.SwitchContext(UIContext::Gameplay);
+		windowManager_.SetMouseInvisible();
 		gameState_ = GameState::Gameplay;
 		break;
 

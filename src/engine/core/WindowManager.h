@@ -22,6 +22,8 @@ namespace nothing
 		void           SetWindowSize(int w, int h);
 		void           GetWindowSize(int& w, int& h);
 		void           SetWindowTitle(const char* newTitle);
+		void           SetMouseInvisible();
+		void           SetMouseVisible(bool snapToWindowCenter);
 		void           SwapBuffers(); // Chiama SDL_GL_SwapWindow()
 
 	private:
@@ -36,7 +38,7 @@ namespace nothing
 
 		int         windowWidth_  = 0;
 		int         windowHeight_ = 0;
-		std::string windowTitle_ = "";
+		std::string windowTitle_  = "";
 
 	};
 

@@ -14,16 +14,25 @@ namespace nothing
 		MoveBackward,
 		MoveLeft,
 		MoveRight,
+
+
 		RotateLeft,
 		RotateRight,
 		RotateUp,
 		RotateDown,
+
+
+		Run,
 		Jump,
 		Use,
 		Fire,
 		Reload,
+
+
 		CameraFovUP,
 		CamerFovDown,
+
+
 		OpenDevConsole,
 		Exit
 
