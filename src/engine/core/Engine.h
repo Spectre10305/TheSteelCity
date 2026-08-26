@@ -9,6 +9,7 @@
 #include "Filesystem.h"
 #include "../graphics/RenderManager.h"
 #include "../user_interface/UserInterface.h"
+#include "../physics/PhysicsManager.h"
 
 
 #include "EngineContext.h"
@@ -66,6 +67,7 @@ namespace nothing
 		InputManager    inputManager_;
 		ResourceManager resourceManager_;
 		SceneManager    sceneManager_;
+		PhysicsManager  physicsManager_;
 
 
 		GameState gameState_ = GameState::None;

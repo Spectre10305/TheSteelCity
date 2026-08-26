@@ -42,6 +42,7 @@ bool nothing::Engine::Init(LaunchOptions& lopts)
 
 
 	sceneManager_.Init(engineContext_);
+	physicsManager_.Init();
 
 
 	renderManager_.Init(engineContext_);
@@ -131,6 +132,7 @@ void nothing::Engine::Run()
 
 		case GameState::Gameplay:
 			sceneManager_.Update(deltaTime);
+			physicsManager_.Update(deltaTime);
 			renderManager_.Update(deltaTime);
 			userInterface_.Update();
 			break;
@@ -221,6 +223,7 @@ void nothing::Engine::Shutdown()
 
 
 	renderManager_.Shutdown();
+	physicsManager_.Shutdown();
 	sceneManager_.Shutdown();
 	windowManager_.Shutdown();
 

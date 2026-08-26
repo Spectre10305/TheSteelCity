@@ -111,6 +111,12 @@
     <ClInclude Include="game\custom_behaviours\PlayerBehaviour.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="physics\PhysicsManager.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="game\components\PhysicsBody.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\Engine.cpp">
@@ -174,6 +180,9 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="core\impl_tinyobj.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="physics\PhysicsManager.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

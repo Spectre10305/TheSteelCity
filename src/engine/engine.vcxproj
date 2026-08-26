@@ -131,15 +131,15 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)libs\SDL3\include\;$(SolutionDir)libs\GLAD\include\;$(SolutionDir)libs\GLM\;$(SolutionDir)libs\STB\;$(SolutionDir)libs\ENTT\;$(SolutionDir)libs\OBJ\;$(SolutionDir)src\game\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\SDL3\include\;$(SolutionDir)libs\GLAD\include\;$(SolutionDir)libs\GLM\;$(SolutionDir)libs\STB\;$(SolutionDir)libs\ENTT\;$(SolutionDir)libs\OBJ\;$(SolutionDIr)libs\B3D\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TreatLinkerWarningAsErrors>false</TreatLinkerWarningAsErrors>
-      <AdditionalLibraryDirectories>$(SolutionDir)libs\SDL3\lib\x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)libs\SDL3\lib\x64\;$(SolutionDir)libs\B3D\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL3.lib;box3dd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -182,6 +182,7 @@
     <ClInclude Include="game\components\Camera.h" />
     <ClInclude Include="game\components\CustomBehaviour.h" />
     <ClInclude Include="game\components\Object3D.h" />
+    <ClInclude Include="game\components\PhysicsBody.h" />
     <ClInclude Include="game\components\PlayerInput.h" />
     <ClInclude Include="game\components\Tags.h" />
     <ClInclude Include="game\components\TestingComponent.h" />
@@ -205,6 +206,7 @@
     <ClInclude Include="core\InputManager.h" />
     <ClInclude Include="core\ResourceManager.h" />
     <ClInclude Include="core\SceneManager.h" />
+    <ClInclude Include="physics\PhysicsManager.h" />
     <ClInclude Include="user_interface\UIStyleHelper.h" />
     <ClInclude Include="user_interface\UserInterface.h" />
     <ClInclude Include="utils\Log.h" />
@@ -230,6 +232,7 @@
     <ClCompile Include="core\InputManager.cpp" />
     <ClCompile Include="core\ResourceManager.cpp" />
     <ClCompile Include="core\SceneManager.cpp" />
+    <ClCompile Include="physics\PhysicsManager.cpp" />
     <ClCompile Include="user_interface\UIStyleHelper.cpp" />
     <ClCompile Include="user_interface\UserInterface.cpp" />
   </ItemGroup>
