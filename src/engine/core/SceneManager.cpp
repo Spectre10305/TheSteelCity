@@ -11,6 +11,7 @@
 #include "../game/components/CustomBehaviour.h"
 #include "../game/components/TestingComponent.h"
 #include "../game/components/Tags.h"
+#include "../game/components/PhysicsBody.h"
 #include "../game/custom_behaviours/CameraBehaviour.h"
 #include "../game/custom_behaviours/PlayerBehaviour.h"
 
@@ -136,18 +137,21 @@ void nothing::SceneManager::LoadScene()
 	if (mapFileStream.is_open())
 	{
 
+#pragma region notmap header
+
+
 		char magic[4];
 		mapFileStream.read(magic, 4);
 
 
 		if (std::strncmp(magic, "NTGH", 4) == 0)
 		{
-			
+
 			nothing::LogInfo("Valid magic number");
 
 		}
 
-		
+
 		uint32_t version;
 		mapFileStream.read(reinterpret_cast<char*>(&version), 4);
 
@@ -170,6 +174,9 @@ void nothing::SceneManager::LoadScene()
 			nothing::LogError("Too many objects in this map file, check for possible corruptions");
 
 		}
+
+
+#pragma endregion
 
 
 		for (int i = 0; i < objectsCount; i++)
@@ -221,6 +228,33 @@ void nothing::SceneManager::LoadScene()
 		beh.customBehaviour->Create();
 
 	}
+
+	// Test fisica
+	ctx_->resourcesManager->CreateTexture(ctx_->filesystem->GetTexturePathFromName("tex_wall_bricks_1.png"));
+	SolidCubeInfo ground{};
+	ground.position = glm::vec3(-5.0f, -1.0f, -5.0f);
+	ground.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	ground.width = 10.0f;
+	ground.height = 1.0f;
+	ground.depth = 10.0f;
+	ground.textureID = ctx_->resourcesManager->GetTextureIDFromName("tex_wall_bricks_1");
+	ground.usePhysics = false;
+	
+
+	CreateWorldSolidCube(ground);
+
+
+	SolidCubeInfo cubePhysTest{};
+	cubePhysTest.position = glm::vec3(1.0f, 4.0f, 1.0f);
+	cubePhysTest.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	cubePhysTest.width = 1.0f;
+	cubePhysTest.height = 1.0f;
+	cubePhysTest.depth = 1.0f;
+	cubePhysTest.textureID = ctx_->resourcesManager->GetTextureIDFromName("tex_wall_bricks_1");
+	cubePhysTest.usePhysics = true;
+
+
+	CreateWorldSolidCube(cubePhysTest);
 
 }
 
@@ -443,6 +477,26 @@ void nothing::SceneManager::CreateWorldSolidCube(const SolidCubeInfo& cubeInfo)
 	auto cubeEnt = registry.create();
 	registry.emplace<components::Object3D>(cubeEnt, worldMeshes.back().VAO, worldMeshes.back().numIndices, cubeInfo.textureID);
 	registry.emplace<components::Transform>(cubeEnt, cubeInfo.position, cubeInfo.rotation);
+
+
+	nothing::components::BodyType physBodyType;
+
+
+	if (cubeInfo.usePhysics)
+	{
+
+		physBodyType = nothing::components::BodyType::Dynamic;
+
+	}
+	else
+	{
+
+		physBodyType = nothing::components::BodyType::Static;
+
+	}
+
+
+	registry.emplace<components::PhysicsBody>(cubeEnt, physBodyType, cubeInfo.width, cubeInfo.height, cubeInfo.depth);
 
 }
 

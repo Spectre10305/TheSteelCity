@@ -32,11 +32,48 @@ void nothing::RenderManager::Init(EngineContext& ctx)
 	glFrontFace(GL_CCW);
 
 
-	const char* vsName = "D:\\TheSteelCity\\assets\\engine\\shaders\\default_shader_vert.glsl";
-	const char* fsName = "D:\\TheSteelCity\\assets\\engine\\shaders\\default_shader_frag.glsl";
+	// Shader di default
+	const char* defVsName = "D:\\TheSteelCity\\assets\\engine\\shaders\\default_shader_vert.glsl";
+	const char* defFsName = "D:\\TheSteelCity\\assets\\engine\\shaders\\default_shader_frag.glsl";
+	
+
+	defaultShader_ = new nothing::Shader(defVsName, defFsName);
 
 
-	defaultShader_ = new nothing::Shader(vsName, fsName);
+	// Shader di debug
+	const char* debVsName = "D:\\TheSteelCity\\assets\\engine\\shaders\\debug_draw_vert.glsl";
+	const char* debFsName = "D:\\TheSteelCity\\assets\\engine\\shaders\\debug_draw_frag.glsl";
+
+
+	debugShader_ = new nothing::Shader(debVsName, debFsName);
+
+
+#pragma region DEBUG_DRAW
+
+
+	glGenVertexArrays(1, &m_debugVAO_);
+	glGenBuffers(1, &m_debugVBO_);
+
+
+	glBindVertexArray(m_debugVAO_);
+	glBindBuffer(GL_ARRAY_BUFFER, m_debugVBO_);
+
+
+	// Quindi si alloca un buffer vuoto con GL_DYNAMIC_DRAW, cambia ogni frame
+	glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
+
+
+	// layout: posizione (location = 0)
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void*)offsetof(DebugVertex, position));
+
+
+	// layout: colore (location = 1)
+	//glEnableVertexAttribArray(1);
+	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void*)offsetof(DebugVertex, color));
+
+
+#pragma endregion
 
 }
 
@@ -63,7 +100,7 @@ void nothing::RenderManager::Update(double deltaTime)
 
 	for (auto [ent, cam] : mainCamView.each())
 	{
-
+		
 		cam.viewMatrix = glm::mat4(1.0f);
 		cam.projectionMatrix = glm::mat4(1.0f);
 		cam.viewMatrix = glm::lookAt(cam.position, cam.position + cam.rotation, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -71,7 +108,16 @@ void nothing::RenderManager::Update(double deltaTime)
 		defaultShader_->SetUniform("projection", cam.projectionMatrix);
 		defaultShader_->SetUniform("view", cam.viewMatrix);
 
+		
+		debugShader_->Use();
+		debugShader_->SetUniform("projection", cam.projectionMatrix);
+		debugShader_->SetUniform("view", cam.viewMatrix);
+		
+
 	}
+
+
+	defaultShader_->Use();
 
 
 	auto objtrview = ctx_->sceneManager->registry.view<nothing::components::Object3D, nothing::components::Transform>();
@@ -98,6 +144,33 @@ void nothing::RenderManager::Update(double deltaTime)
 		glDrawElements(GL_TRIANGLES, obj3D.numVertices, GL_UNSIGNED_INT, 0);
 
 	}
+
+
+
+	debugShader_->Use();
+	debugShader_->SetUniform("model", glm::mat4(1.0f));
+
+
+	DebugDrawLine({ 0.0f, 0.0f, 0.0f }, { 0.0f, 10.0f, 0.0f });
+
+
+	glBindVertexArray(m_debugVAO_);
+	glBindBuffer(GL_ARRAY_BUFFER, m_debugVBO_);
+
+
+	// Nothing
+	glBufferData(GL_ARRAY_BUFFER, allDebugVertices_.size() * sizeof(DebugVertex), allDebugVertices_.data(), GL_DYNAMIC_DRAW);
+	glDrawArrays(GL_LINES, 0, allDebugVertices_.size());
+
+
+	// Aggiunge il debug della fisica
+	//glBufferData(GL_ARRAY_BUFFER, debugDraw.m_allRP3DTris.size() * sizeof(DebugVertex), debugDraw.m_allRP3DTris.data(), GL_DYNAMIC_DRAW);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wireframe
+	//glDrawArrays(GL_TRIANGLES, 0, debugDraw.m_allRP3DTris.size());
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // No wireframe
+
+
+	allDebugVertices_.clear();
 
 }
 
@@ -145,6 +218,18 @@ void nothing::RenderManager::SetAspectRatio(int n, int d)
 
 	aspectRatioN_ = static_cast<float>(n);
 	aspectRatioD_ = static_cast<float>(d);
+
+}
+
+
+// =================================================
+
+
+void nothing::RenderManager::DebugDrawLine(const glm::vec3& start, const glm::vec3& end)
+{
+
+	allDebugVertices_.push_back({ start });
+	allDebugVertices_.push_back({ end });
 
 }
 

@@ -23,6 +23,7 @@ namespace nothing
 		float       depth         = 1.0f;
 		uint32_t    textureID     = 0;
 		bool        isDoubleTiled = false;
+		bool        usePhysics    = false;
 
 	};
 

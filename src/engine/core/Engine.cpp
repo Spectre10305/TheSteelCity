@@ -2,7 +2,6 @@
 #include "../utils/Log.h"
 #include "../utils/Time.h"
 #include "../graphics/IMGUI/imgui_impl_sdl3.h" // ImGui_ImplSDL3_ProcessEvent() in HandleEvents()
-#include <thread>
 
 
 // =================================================
@@ -42,7 +41,7 @@ bool nothing::Engine::Init(LaunchOptions& lopts)
 
 
 	sceneManager_.Init(engineContext_);
-	physicsManager_.Init();
+	physicsManager_.Init(engineContext_);
 
 
 	renderManager_.Init(engineContext_);
@@ -215,6 +214,7 @@ void nothing::Engine::Shutdown()
 	{
 
 		nothing::LogInfo("Quitting from game state, cleaning up resources...");
+		physicsManager_.DeletePhysicsScene();
 		sceneManager_.UnloadScene();
 		resourceManager_.DeleteAllModels3D();
 		resourceManager_.DeleteAllTextures();
@@ -281,6 +281,7 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 
 	case UIEvent::BeginGame:
 		sceneManager_.LoadScene();
+		physicsManager_.InitPhysicsScene();
 		userInterface_.SwitchContext(UIContext::Gameplay);
 		windowManager_.SetMouseInvisible();
 		gameState_ = GameState::Gameplay;
@@ -288,6 +289,7 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 
 
 	case UIEvent::ReturnToMenu:
+		physicsManager_.DeletePhysicsScene();
 		sceneManager_.UnloadScene();
 		resourceManager_.DeleteAllModels3D();
 		resourceManager_.DeleteAllTextures();

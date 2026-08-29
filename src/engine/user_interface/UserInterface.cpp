@@ -278,7 +278,7 @@ void nothing::UserInterface::UpdateGameContext()
 
 	// Letterbox
 	static float letterboxHeight = 90.0f;
-	dl->AddRectFilled(ImVec2(0, 0), ImVec2(scrSz.x - 1.0, letterboxHeight), IM_COL32(0, 0, 0, 255));
+	dl->AddRectFilled(ImVec2(0, -1), ImVec2(scrSz.x, letterboxHeight), IM_COL32(0, 0, 0, 255));
 	dl->AddRectFilled(ImVec2(0, scrSz.y), ImVec2(scrSz.x, scrSz.y - letterboxHeight), IM_COL32(0, 0, 0, 255));
 
 
