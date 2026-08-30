@@ -4,6 +4,9 @@
 #include "InputManager.h"
 #include <sstream>
 #include "../utils/Log.h"
+#include "../utils/TransformsUtils.h"
+#include "../utils/RandomGen.h"
+#include "../utils/MemCheck.h"
 #include "../game/components/Object3D.h"
 #include "../game/components/Transform.h"
 #include "../game/components/Camera.h"
@@ -79,7 +82,7 @@ void nothing::SceneManager::Update(double deltaTime)
 
 void nothing::SceneManager::Shutdown()
 {
-
+	// ...
 }
 
 
@@ -232,29 +235,47 @@ void nothing::SceneManager::LoadScene()
 	// Test fisica
 	ctx_->resourcesManager->CreateTexture(ctx_->filesystem->GetTexturePathFromName("tex_wall_bricks_1.png"));
 	SolidCubeInfo ground{};
-	ground.position = glm::vec3(-5.0f, -1.0f, -5.0f);
-	ground.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-	ground.width = 10.0f;
-	ground.height = 1.0f;
-	ground.depth = 10.0f;
-	ground.textureID = ctx_->resourcesManager->GetTextureIDFromName("tex_wall_bricks_1");
-	ground.usePhysics = false;
+	ground.position      = glm::vec3(-6.0f, -1.0f, -5.0f);
+	ground.rotation      = glm::vec3(0.0f, 0.0f, 0.0f);
+	ground.width         = 10.0f;
+	ground.height        = 1.0f;
+	ground.depth         = 10.0f;
+	ground.textureID     = ctx_->resourcesManager->GetTextureIDFromName("tex_wall_bricks_1");
+	ground.usePhysics    = false;
+	ground.isDoubleTiled = true;
 	
 
 	CreateWorldSolidCube(ground);
 
 
-	SolidCubeInfo cubePhysTest{};
-	cubePhysTest.position = glm::vec3(1.0f, 4.0f, 1.0f);
-	cubePhysTest.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-	cubePhysTest.width = 1.0f;
-	cubePhysTest.height = 1.0f;
-	cubePhysTest.depth = 1.0f;
-	cubePhysTest.textureID = ctx_->resourcesManager->GetTextureIDFromName("tex_wall_bricks_1");
-	cubePhysTest.usePhysics = true;
+	for (int i = 0; i < 100; i++)
+	{
+
+		nothing::Random::RandomizeSeed();
+		float randX = nothing::Random::Float(-10.0f, 10.0f);
+		float randY = nothing::Random::Float(-10.0f, 10.0f);
+		float randZ = nothing::Random::Float(-10.0f, 10.0f);
 
 
-	CreateWorldSolidCube(cubePhysTest);
+		SolidCubeInfo cubePhysTest{};
+		cubePhysTest.position = glm::vec3(randX, randY + 10.0f, randZ);
+		cubePhysTest.rotation = glm::vec3(randX, randY, randZ);
+		cubePhysTest.width = 0.5f;
+		cubePhysTest.height = 0.5f;
+		cubePhysTest.depth = 0.5f;
+		cubePhysTest.textureID = ctx_->resourcesManager->GetTextureIDFromName("tex_wall_bricks_1");
+		cubePhysTest.usePhysics = true;
+		cubePhysTest.isCentered = false;
+		cubePhysTest.isDoubleTiled = true;
+
+
+		CreateWorldSolidCube(cubePhysTest);
+
+	}
+
+
+	// Stampa l'uso della memoria degli asset
+	nothing::InterrogateMemoryStatus();
 
 }
 
@@ -294,7 +315,7 @@ void nothing::SceneManager::UnloadScene()
 }
 
 
-// =================================================
+// MESH MONDO=======================================
 
 
 nothing::WorldMesh nothing::SceneManager::CreateCubeWorldMesh(float width, float height, float depth, bool isDoubleTiled)
@@ -400,6 +421,115 @@ nothing::WorldMesh nothing::SceneManager::CreateCubeWorldMesh(float width, float
 // =================================================
 
 
+nothing::WorldMesh nothing::SceneManager::CreateCenteredCubeWorldMesh(float width, float height, float depth, bool isDoubleTiled)
+{
+
+	float x = width * 0.5f;
+	float y = height * 0.5f;
+	float z = depth * 0.5f;
+
+
+	float tileScale = isDoubleTiled ? 0.5f : 1.0f;
+
+
+	float vertices[] =
+	{
+
+		// FRONT (+Z)
+		-x, -y, +z,       0.0f * tileScale, 0.0f * tileScale,
+		+x, -y, +z,       x    * tileScale, 0.0f * tileScale,
+		+x, +y, +z,       x    * tileScale, y    * tileScale,
+		-x, +y, +z,       0.0f * tileScale, y    * tileScale,
+
+
+		// BACK (-Z)
+		+x, -y, -z,       0.0f * tileScale, 0.0f * tileScale,
+		-x, -y, -z,       x    * tileScale, 0.0f * tileScale,
+		-x, +y, -z,       x    * tileScale, y    * tileScale,
+		+x, +y, -z,       0.0f * tileScale, y    * tileScale,
+
+
+		// LEFT (-X)
+		-x, -y, -z,       0.0f * tileScale, 0.0f * tileScale,
+		-x, -y, +z,       z    * tileScale, 0.0f * tileScale,
+		-x, +y, +z,       z    * tileScale, y    * tileScale,
+		-x, +y, -z,       0.0f * tileScale, y    * tileScale,
+
+
+		// RIGHT (+X)
+		+x, -y, +z,       0.0f * tileScale, 0.0f * tileScale,
+		+x, -y, -z,       z    * tileScale, 0.0f * tileScale,
+		+x, +y, -z,       z    * tileScale, y    * tileScale,
+		+x, +y, +z,       0.0f * tileScale, y    * tileScale,
+
+
+		// TOP (+Y)
+		-x, +y, +z,       0.0f * tileScale, 0.0f * tileScale,
+		+x, +y, +z,       x    * tileScale, 0.0f * tileScale,
+		+x, +y, -z,       x    * tileScale, z    * tileScale,
+		-x, +y, -z,       0.0f * tileScale, z    * tileScale,
+
+
+		// BOTTOM (-Y)
+		-x, -y, -z,       0.0f * tileScale, 0.0f * tileScale,
+		+x, -y, -z,       x    * tileScale, 0.0f * tileScale,
+		+x, -y, +z,       x    * tileScale, z    * tileScale,
+		-x, -y, +z,       0.0f * tileScale, z    * tileScale
+
+	};
+
+
+	unsigned int indices[] =
+	{
+
+		
+		0, 1, 2, 2, 3, 0,       // FRONT  (+Z)
+		4, 5, 6, 6, 7, 4,       // BACK   (-Z)
+		8, 9, 10, 10, 11, 8,    // LEFT   (-X)
+		12, 13, 14, 14, 15, 12, // RIGHT  (+X)
+		16, 17, 18, 18, 19, 16, // TOP    (+Y)
+		20, 21, 22, 22, 23, 20  // BOTTOM (-Y)
+
+	};
+
+
+	WorldMesh res{};
+
+
+	glGenVertexArrays(1, &res.VAO);
+	glGenBuffers(1, &res.VBO);
+	glGenBuffers(1, &res.EBO);
+	glBindVertexArray(res.VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, res.VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, res.EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+
+	// Hardcoded per ora
+	res.numIndices = 36;
+
+
+	return res;
+
+}
+
+
+// =================================================
+
+
 nothing::WorldMesh nothing::SceneManager::CreatePlaneWorldMesh(float width, float height, bool isDoubleTiled)
 {
 
@@ -463,20 +593,36 @@ nothing::WorldMesh nothing::SceneManager::CreatePlaneWorldMesh(float width, floa
 }
 
 
-// =================================================
+// OGGETTI ECS MONDO================================
 
 
 void nothing::SceneManager::CreateWorldSolidCube(const SolidCubeInfo& cubeInfo)
 {
 
-	WorldMesh m = CreateCubeWorldMesh(cubeInfo.width, cubeInfo.height, cubeInfo.depth, cubeInfo.isDoubleTiled);
+	WorldMesh m{};
+
+
+	if (cubeInfo.isCentered)
+	{
+
+		m = CreateCenteredCubeWorldMesh(cubeInfo.width, cubeInfo.height, cubeInfo.depth, cubeInfo.isDoubleTiled);
+
+	}
+	else
+	{
+
+		m = CreateCubeWorldMesh(cubeInfo.width, cubeInfo.height, cubeInfo.depth, cubeInfo.isDoubleTiled);
+
+	}
+
+
 	m.texture = cubeInfo.textureID;
 	worldMeshes.emplace_back(m);
 
 
 	auto cubeEnt = registry.create();
 	registry.emplace<components::Object3D>(cubeEnt, worldMeshes.back().VAO, worldMeshes.back().numIndices, cubeInfo.textureID);
-	registry.emplace<components::Transform>(cubeEnt, cubeInfo.position, cubeInfo.rotation);
+	registry.emplace<components::Transform>(cubeEnt, cubeInfo.position, nothing::EulerToQuaternion(cubeInfo.rotation));
 
 
 	nothing::components::BodyType physBodyType;
@@ -496,7 +642,8 @@ void nothing::SceneManager::CreateWorldSolidCube(const SolidCubeInfo& cubeInfo)
 	}
 
 
-	registry.emplace<components::PhysicsBody>(cubeEnt, physBodyType, cubeInfo.width, cubeInfo.height, cubeInfo.depth);
+	bool centered = cubeInfo.isCentered ? true : false;
+	registry.emplace<components::PhysicsBody>(cubeEnt, nothing::components::MeshType::Cube, physBodyType, cubeInfo.width, cubeInfo.height, cubeInfo.depth, centered);
 
 }
 
@@ -514,7 +661,8 @@ void nothing::SceneManager::CreateWorldSolidPlane(const SolidPlaneInfo& planeInf
 
 	auto planeEnt = registry.create();
 	registry.emplace<components::Object3D>(planeEnt, worldMeshes.back().VAO, worldMeshes.back().numIndices, planeInfo.textureID);
-	registry.emplace<components::Transform>(planeEnt, planeInfo.position, planeInfo.rotation);
+	registry.emplace<components::Transform>(planeEnt, planeInfo.position, nothing::EulerToQuaternion(planeInfo.rotation));
+	registry.emplace<components::PhysicsBody>(planeEnt, components::MeshType::Plane, components::BodyType::Static, planeInfo.width, planeInfo.height, 0.01f);
 
 }
 
@@ -527,7 +675,7 @@ void nothing::SceneManager::CreatePropObject(const PropInfo& propInfo)
 
 	auto propEnt = registry.create();
 	registry.emplace<components::Object3D>(propEnt, propInfo.modelVAO, propInfo.modelIndicesCount, propInfo.textureID);
-	registry.emplace<components::Transform>(propEnt, propInfo.position, propInfo.rotation);
+	registry.emplace<components::Transform>(propEnt, propInfo.position, nothing::EulerToQuaternion(propInfo.rotation));
 	
 }
 

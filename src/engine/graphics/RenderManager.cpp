@@ -15,6 +15,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 
 // =================================================
@@ -130,11 +131,9 @@ void nothing::RenderManager::Update(double deltaTime)
 
 
 		model = glm::translate(model, tr.position);
-		model = glm::rotate   (model, glm::radians(tr.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate   (model, glm::radians(tr.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate   (model, glm::radians(tr.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+		model *= glm::mat4_cast(tr.rotation);
 		model = glm::scale    (model, glm::vec3(1.0f, 1.0f, 1.0f));
-
+		
 
 		defaultShader_->SetUniform("model", model);
 

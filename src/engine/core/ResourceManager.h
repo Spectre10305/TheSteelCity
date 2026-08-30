@@ -27,6 +27,7 @@ namespace nothing
 		uint32_t    vao;
 		uint32_t    vbo;
 		uint32_t    ebo;
+		size_t      verticesDataSize; // Tiene solo la dimensione totale dei vertici in bytes
 		uint32_t    indicesCount;
 		std::string modelTextureFileName; // Scritto come "texture.png"
 

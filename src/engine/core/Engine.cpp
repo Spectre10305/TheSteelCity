@@ -1,6 +1,7 @@
 #include "Engine.h"
 #include "../utils/Log.h"
 #include "../utils/Time.h"
+#include "../utils/MemCheck.h"
 #include "../graphics/IMGUI/imgui_impl_sdl3.h" // ImGui_ImplSDL3_ProcessEvent() in HandleEvents()
 
 
@@ -218,6 +219,7 @@ void nothing::Engine::Shutdown()
 		sceneManager_.UnloadScene();
 		resourceManager_.DeleteAllModels3D();
 		resourceManager_.DeleteAllTextures();
+		nothing::InterrogateMemoryStatus();
 
 	}
 
@@ -295,6 +297,7 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 		resourceManager_.DeleteAllTextures();
 		userInterface_.SwitchContext(UIContext::MainMenu);
 		gameState_ = GameState::MainMenu;
+		nothing::InterrogateMemoryStatus();
 		break;
 
 

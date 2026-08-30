@@ -22,8 +22,13 @@ namespace nothing
 		float       height        = 1.0f;
 		float       depth         = 1.0f;
 		uint32_t    textureID     = 0;
+		bool        isCentered    = false;
 		bool        isDoubleTiled = false;
 		bool        usePhysics    = false;
+
+		// NOTA: Di default il cubo parte da 0,0,0 e si estende verso
+		// +X, +Y e +Z. "isCentered" estende il cubo in tutte le direzioni
+		// allo stesso modo. Quindi un cubo con WIDTH 2.0 sarà 1.0 su +X e 1.0 su -X
 
 	};
 
@@ -82,10 +87,11 @@ namespace nothing
 
 
 		WorldMesh CreateCubeWorldMesh(float width, float height, float depth, bool isDoubleTiled);
+		WorldMesh CreateCenteredCubeWorldMesh(float width, float height, float depth, bool isDoubleTiled);
 		WorldMesh CreatePlaneWorldMesh(float width, float height, bool isDoubleTiled);
-		void CreateWorldSolidCube(const SolidCubeInfo& cubeInfo);
-		void CreateWorldSolidPlane(const SolidPlaneInfo& planeInfo);
-		void CreatePropObject(const PropInfo& propInfo);
+		void      CreateWorldSolidCube(const SolidCubeInfo& cubeInfo);
+		void      CreateWorldSolidPlane(const SolidPlaneInfo& planeInfo);
+		void      CreatePropObject(const PropInfo& propInfo);
 
 
 		template<typename T>

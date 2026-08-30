@@ -2,6 +2,8 @@
 #include <box3d/box3d.h>
 #include <glm/glm.hpp>
 #include "../core/EngineContext.h"
+#include "../game/components/PhysicsBody.h"
+#include "../game/components/Transform.h"
 
 
 namespace nothing
@@ -23,6 +25,10 @@ namespace nothing
 		b3WorldId worldID_{};
 		float     timeStep_ = 1.0f / 60.0f;
 		int       subSteps_ = 4;
+
+
+		void ConstructCubePhysicsBody(components::Transform& tr, components::PhysicsBody& pBody);
+		void ConstructPlanePhysicsBody(components::Transform& tr, components::PhysicsBody& pBody);
 
 
 		// Utility

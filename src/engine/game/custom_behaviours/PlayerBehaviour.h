@@ -50,15 +50,22 @@ namespace nothing
 			glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
 
-			transform.rotation.y -= input.mouseXDelta * 100.0f * deltaTime;
+			glm::quat movYaw = glm::angleAxis(glm::radians(-input.mouseXDelta), glm::vec3(0, 1, 0));
 
 
+			transform.rotation = movYaw * transform.rotation;
+
+
+			/*
 			glm::vec3 forward;
 			float yaw = glm::radians(transform.rotation.y);
 			forward.x = sin(yaw);
 			forward.y = 0.0f;
 			forward.z = cos(yaw);
-			
+			*/
+
+			glm::vec3 forward = transform.rotation * glm::vec3(0.0f, 0.0f, 1.0f);
+
 
 			speed = input.running ? 2.0f : 1.5f;
 

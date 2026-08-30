@@ -17,15 +17,28 @@ namespace nothing
 		};
 
 
+		enum class MeshType
+		{
+
+			Cube,
+			Plane
+
+		};
+
+
 		struct PhysicsBody
 		{
 
-			BodyType type = BodyType::Static;
+			MeshType meshType = MeshType::Cube;
+			BodyType bodyType = BodyType::Static;
 
 
 			float width  = 1.0f;
 			float height = 1.0f;
 			float depth  = 1.0f;
+
+
+			bool isCentered = false;
 
 
 			b3BodyId bodyID{};

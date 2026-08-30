@@ -2,8 +2,6 @@
 #include "../utils/Log.h"
 #include "../core/SceneManager.h"
 #include "../graphics/RenderManager.h"
-#include "../game/components/PhysicsBody.h"
-#include "../game/components/Transform.h"
 #include <glm/gtc/quaternion.hpp>
 
 
@@ -14,11 +12,13 @@ void nothing::PhysicsManager::Init(EngineContext& ctx)
 {
 
 	ctx_ = &ctx;
+
+
 	debugDraw = b3DefaultDebugDraw();
-	debugDraw.DrawSegmentFcn = DebugDrawLine;
-	debugDraw.drawShapes = true;
+	debugDraw.DrawSegmentFcn     = DebugDrawLine;
+	debugDraw.drawShapes         = true;
 	debugDraw.drawContactNormals = true;
-	debugDraw.context = this;
+	debugDraw.context            = this;
 
 }
 
@@ -32,38 +32,50 @@ void nothing::PhysicsManager::Update(double deltaTime)
 	using namespace nothing::components;
 
 
-	b3World_Step(worldID_, timeStep_, subSteps_);
-
-
-	auto bodyIDsView = ctx_->sceneManager->registry.view<PhysicsBody, Transform>();
-
-
-	for (auto [ent, physB, tr] : bodyIDsView.each())
+	if (!ctx_->isGamePaused)
 	{
 
-		b3Vec3 pos = b3Body_GetPosition(physB.bodyID);
-		//b3Quat rot = b3Body_GetRotation(physB.bodyID);
-		
-
-		//glm::quat qrot = glm::quat(rot.s, glm::vec3(rot.v.x, rot.v.y, rot.v.z));
+		b3World_Step(worldID_, timeStep_, subSteps_);
 
 
-		//glm::vec3 euler = glm::eulerAngles(qrot);
-		//tr.rotation.x = euler.x;
-		//tr.rotation.y = euler.y;
-		//tr.rotation.z = euler.z;
+		auto bodyIDsView = ctx_->sceneManager->registry.view<PhysicsBody, Transform>();
 
 
-		tr.position.x = pos.x;
-		tr.position.y = pos.y;
-		tr.position.z = pos.z;
-		
+		for (auto [ent, physB, tr] : bodyIDsView.each())
+		{
+
+			if (physB.bodyType == BodyType::Static)
+				continue;
+
+
+			b3Vec3 pos = b3Body_GetPosition(physB.bodyID);
+			b3Quat rot = b3Body_GetRotation(physB.bodyID);
+
+
+			glm::quat qrot = glm::quat(rot.s, rot.v.x, rot.v.y, rot.v.z);
+
+
+			//glm::vec3 euler = glm::eulerAngles(qrot);
+			//tr.rotation.x = euler.x;
+			//tr.rotation.y = euler.y;
+			//tr.rotation.z = euler.z;
+
+
+			tr.rotation = qrot;
+
+
+			tr.position.x = pos.x;
+			tr.position.y = pos.y;
+			tr.position.z = pos.z;
+
+		}
+
+
+		// Debug draw
+		b3World_Draw(worldID_, &debugDraw, B3_DEFAULT_CATEGORY_BITS);
+
 	}
 
-
-	// Debug draw
-	b3World_Draw(worldID_, &debugDraw, B3_DEFAULT_CATEGORY_BITS);
-	
 }
 
 
@@ -89,49 +101,23 @@ void nothing::PhysicsManager::InitPhysicsScene()
 	for (auto [ent, tr, pBody] : physBodyIDView.each())
 	{
 
-		b3Vec3 offset;
-		offset.x = pBody.width - (pBody.width / 2);
-		offset.y = pBody.height - (pBody.height / 2);
-		offset.z = pBody.depth - (pBody.depth / 2);
-
-
-		b3BodyDef bodyDef = b3DefaultBodyDef();
-		bodyDef.position = B3Vec3_FromGlm(tr.position);
-		
-
-		switch (pBody.type)
+		switch (pBody.meshType)
 		{
 
-		case BodyType::Static:
-			bodyDef.type = b3_staticBody;
+		case MeshType::Cube:
+			ConstructCubePhysicsBody(tr, pBody);
 			break;
 
 
-		case BodyType::Dynamic:
-			bodyDef.type = b3_dynamicBody;
+		case MeshType::Plane:
+			ConstructPlanePhysicsBody(tr, pBody);
 			break;
 
 
 		default:
-			bodyDef.type = b3_staticBody;
+			nothing::LogInfo("Unsupported mesh type evaluated while constructing physics bodies, skipping...");
 			break;
-
 		}
-
-
-		pBody.bodyID = b3CreateBody(worldID_, &bodyDef);
-		
-
-		b3BoxHull boxHull = b3MakeOffsetBoxHull(pBody.width, pBody.height, pBody.depth, offset);
-		
-
-		b3ShapeDef shapeDef = b3DefaultShapeDef();
-		shapeDef.density = 1.0f;
-		shapeDef.baseMaterial.friction = 0.3f;
-		shapeDef.baseMaterial.restitution = 1.0;
-		
-		
-		b3CreateHullShape(pBody.bodyID, &shapeDef, &boxHull.base);
 
 	}
 
@@ -156,6 +142,167 @@ void nothing::PhysicsManager::Shutdown()
 {
 
 	// ...
+
+}
+
+
+// =================================================
+
+
+void nothing::PhysicsManager::ConstructCubePhysicsBody(components::Transform& tr, components::PhysicsBody& pBody)
+{
+
+	using namespace nothing::components;
+
+	
+	b3BodyDef bodyDef = b3DefaultBodyDef();
+	bodyDef.position = B3Vec3_FromGlm(tr.position);
+
+
+	switch (pBody.bodyType)
+	{
+
+	case BodyType::Static:
+		bodyDef.type = b3_staticBody;
+		break;
+
+
+	case BodyType::Dynamic:
+		bodyDef.type = b3_dynamicBody;
+		break;
+
+
+	default:
+		bodyDef.type = b3_staticBody;
+		break;
+
+	}
+
+
+	pBody.bodyID = b3CreateBody(worldID_, &bodyDef);
+
+
+	b3Vec3 offset;
+	offset.x = pBody.width - (pBody.width / 2.0f);
+	offset.y = pBody.height - (pBody.height / 2.0f);
+	offset.z = pBody.depth - (pBody.depth / 2.0f);
+
+
+	b3BoxHull boxHull{};
+
+
+	if (pBody.isCentered)
+	{
+
+		boxHull = b3MakeBoxHull(pBody.width / 2.0f, pBody.height / 2.0f, pBody.depth / 2.0f);
+
+	}
+	else
+	{
+
+		boxHull = b3MakeOffsetBoxHull(offset.x, offset.y, offset.z, offset);
+
+	}
+
+
+	//b3BoxHull boxHull = b3MakeOffsetBoxHull(pBody.width, pBody.height, pBody.depth, offset);
+
+
+	b3ShapeDef shapeDef = b3DefaultShapeDef();
+	shapeDef.density = 1.0f;
+	shapeDef.baseMaterial.friction = 0.3f;
+	shapeDef.baseMaterial.restitution = 0.5f;
+
+
+	b3CreateHullShape(pBody.bodyID, &shapeDef, &boxHull.base);
+
+}
+
+
+// =================================================
+
+
+void nothing::PhysicsManager::ConstructPlanePhysicsBody(components::Transform & tr, components::PhysicsBody& pBody)
+{
+
+	using namespace nothing::components;
+
+
+	b3BodyDef bodyDef = b3DefaultBodyDef();
+	bodyDef.position = B3Vec3_FromGlm(tr.position);
+
+
+	b3Quat rot;
+	rot.s = tr.rotation.w;
+	rot.v.x = tr.rotation.x;
+	rot.v.y = tr.rotation.y;
+	rot.v.z = tr.rotation.z;
+	bodyDef.rotation = rot;
+
+
+	bodyDef.type = b3_staticBody;
+
+
+	// Questo non dovrebbe servire per ora, dato che il bodyType è sempre
+	// forzato a b3_staticBody
+	/*
+	switch (pBody.bodyType)
+	{
+
+	case BodyType::Static:
+		bodyDef.type = b3_staticBody;
+		break;
+
+
+	case BodyType::Dynamic:
+		bodyDef.type = b3_dynamicBody;
+		break;
+
+
+	default:
+		bodyDef.type = b3_staticBody;
+		break;
+
+	}
+	*/
+
+
+	pBody.bodyID = b3CreateBody(worldID_, &bodyDef);
+
+
+	b3Vec3 offset;
+	offset.x = pBody.width - (pBody.width / 2.0f);
+	offset.y = pBody.height - (pBody.height / 2.0f);
+	offset.z = pBody.depth - (pBody.depth / 2.0f);
+	
+
+	b3BoxHull boxHull{};
+
+
+	if (pBody.isCentered)
+	{
+
+		boxHull = b3MakeBoxHull(pBody.width / 2.0f, pBody.height / 2.0f, pBody.depth / 2.0f);
+
+	}
+	else
+	{
+
+		boxHull = b3MakeOffsetBoxHull(offset.x, offset.y, offset.z, offset);
+
+	}
+
+
+	//b3BoxHull boxHull = b3MakeOffsetBoxHull(pBody.width, pBody.height, pBody.depth, offset);
+
+
+	b3ShapeDef shapeDef = b3DefaultShapeDef();
+	shapeDef.density = 1.0f;
+	shapeDef.baseMaterial.friction = 0.3f;
+	shapeDef.baseMaterial.restitution = 0.5f;
+
+
+	b3CreateHullShape(pBody.bodyID, &shapeDef, &boxHull.base);
 
 }
 

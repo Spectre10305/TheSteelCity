@@ -5,6 +5,7 @@
 #include <tiny_obj_loader.h>
 #include <vector>
 #include "../utils/Log.h"
+#include "../utils/MemCheck.h"
 
 
 // =================================================
@@ -72,6 +73,11 @@ bool nothing::ResourceManager::CreateTexture(const std::string& filePath)
 
 	stbi_set_flip_vertically_on_load(true);
 	unsigned char* data = stbi_load(filePath.c_str(), &res.width, &res.height, &res.channels, 0);
+	
+
+	// Usa i dati della texture per calcolare la dimensione dei pixels in bytes
+	size_t currentTexMemory = res.width * res.height * res.channels;
+	nothing::AddBytes(NOTHING_TEXTURES_MEMORY, currentTexMemory);
 
 
 	if (data)
@@ -181,6 +187,10 @@ void nothing::ResourceManager::DeleteAllTextures()
 	{
 
 		glDeleteTextures(1, &resTex.id);
+
+
+		size_t currentTexMemory = resTex.width * resTex.height * resTex.channels;
+		nothing::RemoveBytes(NOTHING_TEXTURES_MEMORY, currentTexMemory);
 
 	}
 
@@ -337,6 +347,8 @@ bool nothing::ResourceManager::CreateModel3D(const std::string& filePath)
 	
 
 	res.modelTextureFileName = modelTextureName;
+	res.verticesDataSize = meshVertices.size() * sizeof(Vertex3D);
+	nothing::AddBytes(NOTHING_MODELS3D_MEMORY, res.verticesDataSize);
 
 	
 	glGenVertexArrays(1, &res.vao);
@@ -491,6 +503,9 @@ void nothing::ResourceManager::DeleteAllModels3D()
 		glDeleteVertexArrays(1, &resMod.vao);
 		glDeleteBuffers(1, &resMod.vbo);
 		glDeleteBuffers(1, &resMod.ebo);
+
+
+		nothing::RemoveBytes(NOTHING_MODELS3D_MEMORY, resMod.verticesDataSize);
 
 	}
 
