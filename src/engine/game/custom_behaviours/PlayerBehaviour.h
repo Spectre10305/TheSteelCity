@@ -2,10 +2,10 @@
 #include "../basic/BaseCustomBehaviour.h"
 #include "../components/Camera.h"
 #include "../components/Transform.h"
+#include "../components/Velocity.h"
 #include "../components/PlayerInput.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
-#include <format>
 
 
 namespace nothing
@@ -31,9 +31,13 @@ namespace nothing
 
 
 			// Posiziona le telecamera in alto e direziona la visione verso il giocatore
-			glm::vec3 posPlusYOffset = transform.position + glm::vec3(0.0f, 0.5f, 0.0f);
-			glm::vec3 dir = glm::normalize(posPlusYOffset - cameraOffset);
+			// con un piccolo offset in Y di -0.5 (in realtà dovrebbe essere +0.5 ma non so perchè...)
+			camera.position = transform.position + glm::vec3(0.0f, -0.5f, 0.0f) + cameraOffset;
+
+
+			glm::vec3 dir = glm::normalize(transform.position - camera.position);
 			camera.rotation = dir;
+			//camera.rotation = glm::vec3(0.408248f, -0.816497f, -0.408248f);
 
 		}
 
@@ -45,9 +49,9 @@ namespace nothing
 
 
 			auto& transform = GetComponent<Transform>();
-			auto& cam = GetComponent<Camera>();
-			auto& input = GetContextComponent<PlayerInput>();
-			glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+			auto& cam       = GetComponent<Camera>();
+			auto& input     = GetContextComponent<PlayerInput>();
+			auto& velocity  = GetComponent<Velocity>();
 
 
 			glm::quat movYaw = glm::angleAxis(glm::radians(-input.mouseXDelta), glm::vec3(0, 1, 0));
@@ -73,7 +77,17 @@ namespace nothing
 			if (input.moveForward == 1.0f)
 			{
 
-				transform.position += forward * speed * static_cast<float>(deltaTime);
+				//transform.position += forward * speed * static_cast<float>(deltaTime);
+
+
+				// Impostiamo solo la velocity, il movimento effettivo avverrà nel PhysicsManager
+				velocity.value = forward * speed * static_cast<float>(deltaTime);
+
+			}
+			else
+			{
+
+				velocity.value = glm::vec3(0.0f, 0.0f, 0.0f);
 
 			}
 

@@ -113,7 +113,6 @@ void nothing::RenderManager::Update(double deltaTime)
 		debugShader_->Use();
 		debugShader_->SetUniform("projection", cam.projectionMatrix);
 		debugShader_->SetUniform("view", cam.viewMatrix);
-		
 
 	}
 
@@ -130,9 +129,9 @@ void nothing::RenderManager::Update(double deltaTime)
 		glm::mat4 model = glm::mat4(1.0f);
 
 
-		model = glm::translate(model, tr.position);
+		model  = glm::translate(model, tr.position);
 		model *= glm::mat4_cast(tr.rotation);
-		model = glm::scale    (model, glm::vec3(1.0f, 1.0f, 1.0f));
+		model  = glm::scale    (model, glm::vec3(1.0f, 1.0f, 1.0f));
 		
 
 		defaultShader_->SetUniform("model", model);

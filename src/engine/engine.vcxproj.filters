@@ -126,6 +126,12 @@
     <ClInclude Include="utils\MemCheck.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="game\components\Velocity.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="game\components\NameTag.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\Engine.cpp">

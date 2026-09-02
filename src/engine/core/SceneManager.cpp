@@ -9,11 +9,13 @@
 #include "../utils/MemCheck.h"
 #include "../game/components/Object3D.h"
 #include "../game/components/Transform.h"
+#include "../game/components/Velocity.h"
 #include "../game/components/Camera.h"
 #include "../game/components/PlayerInput.h"
 #include "../game/components/CustomBehaviour.h"
 #include "../game/components/TestingComponent.h"
 #include "../game/components/Tags.h"
+#include "../game/components/NameTag.h"
 #include "../game/components/PhysicsBody.h"
 #include "../game/custom_behaviours/CameraBehaviour.h"
 #include "../game/custom_behaviours/PlayerBehaviour.h"
@@ -233,28 +235,30 @@ void nothing::SceneManager::LoadScene()
 	}
 
 	// Test fisica
-	ctx_->resourcesManager->CreateTexture(ctx_->filesystem->GetTexturePathFromName("tex_wall_bricks_1.png"));
+
+	
+	//ctx_->resourcesManager->CreateTexture(ctx_->filesystem->GetTexturePathFromName("tex_wall_bricks_1.png"));
 	SolidCubeInfo ground{};
 	ground.position      = glm::vec3(-6.0f, -1.0f, -5.0f);
 	ground.rotation      = glm::vec3(0.0f, 0.0f, 0.0f);
 	ground.width         = 10.0f;
 	ground.height        = 1.0f;
 	ground.depth         = 10.0f;
-	ground.textureID     = ctx_->resourcesManager->GetTextureIDFromName("tex_wall_bricks_1");
+	ground.textureID     = ctx_->resourcesManager->GetTextureIDFromName("nothing_logo");
 	ground.usePhysics    = false;
 	ground.isDoubleTiled = true;
 	
 
 	CreateWorldSolidCube(ground);
 
-
+	/*
 	for (int i = 0; i < 100; i++)
 	{
 
 		nothing::Random::RandomizeSeed();
-		float randX = nothing::Random::Float(-10.0f, 10.0f);
-		float randY = nothing::Random::Float(-10.0f, 10.0f);
-		float randZ = nothing::Random::Float(-10.0f, 10.0f);
+		float randX = nothing::Random::Float(-5.0f, 5.0f);
+		float randY = nothing::Random::Float(-5.0f, 5.0f);
+		float randZ = nothing::Random::Float(-5.0f, 5.0f);
 
 
 		SolidCubeInfo cubePhysTest{};
@@ -272,6 +276,8 @@ void nothing::SceneManager::LoadScene()
 		CreateWorldSolidCube(cubePhysTest);
 
 	}
+	*/
+	
 
 
 	// Stampa l'uso della memoria degli asset
@@ -644,6 +650,7 @@ void nothing::SceneManager::CreateWorldSolidCube(const SolidCubeInfo& cubeInfo)
 
 	bool centered = cubeInfo.isCentered ? true : false;
 	registry.emplace<components::PhysicsBody>(cubeEnt, nothing::components::MeshType::Cube, physBodyType, cubeInfo.width, cubeInfo.height, cubeInfo.depth, centered);
+	registry.emplace<components::NameTag>(cubeEnt, "This is a Cube");
 
 }
 
@@ -890,10 +897,16 @@ void nothing::SceneManager::CreatePlayer()
 	ctx_->resourcesManager->CreateTexture(ctx_->filesystem->GetTexturePathFromName(martyModRef.modelTextureFileName));
 
 
+	glm::vec3 playerPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 playerRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+
+
 	auto playerEnt = registry.create();
 	registry.emplace<Object3D>(playerEnt, martyModRef.vao, martyModRef.indicesCount, ctx_->resourcesManager->GetTextureIDFromName(martyModRef.modelTextureFileName.erase(martyModRef.modelTextureFileName.size() - 4)));
-	registry.emplace<Transform>(playerEnt, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	registry.emplace<Camera>(playerEnt, glm::vec3(0.0f, 0.0f, 3.0), glm::vec3(0.0f, 0.0f, 0.0f));
+	registry.emplace<Transform>(playerEnt, playerPosition, nothing::EulerToQuaternion(playerRotation));
+	registry.emplace<Velocity>(playerEnt, glm::vec3(0.0f, 0.0f, 0.0f));
+	registry.emplace<PhysicsBody>(playerEnt);
+	registry.emplace<Camera>(playerEnt, playerPosition, glm::vec3(0.0f, 0.0f, 0.0f));
 
 
 	auto playerBeh = std::make_unique<nothing::PlayerBehaviour>();
@@ -904,6 +917,7 @@ void nothing::SceneManager::CreatePlayer()
 
 	registry.emplace<MainCameraTag>(playerEnt);
 	registry.emplace<PlayerTag>(playerEnt);
+	registry.emplace<NameTag>(playerEnt, "Player");
 
 }
 

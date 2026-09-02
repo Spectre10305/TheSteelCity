@@ -181,12 +181,14 @@
     <ClInclude Include="game\basic\BaseCustomBehaviour.h" />
     <ClInclude Include="game\components\Camera.h" />
     <ClInclude Include="game\components\CustomBehaviour.h" />
+    <ClInclude Include="game\components\NameTag.h" />
     <ClInclude Include="game\components\Object3D.h" />
     <ClInclude Include="game\components\PhysicsBody.h" />
     <ClInclude Include="game\components\PlayerInput.h" />
     <ClInclude Include="game\components\Tags.h" />
     <ClInclude Include="game\components\TestingComponent.h" />
     <ClInclude Include="game\components\Transform.h" />
+    <ClInclude Include="game\components\Velocity.h" />
     <ClInclude Include="game\custom_behaviours\CameraBehaviour.h" />
     <ClInclude Include="game\custom_behaviours\PlayerBehaviour.h">
       <SubType>

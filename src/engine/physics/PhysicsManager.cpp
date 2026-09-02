@@ -2,6 +2,9 @@
 #include "../utils/Log.h"
 #include "../core/SceneManager.h"
 #include "../graphics/RenderManager.h"
+#include "../game/components/Velocity.h"
+#include "../game/components/Tags.h"
+#include "../game/components/NameTag.h"
 #include <glm/gtc/quaternion.hpp>
 
 
@@ -34,6 +37,23 @@ void nothing::PhysicsManager::Update(double deltaTime)
 
 	if (!ctx_->isGamePaused)
 	{
+
+		auto playerView = ctx_->sceneManager->registry.view<Transform, PhysicsBody, Velocity, PlayerTag>();
+
+
+		for (auto [ent, tr, pBody, vel] : playerView.each())
+		{
+
+			b3Body_SetLinearVelocity(pBody.bodyID, B3Vec3_FromGlm(vel.value * glm::vec3(100)));
+
+
+			b3Vec3 pos = b3Body_GetPosition(pBody.bodyID);
+
+
+			tr.position = GlmVec3_FromB3(pos);
+
+		}
+
 
 		b3World_Step(worldID_, timeStep_, subSteps_);
 
@@ -95,7 +115,7 @@ void nothing::PhysicsManager::InitPhysicsScene()
 	worldID_ = b3CreateWorld(&physicsWorldDef);
 
 
-	auto physBodyIDView = ctx_->sceneManager->registry.view<Transform, PhysicsBody>();
+	auto physBodyIDView = ctx_->sceneManager->registry.view<Transform, PhysicsBody>(entt::exclude<PlayerTag>);
 
 
 	for (auto [ent, tr, pBody] : physBodyIDView.each())
@@ -115,9 +135,47 @@ void nothing::PhysicsManager::InitPhysicsScene()
 
 
 		default:
-			nothing::LogInfo("Unsupported mesh type evaluated while constructing physics bodies, skipping...");
+			nothing::LogWarning("Unsupported mesh type evaluated while constructing physics bodies, skipping...");
 			break;
 		}
+
+	}
+
+
+	// Inizializza le collisioni del Player
+	auto playerView = ctx_->sceneManager->registry.view<Transform, PhysicsBody, PlayerTag>();
+
+
+	for (auto [ent, tr, pBody] : playerView.each())
+	{
+
+		b3BodyDef playerBodyDef = b3DefaultBodyDef();
+		playerBodyDef.position = B3Vec3_FromGlm(tr.position);
+		playerBodyDef.gravityScale = 0.0f;
+		playerBodyDef.type = b3_dynamicBody;
+
+
+		b3MotionLocks playerMotionLocks{};
+		playerMotionLocks.angularX = true;
+		playerMotionLocks.angularZ = true;
+		playerBodyDef.motionLocks = playerMotionLocks;
+		
+
+		pBody.bodyID = b3CreateBody(worldID_, &playerBodyDef);
+
+
+		b3Capsule playerCapsule{};
+		playerCapsule.center1 = b3Vec3{ 0.0f, 0.2f, 0.0f };
+		playerCapsule.center2 = b3Vec3{ 0.0f, 0.9f, 0.0f };
+		playerCapsule.radius = 0.2f;
+
+
+		b3ShapeDef playerShapeDef = b3DefaultShapeDef();
+		playerShapeDef.baseMaterial.restitution = 0.0f;
+		playerShapeDef.baseMaterial.friction = 0.1f;
+
+
+		b3CreateCapsuleShape(pBody.bodyID, &playerShapeDef, &playerCapsule);
 
 	}
 
