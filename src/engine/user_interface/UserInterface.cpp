@@ -66,7 +66,7 @@ void nothing::UserInterface::Init(EngineContext& ctx)
 
 
 	ImGuiIO& io = ImGui::GetIO();
-	io.Fonts->AddFontFromFileTTF("D:\\TheSteelCity\\assets\\engine\\fonts\\SourceCodePro-Regular.ttf", 20.0f);
+	io.Fonts->AddFontFromFileTTF("D:\\TheSteelCity\\assets\\engine\\fonts\\SourceCodePro-Regular.ttf", 25.0f);
 	io.IniFilename = ""; // Togliamo il file .INI
 
 
@@ -340,7 +340,7 @@ void nothing::UserInterface::UpdateGameContext()
 	if (showPauseMenu)
 	{
 
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.5f));
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.7f));
 
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -492,28 +492,30 @@ bool nothing::UserInterface::MenuButton(const char* text, ImVec2 pos, ImVec2 siz
 
 
 	ImU32 col = 0;
+	int alpha = 150;
+	int hoveredAlpha = 240;
 
 
 	switch (currentStyle)
 	{
 
 		case NOTHING_WINSTYLE_TECH:
-			col = hovered ? IM_COL32(0, 245, 245, 240) : IM_COL32(0, 245, 245, 120);
+			col = hovered ? IM_COL32(0, 245, 245, hoveredAlpha) : IM_COL32(0, 245, 245, alpha);
 			break;
 
 
 		case NOTHING_WINSTYLE_INDUSTRIAL:
-			col = hovered ? IM_COL32(240, 240, 240, 240) : IM_COL32(240, 240, 240, 120);
+			col = hovered ? IM_COL32(240, 240, 240, hoveredAlpha) : IM_COL32(240, 240, 240, alpha);
 			break;
 
 
 		case NOTHING_WINSTYLE_EVIL:
-			col = hovered ? IM_COL32(245, 0, 0, 240) : IM_COL32(245, 0, 0, 120);
+			col = hovered ? IM_COL32(245, 0, 0, hoveredAlpha) : IM_COL32(245, 0, 0, alpha);
 			break;
 
 
 		default:
-			col = hovered ? IM_COL32(0, 245, 245, 240) : IM_COL32(0, 245, 245, 120);
+			col = hovered ? IM_COL32(0, 245, 245, hoveredAlpha) : IM_COL32(0, 245, 245, alpha);
 			break;
 
 	}	
@@ -560,7 +562,7 @@ void nothing::UserInterface::CenteredText(const char* text)
 
 
 /* "bool flipVert" serve per flippare verticalmente la texture al caricamento(stbi_set_flip_vertically_on_load(true)).
-*	Per qualche motivo alcune texture si vedono bene anche se stbi_set_flip_vertically_on_load è FALSO altre no
+*	Per qualche motivo alcune texture si vedono bene anche se stbi_set_flip_vertically_on_load è FALSO, altre no
 */
 uint32_t nothing::UserInterface::CreateUITexture(const char* texturePath, bool flipVert)
 {
@@ -912,10 +914,10 @@ void nothing::UserInterface::ShowOptionsPanel(ImVec2& scrSz)
 		ImGui::Spacing();
 		ImGui::Spacing();
 		ImGui::Separator();
-		if (ImGui::Button("Applica", ImVec2(110, 0))) { currentEvent = UIEvent::ApplyOptions; }
+		if (ImGui::Button("Applica", ImVec2(125, 0))) { currentEvent = UIEvent::ApplyOptions; }
 		ImGui::SameLine();
-		if (ImGui::Button("Ripristina", ImVec2(110, 0))) { currentEvent = UIEvent::ResetOptions; }
-
+		if (ImGui::Button("Ripristina", ImVec2(125, 0))) { currentEvent = UIEvent::ResetOptions; }
+		
 
 		ImGui::End();
 		nothing::UIStyleHelper::PopStyle();

@@ -1,5 +1,6 @@
 #pragma once
 #include <box3d/id.h>
+#include <entt.hpp>
 
 
 namespace nothing
@@ -39,6 +40,11 @@ namespace nothing
 
 
 			bool isCentered = false;
+
+
+			// Lo stesso ID dell'entità a cui attacchiamo questo componenete,
+			// serve per recuperarla negli User Data dal Raycast fisico
+			entt::entity selfEntID;
 
 
 			b3BodyId bodyID{};

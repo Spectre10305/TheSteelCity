@@ -66,6 +66,7 @@ bool nothing::Engine::Init(LaunchOptions& lopts)
 
 	inputManager_.BindKey(SDL_SCANCODE_LSHIFT, GameAction::Run);
 	inputManager_.BindKey(SDL_SCANCODE_SPACE,  GameAction::Jump);
+	inputManager_.BindKey(SDL_SCANCODE_E,      GameAction::Use);
 
 
 	inputManager_.BindKey(SDL_SCANCODE_LEFT,   GameAction::RotateLeft);

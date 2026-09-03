@@ -2,9 +2,11 @@
 #include "../utils/Log.h"
 #include "../core/SceneManager.h"
 #include "../graphics/RenderManager.h"
+#include "../core/InputManager.h"
 #include "../game/components/Velocity.h"
 #include "../game/components/Tags.h"
 #include "../game/components/NameTag.h"
+#include "../game/components/CustomBehaviour.h"
 #include <glm/gtc/quaternion.hpp>
 
 
@@ -38,6 +40,7 @@ void nothing::PhysicsManager::Update(double deltaTime)
 	if (!ctx_->isGamePaused)
 	{
 
+		// Applica la fisica del giocatore
 		auto playerView = ctx_->sceneManager->registry.view<Transform, PhysicsBody, Velocity, PlayerTag>();
 
 
@@ -48,13 +51,14 @@ void nothing::PhysicsManager::Update(double deltaTime)
 
 
 			b3Vec3 pos = b3Body_GetPosition(pBody.bodyID);
-
+			
 
 			tr.position = GlmVec3_FromB3(pos);
 
 		}
 
 
+		// Applica la fisica degli oggetti fisici
 		b3World_Step(worldID_, timeStep_, subSteps_);
 
 
@@ -64,6 +68,7 @@ void nothing::PhysicsManager::Update(double deltaTime)
 		for (auto [ent, physB, tr] : bodyIDsView.each())
 		{
 
+			// Salta gli oggetti statici
 			if (physB.bodyType == BodyType::Static)
 				continue;
 
@@ -89,6 +94,86 @@ void nothing::PhysicsManager::Update(double deltaTime)
 			tr.position.z = pos.z;
 
 		}
+
+
+		auto playerView2 = ctx_->sceneManager->registry.view<Transform, PhysicsBody, PlayerTag>();
+
+
+		for (auto [ent, tr, pBody] : playerView2.each())
+		{
+
+			// Raycast di interazione
+			if (ctx_->inputManager->IsActionTriggered(GameAction::Use))
+			{
+
+				nothing::LogInfoVector("Player position: ", tr.position.x, tr.position.y, tr.position.z);
+
+
+				// Trova il forward, la direzione in cui il personaggio guarda
+				glm::vec3 forward = glm::normalize(tr.rotation * glm::vec3(0.0f, 0.0f, 1.0f));
+
+
+				nothing::LogInfoVector("Forward vector: ", forward.x, forward.y, forward.z);
+
+
+				float       rayLenght   = 1.0f;
+				b3Vec3      rayOrigin   = B3Vec3_FromGlm(tr.position + forward * 0.1f);
+				rayOrigin.y             += 0.5f;
+				glm::vec3   translation = forward * rayLenght;
+				b3RayResult res         = b3World_CastRayClosest(worldID_, rayOrigin, B3Vec3_FromGlm(translation), b3DefaultQueryFilter());
+
+
+				if (res.hit)
+				{
+
+					nothing::LogInfo("Hit something");
+					
+
+					void* userData = b3Shape_GetUserData(res.shapeId);
+
+
+					entt::entity ent = static_cast<entt::entity>(reinterpret_cast<std::uintptr_t>(userData));
+
+
+					if (ent != entt::null)
+					{
+
+						nothing::LogInfo("We got entity!");
+
+
+						if (ctx_->sceneManager->registry.all_of<nothing::components::CustomBehaviour>(ent))
+						{
+
+							nothing::LogInfo("Entity got CustomBehaviour component");
+
+
+							auto beh = ctx_->sceneManager->registry.try_get<nothing::components::CustomBehaviour>(ent);
+
+
+							if (beh != nullptr)
+							{
+
+								beh->customBehaviour->Interact();
+
+							}
+
+						}
+
+					}
+
+				}
+
+
+				// Solo per debug
+				b3Vec3 rayEnd = rayOrigin + B3Vec3_FromGlm(translation);
+				ctx_->renderManager->DebugDrawLine(GlmVec3_FromB3(rayOrigin), GlmVec3_FromB3(rayEnd));
+
+			}
+
+		}
+
+
+
 
 
 		// Debug draw
@@ -140,7 +225,7 @@ void nothing::PhysicsManager::InitPhysicsScene()
 		}
 
 	}
-
+	
 
 	// Inizializza le collisioni del Player
 	auto playerView = ctx_->sceneManager->registry.view<Transform, PhysicsBody, PlayerTag>();
@@ -270,6 +355,7 @@ void nothing::PhysicsManager::ConstructCubePhysicsBody(components::Transform& tr
 	shapeDef.density = 1.0f;
 	shapeDef.baseMaterial.friction = 0.3f;
 	shapeDef.baseMaterial.restitution = 0.5f;
+	shapeDef.userData = reinterpret_cast<void*>(static_cast<std::uintptr_t>(pBody.selfEntID));
 
 
 	b3CreateHullShape(pBody.bodyID, &shapeDef, &boxHull.base);
@@ -358,6 +444,7 @@ void nothing::PhysicsManager::ConstructPlanePhysicsBody(components::Transform & 
 	shapeDef.density = 1.0f;
 	shapeDef.baseMaterial.friction = 0.3f;
 	shapeDef.baseMaterial.restitution = 0.5f;
+	shapeDef.userData = reinterpret_cast<void*>(static_cast<std::uintptr_t>(pBody.selfEntID));
 
 
 	b3CreateHullShape(pBody.bodyID, &shapeDef, &boxHull.base);

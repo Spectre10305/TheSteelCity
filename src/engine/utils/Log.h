@@ -52,6 +52,29 @@ namespace nothing
 	// =================================================
 
 
+	// Utility per mostrare i vettori, message può essere vuoto ("")
+	inline void LogInfoVector(const std::string& message, float x, float y, float z)
+	{
+
+		if (message.empty())
+		{
+
+			std::cout << G_COLOR_GREEN << "[INFO]: " << x << ", " << y << ", " << z << G_COLOR_RESET << std::endl;
+
+		}
+		else
+		{
+
+			std::cout << G_COLOR_GREEN << "[INFO]: " << message << x << ", " << y << ", " << z << G_COLOR_RESET << std::endl;
+
+		}
+
+	}
+
+
+	// =================================================
+
+
 	inline float ToKilobytes(size_t bytes)
 	{
 

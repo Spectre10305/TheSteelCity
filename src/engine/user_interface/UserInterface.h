@@ -6,7 +6,7 @@
 #include "../core/EngineContext.h"
 
 
-#define NEW_GAME_PANEL_WIDTH        500.0f
+#define NEW_GAME_PANEL_WIDTH        550.0f
 #define NEW_GAME_PANEL_HEIGHT       350.0f
 #define LOAD_GAME_PANEL_WIDTH       500.0f
 #define LOAD_GAME_PANEL_HEIGHT      350.0f
@@ -82,12 +82,12 @@ namespace nothing
 
 
 		float buttonWidth         = 250.0f;
-		float buttonHeight        = 40.0f;
+		float buttonHeight        = 47.0f;
 		float buttonOffsetX       = 20.0f;
 		float buttonSpacingY      = 0.0f;
 		float buttonSpacingOffset = 10.0f;
 		float fontScaleBase       = 1.0f;
-		int   toleranceY          = 7;
+		int   toleranceY          = 10;
 
 
 		bool showNewGamePanel  = false;

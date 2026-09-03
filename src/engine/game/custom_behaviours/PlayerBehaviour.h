@@ -17,6 +17,7 @@ namespace nothing
 	public:
 
 		glm::vec3 cameraOffset = glm::vec3(-3.0f, 6.0f, 3.0f);
+		glm::vec3 cameraTopOffset = glm::vec3(0.001f, 6.0f, 0.001f); // Vista "dritto per dritto" dall'alto. Test
 		float speed = 0.0f;
 
 
@@ -30,7 +31,7 @@ namespace nothing
 			auto& camera = GetComponent<Camera>();
 
 
-			// Posiziona le telecamera in alto e direziona la visione verso il giocatore
+			// Posiziona la telecamera in alto e direziona la visione verso il giocatore
 			// con un piccolo offset in Y di -0.5 (in realtà dovrebbe essere +0.5 ma non so perchè...)
 			camera.position = transform.position + glm::vec3(0.0f, -0.5f, 0.0f) + cameraOffset;
 
@@ -105,7 +106,7 @@ namespace nothing
 
 
 			glm::vec3 desiredPos = transform.position + cameraOffset;
-			cam.position = glm::mix(cam.position, desiredPos, 5.0 * deltaTime);
+			cam.position = glm::mix(cam.position, desiredPos, 5.0 * static_cast<float>(deltaTime));
 
 		}
 

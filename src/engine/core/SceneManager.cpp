@@ -19,6 +19,7 @@
 #include "../game/components/PhysicsBody.h"
 #include "../game/custom_behaviours/CameraBehaviour.h"
 #include "../game/custom_behaviours/PlayerBehaviour.h"
+#include "../game/custom_behaviours/TestCustomBehaviour.h"
 
 
 // =================================================
@@ -93,6 +94,9 @@ void nothing::SceneManager::Shutdown()
 
 void nothing::SceneManager::LoadScene()
 {
+
+	using namespace nothing::components;
+
 
 	// Esempio tattico nucleare
 	std::string testMapPath = ctx_->filesystem->GetMapPath("testing");
@@ -223,16 +227,7 @@ void nothing::SceneManager::LoadScene()
 	CreatePlayer();
 
 
-	auto customBehView = registry.view<nothing::components::CustomBehaviour>();
 
-
-	for (auto [ent, beh] : customBehView.each())
-	{
-
-		beh.customBehaviour->engineServices_ = &engineServices_;
-		beh.customBehaviour->Create();
-
-	}
 
 	// Test fisica
 
@@ -250,6 +245,35 @@ void nothing::SceneManager::LoadScene()
 	
 
 	CreateWorldSolidCube(ground);
+
+
+	ctx_->resourcesManager->CreateTexture(ctx_->filesystem->GetTexturePathFromName("tex_wall_bricks_1.png"));
+	SolidCubeInfo column{};
+	column.position = glm::vec3(0.0f, 0.0f, 4.0f);
+	column.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	column.width =  1.0f;
+	column.height = 2.0f;
+	column.depth =  1.0f;
+	column.textureID = ctx_->resourcesManager->GetTextureIDFromName("tex_wall_bricks_1");
+	column.usePhysics = false;
+	column.isDoubleTiled = false;
+
+
+	CreateWorldSolidCube(column);
+
+
+	auto interactableEnt = registry.create();
+	registry.emplace<Transform>(interactableEnt, glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	registry.emplace<PhysicsBody>(interactableEnt, MeshType::Cube, BodyType::Static, 1.0f, 2.0f, 4.0f, false, interactableEnt);
+
+
+	auto testInteractBeh = std::make_unique<TestCustomBehaviour>();
+	testInteractBeh->SetRegistry(registry);
+	testInteractBeh->SetEntity(interactableEnt);
+
+
+	registry.emplace<CustomBehaviour>(interactableEnt, std::move(testInteractBeh));
+
 
 	/*
 	for (int i = 0; i < 100; i++)
@@ -277,7 +301,19 @@ void nothing::SceneManager::LoadScene()
 
 	}
 	*/
-	
+
+
+	// Crea tutti i custom behaviours
+	auto customBehView = registry.view<nothing::components::CustomBehaviour>();
+
+
+	for (auto [ent, beh] : customBehView.each())
+	{
+
+		beh.customBehaviour->engineServices_ = &engineServices_;
+		beh.customBehaviour->Create();
+
+	}
 
 
 	// Stampa l'uso della memoria degli asset
@@ -649,7 +685,7 @@ void nothing::SceneManager::CreateWorldSolidCube(const SolidCubeInfo& cubeInfo)
 
 
 	bool centered = cubeInfo.isCentered ? true : false;
-	registry.emplace<components::PhysicsBody>(cubeEnt, nothing::components::MeshType::Cube, physBodyType, cubeInfo.width, cubeInfo.height, cubeInfo.depth, centered);
+	registry.emplace<components::PhysicsBody>(cubeEnt, nothing::components::MeshType::Cube, physBodyType, cubeInfo.width, cubeInfo.height, cubeInfo.depth, centered, cubeEnt);
 	registry.emplace<components::NameTag>(cubeEnt, "This is a Cube");
 
 }
@@ -669,7 +705,7 @@ void nothing::SceneManager::CreateWorldSolidPlane(const SolidPlaneInfo& planeInf
 	auto planeEnt = registry.create();
 	registry.emplace<components::Object3D>(planeEnt, worldMeshes.back().VAO, worldMeshes.back().numIndices, planeInfo.textureID);
 	registry.emplace<components::Transform>(planeEnt, planeInfo.position, nothing::EulerToQuaternion(planeInfo.rotation));
-	registry.emplace<components::PhysicsBody>(planeEnt, components::MeshType::Plane, components::BodyType::Static, planeInfo.width, planeInfo.height, 0.01f);
+	registry.emplace<components::PhysicsBody>(planeEnt, components::MeshType::Plane, components::BodyType::Static, planeInfo.width, planeInfo.height, 0.01f, false, planeEnt);
 
 }
 
