@@ -38,8 +38,9 @@ namespace nothing
 			float height = 1.0f;
 			float depth  = 1.0f;
 
-
+			
 			bool isCentered = false;
+			bool isTrigger  = false;
 
 
 			// Lo stesso ID dell'entità a cui attacchiamo questo componenete,

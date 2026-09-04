@@ -181,6 +181,7 @@
     <ClInclude Include="game\basic\BaseCustomBehaviour.h" />
     <ClInclude Include="game\components\Camera.h" />
     <ClInclude Include="game\components\CustomBehaviour.h" />
+    <ClInclude Include="game\components\EntityReference.h" />
     <ClInclude Include="game\components\NameTag.h" />
     <ClInclude Include="game\components\Object3D.h" />
     <ClInclude Include="game\components\PhysicsBody.h" />

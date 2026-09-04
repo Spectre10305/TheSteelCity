@@ -23,11 +23,12 @@ namespace nothing
 		virtual ~BaseCustomBehaviour() = default;
 
 
-		virtual void Create() {}
-		virtual void Update(double deltaTime) {}
-		virtual void LateUpdate(double deltaTime) {}
-		virtual void Interact() {}
-		virtual void Destroy() {}
+		virtual void Create()                           {}
+		virtual void Update(double deltaTime)           {}
+		virtual void LateUpdate(double deltaTime)       {}
+		virtual void Interact()                         {}
+		virtual void TriggerTouch(entt::entity visitor) {}
+		virtual void Destroy()                          {}
 
 	protected:
 

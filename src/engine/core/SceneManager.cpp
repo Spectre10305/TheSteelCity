@@ -17,6 +17,7 @@
 #include "../game/components/Tags.h"
 #include "../game/components/NameTag.h"
 #include "../game/components/PhysicsBody.h"
+#include "../game/components/EntityReference.h"
 #include "../game/custom_behaviours/CameraBehaviour.h"
 #include "../game/custom_behaviours/PlayerBehaviour.h"
 #include "../game/custom_behaviours/TestCustomBehaviour.h"
@@ -262,17 +263,20 @@ void nothing::SceneManager::LoadScene()
 	CreateWorldSolidCube(column);
 
 
-	auto interactableEnt = registry.create();
-	registry.emplace<Transform>(interactableEnt, glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	registry.emplace<PhysicsBody>(interactableEnt, MeshType::Cube, BodyType::Static, 1.0f, 2.0f, 4.0f, false, interactableEnt);
+	// Test Trigger 1
 
 
-	auto testInteractBeh = std::make_unique<TestCustomBehaviour>();
-	testInteractBeh->SetRegistry(registry);
-	testInteractBeh->SetEntity(interactableEnt);
+	auto testLogicEnt = registry.create();
+	auto testTriggerBeh = std::make_unique<TestCustomBehaviour>();
+	testTriggerBeh->SetRegistry(registry);
+	testTriggerBeh->SetEntity(testLogicEnt);
+	registry.emplace<CustomBehaviour>(testLogicEnt, std::move(testTriggerBeh));
 
 
-	registry.emplace<CustomBehaviour>(interactableEnt, std::move(testInteractBeh));
+	auto triggerEnt = registry.create();
+	registry.emplace<Transform>(triggerEnt, glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	registry.emplace<PhysicsBody>(triggerEnt, MeshType::Cube, BodyType::Static, 1.0f, 2.0f, 4.0f, false, true, triggerEnt);
+	registry.emplace<EntityReference>(triggerEnt, testLogicEnt);
 
 
 	/*
@@ -685,8 +689,8 @@ void nothing::SceneManager::CreateWorldSolidCube(const SolidCubeInfo& cubeInfo)
 
 
 	bool centered = cubeInfo.isCentered ? true : false;
-	registry.emplace<components::PhysicsBody>(cubeEnt, nothing::components::MeshType::Cube, physBodyType, cubeInfo.width, cubeInfo.height, cubeInfo.depth, centered, cubeEnt);
-	registry.emplace<components::NameTag>(cubeEnt, "This is a Cube");
+	registry.emplace<components::PhysicsBody>(cubeEnt, nothing::components::MeshType::Cube, physBodyType, cubeInfo.width, cubeInfo.height, cubeInfo.depth, centered, false, cubeEnt);
+	//registry.emplace<components::NameTag>(cubeEnt, "This is a Cube");
 
 }
 
@@ -705,7 +709,7 @@ void nothing::SceneManager::CreateWorldSolidPlane(const SolidPlaneInfo& planeInf
 	auto planeEnt = registry.create();
 	registry.emplace<components::Object3D>(planeEnt, worldMeshes.back().VAO, worldMeshes.back().numIndices, planeInfo.textureID);
 	registry.emplace<components::Transform>(planeEnt, planeInfo.position, nothing::EulerToQuaternion(planeInfo.rotation));
-	registry.emplace<components::PhysicsBody>(planeEnt, components::MeshType::Plane, components::BodyType::Static, planeInfo.width, planeInfo.height, 0.01f, false, planeEnt);
+	registry.emplace<components::PhysicsBody>(planeEnt, components::MeshType::Plane, components::BodyType::Static, planeInfo.width, planeInfo.height, 0.01f, false, false, planeEnt);
 
 }
 
@@ -933,7 +937,7 @@ void nothing::SceneManager::CreatePlayer()
 	ctx_->resourcesManager->CreateTexture(ctx_->filesystem->GetTexturePathFromName(martyModRef.modelTextureFileName));
 
 
-	glm::vec3 playerPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 playerPosition = glm::vec3(6.0f, 0.0f, -1.0f);
 	glm::vec3 playerRotation = glm::vec3(0.0f, 0.0f, 0.0f);
 
 
@@ -941,7 +945,12 @@ void nothing::SceneManager::CreatePlayer()
 	registry.emplace<Object3D>(playerEnt, martyModRef.vao, martyModRef.indicesCount, ctx_->resourcesManager->GetTextureIDFromName(martyModRef.modelTextureFileName.erase(martyModRef.modelTextureFileName.size() - 4)));
 	registry.emplace<Transform>(playerEnt, playerPosition, nothing::EulerToQuaternion(playerRotation));
 	registry.emplace<Velocity>(playerEnt, glm::vec3(0.0f, 0.0f, 0.0f));
-	registry.emplace<PhysicsBody>(playerEnt);
+
+
+	// Tutti valori di default, vengono ignorati alla creazione della fisica del player. Serve solo per impostare selfEntID
+	registry.emplace<PhysicsBody>(playerEnt, MeshType::Cube, BodyType::Static, 1.0f, 1.0f, 1.0f, false, false, playerEnt);
+
+
 	registry.emplace<Camera>(playerEnt, playerPosition, glm::vec3(0.0f, 0.0f, 0.0f));
 
 
@@ -953,7 +962,7 @@ void nothing::SceneManager::CreatePlayer()
 
 	registry.emplace<MainCameraTag>(playerEnt);
 	registry.emplace<PlayerTag>(playerEnt);
-	registry.emplace<NameTag>(playerEnt, "Player");
+	//registry.emplace<NameTag>(playerEnt, "Player");
 
 }
 

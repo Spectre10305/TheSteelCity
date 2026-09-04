@@ -6,6 +6,7 @@
 #include "../game/components/Velocity.h"
 #include "../game/components/Tags.h"
 #include "../game/components/NameTag.h"
+#include "../game/components/EntityReference.h"
 #include "../game/components/CustomBehaviour.h"
 #include <glm/gtc/quaternion.hpp>
 
@@ -60,6 +61,52 @@ void nothing::PhysicsManager::Update(double deltaTime)
 
 		// Applica la fisica degli oggetti fisici
 		b3World_Step(worldID_, timeStep_, subSteps_);
+
+
+		b3SensorEvents sensorsEvents = b3World_GetSensorEvents(worldID_);
+
+
+		for (int i = 0; i < sensorsEvents.beginCount; ++i)
+		{
+
+			nothing::LogInfo("We got trigger collision....");
+
+
+			b3SensorBeginTouchEvent* begEvent = sensorsEvents.beginEvents + i;
+
+
+			entt::entity triggerEnt = static_cast<entt::entity>(reinterpret_cast<std::uintptr_t>(b3Shape_GetUserData(begEvent->sensorShapeId)));
+			entt::entity visitorEnt = static_cast<entt::entity>(reinterpret_cast<std::uintptr_t>(b3Shape_GetUserData(begEvent->visitorShapeId)));
+
+
+			if (!ctx_->sceneManager->registry.valid(triggerEnt) || !ctx_->sceneManager->registry.valid(visitorEnt))
+			{
+
+				nothing::LogError("Something went wrong when getting trigger collision data");
+				continue;
+
+			}
+
+
+			auto entRef = ctx_->sceneManager->registry.try_get<EntityReference>(triggerEnt);
+
+
+			if (entRef != nullptr)
+			{
+
+				auto customBeh = ctx_->sceneManager->registry.try_get<CustomBehaviour>(entRef->other);
+
+
+				if (customBeh != nullptr)
+				{
+
+					customBeh->customBehaviour->TriggerTouch(visitorEnt);
+
+				}
+
+			}
+
+		}
 
 
 		auto bodyIDsView = ctx_->sceneManager->registry.view<PhysicsBody, Transform>();
@@ -173,9 +220,6 @@ void nothing::PhysicsManager::Update(double deltaTime)
 		}
 
 
-
-
-
 		// Debug draw
 		b3World_Draw(worldID_, &debugDraw, B3_DEFAULT_CATEGORY_BITS);
 
@@ -258,6 +302,8 @@ void nothing::PhysicsManager::InitPhysicsScene()
 		b3ShapeDef playerShapeDef = b3DefaultShapeDef();
 		playerShapeDef.baseMaterial.restitution = 0.0f;
 		playerShapeDef.baseMaterial.friction = 0.1f;
+		playerShapeDef.enableSensorEvents = true;
+		playerShapeDef.userData = reinterpret_cast<void*>(static_cast<std::uintptr_t>(pBody.selfEntID));
 
 
 		b3CreateCapsuleShape(pBody.bodyID, &playerShapeDef, &playerCapsule);
@@ -356,6 +402,15 @@ void nothing::PhysicsManager::ConstructCubePhysicsBody(components::Transform& tr
 	shapeDef.baseMaterial.friction = 0.3f;
 	shapeDef.baseMaterial.restitution = 0.5f;
 	shapeDef.userData = reinterpret_cast<void*>(static_cast<std::uintptr_t>(pBody.selfEntID));
+
+
+	if (pBody.isTrigger)
+	{
+
+		shapeDef.isSensor = true;
+		shapeDef.enableSensorEvents = true;
+
+	}
 
 
 	b3CreateHullShape(pBody.bodyID, &shapeDef, &boxHull.base);
