@@ -93,15 +93,15 @@ void nothing::SceneManager::Shutdown()
 // =================================================
 
 
-void nothing::SceneManager::LoadScene()
+void nothing::SceneManager::LoadScene(const std::string& mapName)
 {
 
 	using namespace nothing::components;
 
 
 	// Esempio tattico nucleare
-	std::string testMapPath = ctx_->filesystem->GetMapPath("testing");
-	std::string mapFile = testMapPath + "\\testing.notmap";
+	std::string testMapPath = ctx_->filesystem->GetMapPath(mapName);
+	std::string mapFile = testMapPath + "\\" + mapName + ".notmap";
 	std::string assetFile = testMapPath + "\\assets.txt";
 
 
@@ -243,6 +243,7 @@ void nothing::SceneManager::LoadScene()
 	ground.textureID     = ctx_->resourcesManager->GetTextureIDFromName("nothing_logo");
 	ground.usePhysics    = false;
 	ground.isDoubleTiled = true;
+	ground.density       = 1.0f;
 	
 
 	CreateWorldSolidCube(ground);
@@ -250,14 +251,15 @@ void nothing::SceneManager::LoadScene()
 
 	ctx_->resourcesManager->CreateTexture(ctx_->filesystem->GetTexturePathFromName("tex_wall_bricks_1.png"));
 	SolidCubeInfo column{};
-	column.position = glm::vec3(0.0f, 0.0f, 4.0f);
-	column.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-	column.width =  1.0f;
-	column.height = 2.0f;
-	column.depth =  1.0f;
-	column.textureID = ctx_->resourcesManager->GetTextureIDFromName("tex_wall_bricks_1");
-	column.usePhysics = false;
+	column.position      = glm::vec3(0.0f, 0.0f, 4.0f);
+	column.rotation      = glm::vec3(0.0f, 0.0f, 0.0f);
+	column.width         = 1.0f;
+	column.height        = 2.0f;
+	column.depth         = 1.0f;
+	column.textureID     = ctx_->resourcesManager->GetTextureIDFromName("tex_wall_bricks_1");
+	column.usePhysics    = true;
 	column.isDoubleTiled = false;
+	column.density       = 500.0f;
 
 
 	CreateWorldSolidCube(column);
@@ -275,7 +277,7 @@ void nothing::SceneManager::LoadScene()
 
 	auto triggerEnt = registry.create();
 	registry.emplace<Transform>(triggerEnt, glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	registry.emplace<PhysicsBody>(triggerEnt, MeshType::Cube, BodyType::Static, 1.0f, 2.0f, 4.0f, false, true, triggerEnt);
+	registry.emplace<PhysicsBody>(triggerEnt, MeshType::Cube, BodyType::Static, 1.0f, 2.0f, 4.0f, 0.0f, false, true);
 	registry.emplace<EntityReference>(triggerEnt, testLogicEnt);
 
 
@@ -689,7 +691,7 @@ void nothing::SceneManager::CreateWorldSolidCube(const SolidCubeInfo& cubeInfo)
 
 
 	bool centered = cubeInfo.isCentered ? true : false;
-	registry.emplace<components::PhysicsBody>(cubeEnt, nothing::components::MeshType::Cube, physBodyType, cubeInfo.width, cubeInfo.height, cubeInfo.depth, centered, false, cubeEnt);
+	registry.emplace<components::PhysicsBody>(cubeEnt, nothing::components::MeshType::Cube, physBodyType, cubeInfo.width, cubeInfo.height, cubeInfo.depth, cubeInfo.density, centered, false);
 	//registry.emplace<components::NameTag>(cubeEnt, "This is a Cube");
 
 }
@@ -709,7 +711,7 @@ void nothing::SceneManager::CreateWorldSolidPlane(const SolidPlaneInfo& planeInf
 	auto planeEnt = registry.create();
 	registry.emplace<components::Object3D>(planeEnt, worldMeshes.back().VAO, worldMeshes.back().numIndices, planeInfo.textureID);
 	registry.emplace<components::Transform>(planeEnt, planeInfo.position, nothing::EulerToQuaternion(planeInfo.rotation));
-	registry.emplace<components::PhysicsBody>(planeEnt, components::MeshType::Plane, components::BodyType::Static, planeInfo.width, planeInfo.height, 0.01f, false, false, planeEnt);
+	registry.emplace<components::PhysicsBody>(planeEnt, components::MeshType::Plane, components::BodyType::Static, planeInfo.width, planeInfo.height, 0.01f, 1.0f, false, false);
 
 }
 
@@ -948,7 +950,7 @@ void nothing::SceneManager::CreatePlayer()
 
 
 	// Tutti valori di default, vengono ignorati alla creazione della fisica del player. Serve solo per impostare selfEntID
-	registry.emplace<PhysicsBody>(playerEnt, MeshType::Cube, BodyType::Static, 1.0f, 1.0f, 1.0f, false, false, playerEnt);
+	registry.emplace<PhysicsBody>(playerEnt);
 
 
 	registry.emplace<Camera>(playerEnt, playerPosition, glm::vec3(0.0f, 0.0f, 0.0f));

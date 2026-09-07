@@ -10,6 +10,9 @@
 
 bool nothing::Engine::Init(LaunchOptions& lopts)
 {
+	nothing::LogInfo("Testing...");
+	nothing::LogWarning("Testing...");
+	nothing::LogError("Testing...");
 
 	nothing::LogInfo("Initializing engine...");
 
@@ -38,7 +41,7 @@ bool nothing::Engine::Init(LaunchOptions& lopts)
 	}
 	
 
-	resourceManager_.InitDefaults(engineContext_);
+	//resourceManager_.InitDefaults(engineContext_);
 
 
 	sceneManager_.Init(engineContext_);
@@ -81,6 +84,23 @@ bool nothing::Engine::Init(LaunchOptions& lopts)
 
 	double timeToInitialize = nothing::ElapsedMS();
 	nothing::LogInfo("Took: " + std::to_string(timeToInitialize) + " MS to initialize engine");
+
+
+	if (!lopts.mapOnLaunchName.empty())
+	{
+
+		// Inizializziamo le risorse di default ogni volta che entriamo in scena,
+		// uscendo dalla scena corrente chiamiamo resourceManager_.DeleteAll...()
+		// che rimuove tutte le risorse. Comprese quelle di default
+		resourceManager_.InitDefaults(engineContext_);
+		sceneManager_.LoadScene(lopts.mapOnLaunchName);
+		physicsManager_.InitPhysicsScene();
+		userInterface_.SwitchContext(UIContext::Gameplay);
+		windowManager_.SetMouseInvisible();
+		gameState_ = GameState::Gameplay;
+		return true;
+
+	}
 
 
 	if (lopts.noSplash == true)
@@ -132,10 +152,10 @@ void nothing::Engine::Run()
 
 
 		case GameState::Gameplay:
-			sceneManager_.Update(deltaTime);
+			sceneManager_  .Update(deltaTime);
 			physicsManager_.Update(deltaTime);
-			renderManager_.Update(deltaTime);
-			userInterface_.Update();
+			renderManager_ .Update(deltaTime);
+			userInterface_ .Update();
 			break;
 
 
@@ -172,7 +192,6 @@ void nothing::Engine::Run()
 			break;
 		}
 			
-
 
 		default:
 			break;
@@ -216,8 +235,8 @@ void nothing::Engine::Shutdown()
 	{
 
 		nothing::LogInfo("Quitting from game state, cleaning up resources...");
-		physicsManager_.DeletePhysicsScene();
-		sceneManager_.UnloadScene();
+		physicsManager_ .DeletePhysicsScene();
+		sceneManager_   .UnloadScene();
 		resourceManager_.DeleteAllModels3D();
 		resourceManager_.DeleteAllTextures();
 		nothing::InterrogateMemoryStatus();
@@ -283,21 +302,22 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 	{
 
 	case UIEvent::BeginGame:
-		sceneManager_.LoadScene();
-		physicsManager_.InitPhysicsScene();
-		userInterface_.SwitchContext(UIContext::Gameplay);
-		windowManager_.SetMouseInvisible();
-		gameState_ = GameState::Gameplay;
+		resourceManager_.InitDefaults(engineContext_);
+		sceneManager_   .LoadScene("testing");
+		physicsManager_ .InitPhysicsScene();
+		userInterface_  .SwitchContext(UIContext::Gameplay);
+		windowManager_  .SetMouseInvisible();
+		gameState_      = GameState::Gameplay;
 		break;
 
 
 	case UIEvent::ReturnToMenu:
-		physicsManager_.DeletePhysicsScene();
-		sceneManager_.UnloadScene();
+		physicsManager_ .DeletePhysicsScene();
+		sceneManager_   .UnloadScene();
 		resourceManager_.DeleteAllModels3D();
 		resourceManager_.DeleteAllTextures();
-		userInterface_.SwitchContext(UIContext::MainMenu);
-		gameState_ = GameState::MainMenu;
+		userInterface_  .SwitchContext(UIContext::MainMenu);
+		gameState_      = GameState::MainMenu;
 		nothing::InterrogateMemoryStatus();
 		break;
 

@@ -1,6 +1,9 @@
 #pragma once
 #include <cstdint>
 #include <limits.h>
+#define NOMINMAX
+#include <Windows.h>
+#include <psapi.h>
 #include "Log.h"
 
 
@@ -16,6 +19,9 @@ namespace nothing
 	inline size_t gTotalTexturesMemory = 0;
 	inline size_t gTotalModels3DMemory = 0;
 	inline size_t gTotalAudiosMemory   = 0;
+
+
+	inline _PROCESS_MEMORY_COUNTERS_EX gMemoryCounters{};
 
 
 	// =================================================
@@ -118,6 +124,43 @@ namespace nothing
 		nothing::LogInfo("Total models 3D memory_(bytes): " + std::to_string(gTotalModels3DMemory));
 		nothing::LogInfo("Total audios memory____(bytes): " + std::to_string(gTotalAudiosMemory));
 		nothing::LogInfo("=================================================");
+
+	}
+
+
+	// =================================================
+
+
+	inline void PrintTotalProgramMemory(bool inMegaBytes = false)
+	{
+
+		// Non ho la minima idea di cosa sto facendo :D
+		GetProcessMemoryInfo(GetCurrentProcess(), (_PROCESS_MEMORY_COUNTERS*)&gMemoryCounters, sizeof(gMemoryCounters));
+		SIZE_T totMem = gMemoryCounters.WorkingSetSize;
+		SIZE_T realTotMem = gMemoryCounters.PrivateUsage;
+
+
+		double totmem_bytes = static_cast<double>(totMem);
+		double totRealMem_bytes = static_cast<double>(realTotMem);
+
+
+		if (inMegaBytes)
+		{
+
+			
+			double totmem_mbs = totmem_bytes / 1000000.0;
+			double realtotmem_mbs = totRealMem_bytes / 1000000.0;
+			nothing::LogInfo("Total program memory------: " + std::to_string(totmem_mbs) + " MB");
+			nothing::LogInfo("Total program memory REAL-: " + std::to_string(realtotmem_mbs) + " MB");
+
+		}
+		else
+		{
+
+			nothing::LogInfo("Total program memory------: " + std::to_string(totmem_bytes) + " B");
+			nothing::LogInfo("Total program memory REAL-: " + std::to_string(totRealMem_bytes) + " B");
+
+		}
 
 	}
 

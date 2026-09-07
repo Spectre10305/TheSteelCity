@@ -6,7 +6,7 @@
 #include <entt.hpp>
 #include <glm/glm.hpp>
 #include "EngineContext.h"
-#include "../game/basic/BaseCustomBehaviour.h"
+#include "../game/basic/BaseCustomBehaviour.h" // EngineServices
 
 
 namespace nothing
@@ -25,6 +25,7 @@ namespace nothing
 		bool        isCentered    = false;
 		bool        isDoubleTiled = false;
 		bool        usePhysics    = false;
+		float       density       = 1.0f;
 
 		// NOTA: Di default il cubo parte da 0,0,0 e si estende verso
 		// +X, +Y e +Z. "isCentered" estende il cubo in tutte le direzioni
@@ -82,7 +83,8 @@ namespace nothing
 		void Shutdown();
 
 
-		void LoadScene();
+		// NOTA: "mapName" deve essere il solo nome della mappa, niente ".notmap" o percorsi
+		void LoadScene(const std::string& mapName);
 		void UnloadScene();
 
 

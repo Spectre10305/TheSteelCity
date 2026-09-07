@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL3/SDL.h>
+#include <string>
 
 
 #include "WindowManager.h"
@@ -35,6 +36,7 @@ namespace nothing
 	{
 
 		bool noSplash = false;
+		std::string mapOnLaunchName = "";
 
 	};
 

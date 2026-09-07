@@ -59,7 +59,7 @@ void nothing::PhysicsManager::Update(double deltaTime)
 		}
 
 
-		// Applica la fisica degli oggetti fisici
+		// Simulazione mondo fisico
 		b3World_Step(worldID_, timeStep_, subSteps_);
 
 
@@ -254,12 +254,12 @@ void nothing::PhysicsManager::InitPhysicsScene()
 		{
 
 		case MeshType::Cube:
-			ConstructCubePhysicsBody(tr, pBody);
+			ConstructCubePhysicsBody(ent, tr, pBody);
 			break;
 
 
 		case MeshType::Plane:
-			ConstructPlanePhysicsBody(tr, pBody);
+			ConstructPlanePhysicsBody(ent, tr, pBody);
 			break;
 
 
@@ -303,7 +303,7 @@ void nothing::PhysicsManager::InitPhysicsScene()
 		playerShapeDef.baseMaterial.restitution = 0.0f;
 		playerShapeDef.baseMaterial.friction = 0.1f;
 		playerShapeDef.enableSensorEvents = true;
-		playerShapeDef.userData = reinterpret_cast<void*>(static_cast<std::uintptr_t>(pBody.selfEntID));
+		playerShapeDef.userData = reinterpret_cast<void*>(static_cast<std::uintptr_t>(ent));
 
 
 		b3CreateCapsuleShape(pBody.bodyID, &playerShapeDef, &playerCapsule);
@@ -338,7 +338,7 @@ void nothing::PhysicsManager::Shutdown()
 // =================================================
 
 
-void nothing::PhysicsManager::ConstructCubePhysicsBody(components::Transform& tr, components::PhysicsBody& pBody)
+void nothing::PhysicsManager::ConstructCubePhysicsBody(entt::entity entID, components::Transform& tr, components::PhysicsBody& pBody)
 {
 
 	using namespace nothing::components;
@@ -398,10 +398,10 @@ void nothing::PhysicsManager::ConstructCubePhysicsBody(components::Transform& tr
 
 
 	b3ShapeDef shapeDef = b3DefaultShapeDef();
-	shapeDef.density = 1.0f;
+	shapeDef.density = pBody.density;
 	shapeDef.baseMaterial.friction = 0.3f;
 	shapeDef.baseMaterial.restitution = 0.5f;
-	shapeDef.userData = reinterpret_cast<void*>(static_cast<std::uintptr_t>(pBody.selfEntID));
+	shapeDef.userData = reinterpret_cast<void*>(static_cast<std::uintptr_t>(entID));
 
 
 	if (pBody.isTrigger)
@@ -421,7 +421,7 @@ void nothing::PhysicsManager::ConstructCubePhysicsBody(components::Transform& tr
 // =================================================
 
 
-void nothing::PhysicsManager::ConstructPlanePhysicsBody(components::Transform & tr, components::PhysicsBody& pBody)
+void nothing::PhysicsManager::ConstructPlanePhysicsBody(entt::entity entID, components::Transform & tr, components::PhysicsBody& pBody)
 {
 
 	using namespace nothing::components;
@@ -499,7 +499,7 @@ void nothing::PhysicsManager::ConstructPlanePhysicsBody(components::Transform & 
 	shapeDef.density = 1.0f;
 	shapeDef.baseMaterial.friction = 0.3f;
 	shapeDef.baseMaterial.restitution = 0.5f;
-	shapeDef.userData = reinterpret_cast<void*>(static_cast<std::uintptr_t>(pBody.selfEntID));
+	shapeDef.userData = reinterpret_cast<void*>(static_cast<std::uintptr_t>(entID));
 
 
 	b3CreateHullShape(pBody.bodyID, &shapeDef, &boxHull.base);

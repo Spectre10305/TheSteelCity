@@ -3,12 +3,14 @@
 #include "../graphics/IMGUI/imgui_impl_sdl3.h"
 #include "../graphics/IMGUI/imgui_impl_opengl3.h"
 #include "../utils/Log.h"
+#include "../utils/MemCheck.h"
 #include "UIStyleHelper.h"
 #include <glad/glad.h>
 #include <stb_image.h>
 #include "../core/WindowManager.h"
 #include "../core/InputManager.h"
 #include "../core/Filesystem.h"
+#include <string>
 
 
 //=============================================================
@@ -66,7 +68,8 @@ void nothing::UserInterface::Init(EngineContext& ctx)
 
 
 	ImGuiIO& io = ImGui::GetIO();
-	io.Fonts->AddFontFromFileTTF("D:\\TheSteelCity\\assets\\engine\\fonts\\SourceCodePro-Regular.ttf", 25.0f);
+	defaultFont = io.Fonts->AddFontFromFileTTF("D:\\TheSteelCity\\assets\\engine\\fonts\\SourceCodePro-Regular.ttf", 25.0f);
+	consoleFont = io.Fonts->AddFontFromFileTTF("D:\\TheSteelCity\\assets\\engine\\fonts\\SourceCodePro-Regular.ttf", 20.0f);
 	io.IniFilename = ""; // Togliamo il file .INI
 
 
@@ -1002,29 +1005,77 @@ void nothing::UserInterface::ShowDevConsole(ImVec2& scrSz)
 		ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
 		ImGui::Begin("Development console", &showDevConsole);
 
-		
-		if (ImGui::InputText("Command line", buf_, IM_ARRAYSIZE(buf_), ImGuiInputTextFlags_EnterReturnsTrue))
+
+		ImGui::BeginChild("ConsoleLog", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar);
+
+
+		if (gConsoleMessages.size() > 40)
 		{
 
-			if (std::strcmp(buf_, "sas") == 0)
-			{
-
-				lines_.push_back("sas command invoked");
-
-			}
+			gConsoleMessages.erase(gConsoleMessages.begin());
 
 		}
 
 
-		ImGui::SameLine();
-		if (ImGui::Button("Clear log")) { lines_.clear(); }
-
-
-		for (auto& str : lines_)
+		for (auto& str : gConsoleMessages)
 		{
 
-			std::string outLine = "[INFO]: " + str;
-			ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), outLine.c_str());
+			ImGui::PushFont(consoleFont);
+
+
+			if (str.starts_with("[INFO]:"))
+			{
+
+				ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), str.c_str());
+
+			}
+			else if (str.starts_with("[WARNING]:"))
+			{
+
+				ImGui::TextColored(ImVec4(0.941, 0.835, 0.051, 1.0f), str.c_str());
+
+			}
+			else if (str.starts_with("[ERROR]:"))
+			{
+
+				ImGui::TextColored(ImVec4(1.0, 0.0, 0.0, 1.0f), str.c_str());
+
+			}
+
+
+			ImGui::PopFont();
+
+		}
+
+
+		ImGui::EndChild();
+
+
+		if (ImGui::InputText("Command line", buf_, IM_ARRAYSIZE(buf_), ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			
+			if (std::strcmp(buf_, "clear") == 0)
+			{
+
+				gConsoleMessages.clear();
+
+			}
+
+
+			if (std::strcmp(buf_, "test") == 0)
+			{
+
+				nothing::LogInfo("Testing...");
+
+			}
+
+
+			if (std::strcmp(buf_, "totmem") == 0)
+			{
+
+				nothing::PrintTotalProgramMemory(true);
+
+			}
 
 		}
 

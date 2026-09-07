@@ -23,17 +23,26 @@ void LogInfo(const char* message)
 }
 
 
+// ======================================================================
+
+
+// In release forziamo il punto d'entrata a mainCRTStartup
+#ifndef _DEBUG
+#pragma comment(linker, "/ENTRY:mainCRTStartup")
+#endif
+
+
 int main(int argc, char* argv[])
 {
 
-	HMODULE lib = LoadLibrary(L"engine.dll");
+	HMODULE lib = LoadLibrary(L"NothingAssembly.dll");
 
 
 	if (!lib)
 	{
 
 		// Non si è caricata la libreria
-		LogInfo("Can't load library 'engine.dll'");
+		LogInfo("Can't load library 'NothingAssembly.dll'");
 		return -1;
 
 	}
@@ -55,7 +64,7 @@ int main(int argc, char* argv[])
 	// Punto di ingresso engine
 	emain(argc, argv);
 
-	
+
 	FreeLibrary(lib);
 
 

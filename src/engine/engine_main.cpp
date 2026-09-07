@@ -10,16 +10,33 @@ void EngineMain(int args, char* argsv[])
 	nothing::LaunchOptions launchOpts{};
 	
 
-	for (size_t i = 0; i < args; i++)
+	for (int i = 1; i < args; i++)
 	{
 
-		nothing::LogInfo(argsv[i]);
+		std::string arg = argsv[i];
 
 
-		if (std::strcmp(argsv[i], "-nosplash") == 0)
+		if (arg == "-map" && i + 1 < args)
+		{
+
+			launchOpts.mapOnLaunchName = argsv[++i];
+			nothing::LogInfo("Launching with map: " + launchOpts.mapOnLaunchName);
+
+		}
+
+
+		if (arg == "-nosplash")
 		{
 
 			launchOpts.noSplash = true;
+
+		}
+
+
+		if (arg == "-devmode")
+		{
+
+			// Attiva la modalità sviluppo
 
 		}
 

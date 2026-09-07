@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <glad/glad.h> // per GlDebugOutput
+#include <vector>
 
 
 namespace nothing
@@ -15,6 +16,8 @@ namespace nothing
 	inline constexpr const char* G_COLOR_RESET  = "\033[0m";
 
 
+	inline std::vector<std::string> gConsoleMessages;
+
 
 	// =================================================
 
@@ -23,6 +26,7 @@ namespace nothing
 	{
 
 		std::cout << G_COLOR_GREEN << "[INFO]: " << message << G_COLOR_RESET << std::endl;
+		gConsoleMessages.push_back("[INFO]: " + message);
 
 	}
 
@@ -34,6 +38,7 @@ namespace nothing
 	{
 
 		std::cout << G_COLOR_YELLOW << "[WARNING]: " << message << G_COLOR_RESET << std::endl;
+		gConsoleMessages.push_back("[WARNING]: " + message);
 
 	}
 
@@ -45,6 +50,7 @@ namespace nothing
 	{
 
 		std::cout << G_COLOR_RED << "[ERROR]: " << message << G_COLOR_RESET << std::endl;
+		gConsoleMessages.push_back("[ERROR]: " + message);
 
 	}
 
@@ -60,12 +66,14 @@ namespace nothing
 		{
 
 			std::cout << G_COLOR_GREEN << "[INFO]: " << x << ", " << y << ", " << z << G_COLOR_RESET << std::endl;
+			gConsoleMessages.push_back("[INFO]: " + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z));
 
 		}
 		else
 		{
 
 			std::cout << G_COLOR_GREEN << "[INFO]: " << message << x << ", " << y << ", " << z << G_COLOR_RESET << std::endl;
+			gConsoleMessages.push_back("[INFO]: " + message + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z));
 
 		}
 

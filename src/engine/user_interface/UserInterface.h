@@ -108,6 +108,10 @@ namespace nothing
 		uint32_t uiTexture_NothingLogo = 0;
 
 
+		// Font di default
+		ImFont* defaultFont = nullptr;
+
+
 		UIEvent currentEvent = UIEvent::None;
 
 
@@ -119,6 +123,7 @@ namespace nothing
 		// Dev console
 		std::vector<std::string> lines_;
 		char buf_[32];
+		ImFont* consoleFont = nullptr;
 
 
 	};
