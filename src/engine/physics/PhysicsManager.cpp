@@ -142,7 +142,7 @@ void nothing::PhysicsManager::Update(double deltaTime)
 
 		}
 
-
+		/*
 		auto playerView2 = ctx_->sceneManager->registry.view<Transform, PhysicsBody, PlayerTag>();
 
 
@@ -218,6 +218,7 @@ void nothing::PhysicsManager::Update(double deltaTime)
 			}
 
 		}
+		*/
 
 
 		// Debug draw
@@ -331,6 +332,65 @@ void nothing::PhysicsManager::Shutdown()
 {
 
 	// ...
+
+}
+
+
+// =================================================
+
+
+bool nothing::PhysicsManager::RaycastInternal(const glm::vec3& origin, const glm::vec3& direction, RaycastHit& outRay)
+{
+
+	b3Vec3 rayOrigin(origin.x, origin.y, origin.z);
+	b3Vec3 translation = B3Vec3_FromGlm(direction) * 1.0f;
+	b3RayResult result = b3World_CastRayClosest(worldID_, rayOrigin, translation, b3DefaultQueryFilter());
+
+
+	b3Vec3 rayEnd = rayOrigin + translation;
+	ctx_->renderManager->DebugDrawLine(GlmVec3_FromB3(rayOrigin), GlmVec3_FromB3(rayEnd));
+
+
+	RaycastHit hitInfo;
+
+
+	if (result.hit)
+	{
+
+		void* userData = b3Shape_GetUserData(result.shapeId);
+
+
+		entt::entity ent = static_cast<entt::entity>(reinterpret_cast<std::uintptr_t>(userData));
+
+
+		if (ent != entt::null)
+		{
+			
+			hitInfo.hitEntityID = ent;
+			hitInfo.hitPoint = GlmVec3_FromB3(result.point);
+
+		}
+		else
+		{
+
+			hitInfo.hitEntityID = entt::null;
+			hitInfo.hitPoint = glm::vec3(0.0f, 0.0f, 0.0f);
+
+		}
+
+	}
+	else
+	{
+
+		return false;
+
+	}
+
+
+	outRay = hitInfo;
+
+
+	return true;
 
 }
 

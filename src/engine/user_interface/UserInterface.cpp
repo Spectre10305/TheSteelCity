@@ -10,6 +10,8 @@
 #include "../core/WindowManager.h"
 #include "../core/InputManager.h"
 #include "../core/Filesystem.h"
+#include "../core/SceneManager.h"
+#include "../game/components/UIDebugValues.h"
 #include <string>
 
 
@@ -316,18 +318,23 @@ void nothing::UserInterface::UpdateGameContext()
 	}
 
 
+	// Letterbox
 	dl->AddRectFilled(ImVec2(x, scrSz.y - letterboxHeight + y), ImVec2(width2, scrSz.y - height), barColor);
-
-
-	dl->AddText(ImVec2(20, 20), IM_COL32(255, 255, 255, 255), "HUD di gioco in sviluppo...");
-
-
 	dl->AddRectFilled(ImVec2(scrSz.x - 100.0, scrSz.y - 100), ImVec2(scrSz.x - 20.0, scrSz.y - 10), IM_COL32(20, 194, 224, 150));
 
 
 	ImGui::End();
 	ImGui::PopStyleVar(2);
 	ImGui::PopStyleColor();
+
+
+	ImGui::Begin("UI Debug values");
+	auto& uiDbgVals = ctx_->sceneManager->registry.ctx().get<nothing::components::UIDebugValues>();
+	ImGui::SetNextItemWidth(100.0f);
+	ImGui::SliderFloat("Player Walk Speed", &uiDbgVals.playerWalkSpeed, 0.1f, 5.0f);
+	ImGui::SetNextItemWidth(100.0f);
+	ImGui::SliderFloat("Player Run Speed", &uiDbgVals.playerRunSpeed, 0.1f, 5.0f);
+	ImGui::End();
 
 
 	if (ctx_->inputManager->IsActionTriggered(GameAction::Exit))

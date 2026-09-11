@@ -4,6 +4,7 @@
 #include "../components/Transform.h"
 #include "../components/Velocity.h"
 #include "../components/PlayerInput.h"
+#include "../components/UIDebugValues.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 
@@ -17,8 +18,12 @@ namespace nothing
 	public:
 
 		glm::vec3 cameraOffset = glm::vec3(-3.0f, 6.0f, 3.0f);
-		glm::vec3 cameraTopOffset = glm::vec3(0.001f, 6.0f, 0.001f); // Vista "dritto per dritto" dall'alto. Test
+		glm::vec3 cameraTopOffset = glm::vec3(0.001f, 6.0f, 0.001f); // Vista "dritto per dritto" dall'alto. Test.
 		float speed = 0.0f;
+
+
+		float walkSpeed = 1.5f;
+		float runSpeed = 2.0f;
 
 
 		void Create()
@@ -40,6 +45,11 @@ namespace nothing
 			camera.rotation = dir;
 			//camera.rotation = glm::vec3(0.408248f, -0.816497f, -0.408248f);
 
+
+			auto& UIDgbVals = GetContextComponent<UIDebugValues>();
+			UIDgbVals.playerWalkSpeed = walkSpeed;
+			UIDgbVals.playerRunSpeed = runSpeed;
+
 		}
 
 
@@ -52,6 +62,7 @@ namespace nothing
 			auto& transform = GetComponent<Transform>();
 			auto& cam       = GetComponent<Camera>();
 			auto& input     = GetContextComponent<PlayerInput>();
+			auto& UIDgbVals = GetContextComponent<UIDebugValues>();
 			auto& velocity  = GetComponent<Velocity>();
 
 
@@ -72,7 +83,7 @@ namespace nothing
 			glm::vec3 forward = transform.rotation * glm::vec3(0.0f, 0.0f, 1.0f);
 
 
-			speed = input.running ? 2.0f : 1.5f;
+			speed = input.running ? UIDgbVals.playerRunSpeed : UIDgbVals.playerWalkSpeed;
 
 
 			if (input.moveForward == 1.0f)
@@ -89,6 +100,31 @@ namespace nothing
 			{
 
 				velocity.value = glm::vec3(0.0f, 0.0f, 0.0f);
+
+			}
+
+
+			if (input.useKeyPressed)
+			{
+
+				RaycastHit hit;
+
+
+				glm::vec3 rayOrigin = transform.position + forward * 0.1f;
+				rayOrigin.y += 0.5f;
+
+
+				if (Raycast(rayOrigin, forward, hit))
+				{
+
+					if (sceneRegistry_->valid(hit.hitEntityID))
+					{
+
+						PrintInfoMessage("Entità valida.");
+
+					}
+
+				}
 
 			}
 

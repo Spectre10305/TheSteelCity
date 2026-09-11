@@ -10,6 +10,16 @@
 namespace nothing
 {
 
+	// Viene passato al codice di gioco per recuperare i dati di raycast
+	struct RaycastHit
+	{
+
+		glm::vec3 hitPoint;
+		entt::entity hitEntityID;
+
+	};
+
+
 	// SCOPO: Gestione della fisica, powered by Box3D.
 	class PhysicsManager
 	{
@@ -20,6 +30,9 @@ namespace nothing
 		void InitPhysicsScene();
 		void DeletePhysicsScene();
 		void Shutdown();
+
+
+		bool RaycastInternal(const glm::vec3& origin, const glm::vec3& direction, RaycastHit& outRay);
 
 	private:
 

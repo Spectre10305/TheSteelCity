@@ -83,6 +83,9 @@ namespace nothing
 		void Shutdown();
 
 
+		void InitServices();
+
+
 		// NOTA: "mapName" deve essere il solo nome della mappa, niente ".notmap" o percorsi
 		void LoadScene(const std::string& mapName);
 		void UnloadScene();

@@ -23,6 +23,7 @@ bool nothing::Engine::Init(LaunchOptions& lopts)
 	engineContext_.windowManager    = &windowManager_;
 	engineContext_.resourcesManager = &resourceManager_;
 	engineContext_.sceneManager     = &sceneManager_;
+	engineContext_.physicsManager   = &physicsManager_;
 	engineContext_.inputManager     = &inputManager_;
 	engineContext_.renderManager    = &renderManager_;
 	engineContext_.userInterface    = &userInterface_;
@@ -46,6 +47,7 @@ bool nothing::Engine::Init(LaunchOptions& lopts)
 
 	sceneManager_.Init(engineContext_);
 	physicsManager_.Init(engineContext_);
+	sceneManager_.InitServices();
 
 
 	renderManager_.Init(engineContext_);

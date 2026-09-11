@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 #include "ResourceManager.h"
 #include "InputManager.h"
+#include "../physics/PhysicsManager.h" // Raycast
 #include <sstream>
 #include "../utils/Log.h"
 #include "../utils/TransformsUtils.h"
@@ -18,6 +19,7 @@
 #include "../game/components/NameTag.h"
 #include "../game/components/PhysicsBody.h"
 #include "../game/components/EntityReference.h"
+#include "../game/components/UIDebugValues.h"
 #include "../game/custom_behaviours/CameraBehaviour.h"
 #include "../game/custom_behaviours/PlayerBehaviour.h"
 #include "../game/custom_behaviours/TestCustomBehaviour.h"
@@ -30,7 +32,10 @@ void nothing::SceneManager::Init(EngineContext& ctx)
 {
 
 	ctx_ = &ctx;
+	assert(ctx_->physicsManager != nullptr);
 	engineServices_.PrintInfoMessage = nothing::LogInfo;
+	engineServices_.Raycast = std::bind(&nothing::PhysicsManager::RaycastInternal, ctx_->physicsManager, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+
 
 }
 
@@ -55,6 +60,7 @@ void nothing::SceneManager::Update(double deltaTime)
 	inp.rotateLeft    = ctx_->inputManager->IsActionHeld(GameAction::RotateLeft)   ? 1.0f : 0.0f;
 	inp.rotateRight   = ctx_->inputManager->IsActionHeld(GameAction::RotateRight)  ? 1.0f : 0.0f;
 	inp.running       = ctx_->inputManager->IsActionHeld(GameAction::Run)          ? 1.0f : 0.0f;
+	inp.useKeyPressed = ctx_->inputManager->IsActionTriggered(GameAction::Use)     ? 1.0f : 0.0f;
 
 
 	ctx_->inputManager->GetMouseDelta(inp.mouseXDelta, inp.mouseYDelta);
@@ -87,6 +93,15 @@ void nothing::SceneManager::Update(double deltaTime)
 void nothing::SceneManager::Shutdown()
 {
 	// ...
+}
+
+void nothing::SceneManager::InitServices()
+{
+
+	//assert(ctx_->physicsManager != nullptr);
+	//engineServices_.PrintInfoMessage = nothing::LogInfo;
+	//engineServices_.Raycast = std::bind(&nothing::PhysicsManager::RaycastInternal, ctx_->physicsManager, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+
 }
 
 
@@ -223,6 +238,7 @@ void nothing::SceneManager::LoadScene(const std::string& mapName)
 
 
 	registry.ctx().emplace<components::PlayerInput>();
+	registry.ctx().emplace<components::UIDebugValues>();
 
 
 	CreatePlayer();

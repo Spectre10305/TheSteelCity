@@ -138,6 +138,9 @@
     <ClInclude Include="game\components\EntityReference.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="game\components\UIDebugValues.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\Engine.cpp">

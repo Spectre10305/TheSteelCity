@@ -1,6 +1,9 @@
 #pragma once
 #include <entt.hpp>
 #include <string>
+#include <glm/glm.hpp>
+#include "../../physics/PhysicsManager.h" // RaycastHit
+#include <functional>
 
 
 namespace nothing
@@ -11,6 +14,8 @@ namespace nothing
 	{
 
 		void (*PrintInfoMessage)(const std::string&);
+		//bool (*Raycast)(const glm::vec3&, const glm::vec3&, RaycastHit&);
+		std::function<bool(const glm::vec3&, const glm::vec3&, RaycastHit&)> Raycast;
 
 	};
 
@@ -70,6 +75,7 @@ namespace nothing
 
 
 		void PrintInfoMessage(const std::string& message) { engineServices_->PrintInfoMessage(message); }
+		bool Raycast(const glm::vec3& origin, const glm::vec3& direction, RaycastHit& outRay) { return engineServices_->Raycast(origin, direction, outRay); }
 
 
 		void SetRegistry(entt::registry& r) { sceneRegistry_ = &r; }

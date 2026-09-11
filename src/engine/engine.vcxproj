@@ -191,6 +191,7 @@
     <ClInclude Include="game\components\Tags.h" />
     <ClInclude Include="game\components\TestingComponent.h" />
     <ClInclude Include="game\components\Transform.h" />
+    <ClInclude Include="game\components\UIDebugValues.h" />
     <ClInclude Include="game\components\Velocity.h" />
     <ClInclude Include="game\custom_behaviours\CameraBehaviour.h" />
     <ClInclude Include="game\custom_behaviours\PlayerBehaviour.h">

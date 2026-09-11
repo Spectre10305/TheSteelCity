@@ -8,6 +8,7 @@ namespace nothing
 	class WindowManager;
 	class ResourceManager;
 	class SceneManager;
+	class PhysicsManager;
 	class InputManager;
 	class RenderManager;
 	class UserInterface;
@@ -22,6 +23,7 @@ namespace nothing
 		WindowManager*   windowManager    = nullptr;
 		ResourceManager* resourcesManager = nullptr;
 		SceneManager*    sceneManager     = nullptr;
+		PhysicsManager*  physicsManager   = nullptr;
 		InputManager*    inputManager     = nullptr;
 		RenderManager*   renderManager    = nullptr;
 		UserInterface*   userInterface    = nullptr;

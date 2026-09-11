@@ -26,6 +26,9 @@ namespace nothing
 
 			float running = 0.0f;
 
+
+			float useKeyPressed = 0.0f;
+
 		};
 	}
 }
