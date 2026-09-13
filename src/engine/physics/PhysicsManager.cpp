@@ -94,15 +94,38 @@ void nothing::PhysicsManager::Update(double deltaTime)
 			if (entRef != nullptr)
 			{
 
-				auto customBeh = ctx_->sceneManager->registry.try_get<CustomBehaviour>(entRef->other);
+				auto targetEnt = ctx_->sceneManager->ResolveEntityID(entRef->other);
 
 
-				if (customBeh != nullptr)
+				if (ctx_->sceneManager->registry.valid(targetEnt))
 				{
 
-					customBeh->customBehaviour->TriggerTouch(visitorEnt);
+					nothing::LogInfo("Collider activated a valid entity");
+
+
+					auto beh = ctx_->sceneManager->registry.try_get<CustomBehaviour>(targetEnt);
+
+
+					if (beh)
+					{
+
+						beh->customBehaviour->TriggerTouch(visitorEnt);
+
+					}
 
 				}
+				else
+				{
+
+					nothing::LogInfo("Invalid entity got in collision");
+
+				}
+
+			}
+			else
+			{
+
+				nothing::LogWarning("Entity reference in collider was nullptr!");
 
 			}
 

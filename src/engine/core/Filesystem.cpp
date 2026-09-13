@@ -79,3 +79,29 @@ std::string nothing::Filesystem::GetMapPath(const std::string& name)
 
 
 // =================================================
+
+
+bool nothing::Filesystem::MapExists(const std::string& name)
+{
+
+	std::string mapPath = mapsFolderPath_.string() + std::string(name);
+	//std::string mapFile = mapPath + "\\" + name + ".notmap";
+	
+
+	if (std::filesystem::exists(mapPath))
+	{
+
+		return true;
+
+	}
+	else
+	{
+
+		return false;
+
+	}
+
+}
+
+
+// =================================================

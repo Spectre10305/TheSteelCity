@@ -1,6 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include <vector>
+#include <unordered_map>
 #include <fstream>
 #include <functional>
 #include <entt.hpp>
@@ -16,6 +17,7 @@ namespace nothing
 	struct SolidCubeInfo
 	{
 
+		uint64_t    ID            = 0;
 		glm::vec3   position      = glm::vec3(0.0f, 0.0f, 0.0f);
 		glm::vec3   rotation      = glm::vec3(0.0f, 0.0f, 0.0f);
 		float       width         = 1.0f;
@@ -37,6 +39,7 @@ namespace nothing
 	struct SolidPlaneInfo
 	{
 
+		uint64_t    ID            = 0;
 		glm::vec3   position      = glm::vec3(0.0f, 0.0f, 0.0f);
 		glm::vec3   rotation      = glm::vec3(0.0f, 0.0f, 0.0f);
 		float       width         = 1.0f;
@@ -50,12 +53,38 @@ namespace nothing
 	struct PropInfo
 	{
 
+		uint64_t    ID                = 0;
 		glm::vec3   position          = glm::vec3(0.0f, 0.0f, 0.0f);
 		glm::vec3   rotation          = glm::vec3(0.0f, 0.0f, 0.0f);
 		uint32_t    modelVAO          = 0;
 		uint32_t    modelIndicesCount = 0;
 		uint32_t    textureID         = 0;
 		bool        usePhysics        = false;
+
+	};
+
+
+	struct TriggerInfo
+	{
+
+		uint64_t    ID            = 0;
+		glm::vec3   position      = glm::vec3(0.0f, 0.0f, 0.0f);
+		glm::vec3   rotation      = glm::vec3(0.0f, 0.0f, 0.0f);
+		float       width         = 1.0f;
+		float       height        = 1.0f;
+		float       depth         = 1.0f;
+		uint64_t    targetEntiyID = 0;
+
+	};
+
+
+	struct TestEntityInfo
+	{
+
+		uint64_t ID          = 0;
+		float    garbageVal1 = 0.0f;
+		float    garbageVal2 = 0.0f;
+		float    garbageVal3 = 0.0f;
 
 	};
 
@@ -89,6 +118,7 @@ namespace nothing
 		// NOTA: "mapName" deve essere il solo nome della mappa, niente ".notmap" o percorsi
 		void LoadScene(const std::string& mapName);
 		void UnloadScene();
+		entt::entity ResolveEntityID(uint64_t entID);
 
 
 		WorldMesh CreateCubeWorldMesh(float width, float height, float depth, bool isDoubleTiled);
@@ -97,6 +127,9 @@ namespace nothing
 		void      CreateWorldSolidCube(const SolidCubeInfo& cubeInfo);
 		void      CreateWorldSolidPlane(const SolidPlaneInfo& planeInfo);
 		void      CreatePropObject(const PropInfo& propInfo);
+		void      CreateTriggerObject(const TriggerInfo& trigInfo);
+		void      CreateTestEntityObject(const TestEntityInfo& testEntInfo);
+		
 
 
 		template<typename T>
@@ -113,6 +146,7 @@ namespace nothing
 
 
 		std::vector<WorldMesh> worldMeshes;
+		std::unordered_map<uint64_t, entt::entity> entitiesMap; // Mappa per riferimenti delle entità ECS
 
 
 	private:
@@ -124,11 +158,12 @@ namespace nothing
 		bool LoadAssetFile(const char* assetFile, std::vector<std::string>& allTexturesFiles, std::vector<std::string>& allModels3DFiles, std::vector<std::string>& allAudioFiles);
 
 
+		void ReadCubeDataFromFile(std::fstream& f);
 		void ReadPlaneDataFromFile(std::fstream& f);
 		void ReadPropDataFromFile(std::fstream& f, std::unordered_map<std::string, std::string>& modelTextureMap);
-
-
-		void CreatePlayer();
+		void ReadPlayerDataFromFile(std::fstream& f);
+		void ReadTriggerDataFromFile(std::fstream& f);
+		void ReadTestEntityDataFromFile(std::fstream& f);
 
 	};
 

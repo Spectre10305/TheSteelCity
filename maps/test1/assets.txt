@@ -1,0 +1,5 @@
+_TEXTURES
+tex_floor_wood_2.png
+tex_floor_concrete_3.png
+tex_wall_bricks_1.png
+_MODELS3D

@@ -18,6 +18,10 @@ namespace nothing
 		std::string GetAudioPathFromName(const std::string& name); // Nome + ".ogg" / ".wav"
 		std::string GetMapPath(const std::string& name);
 
+
+		// Controlla se una mappa esiste
+		bool MapExists(const std::string& name);
+
 	private:
 
 		std::filesystem::path rootPath_;

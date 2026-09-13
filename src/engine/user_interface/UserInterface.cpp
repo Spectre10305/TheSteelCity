@@ -1055,6 +1055,9 @@ void nothing::UserInterface::ShowDevConsole(ImVec2& scrSz)
 		}
 
 
+		//ImGui::SetScrollHereY(1.0f);
+
+
 		ImGui::EndChild();
 
 

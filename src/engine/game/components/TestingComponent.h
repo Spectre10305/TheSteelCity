@@ -11,7 +11,9 @@ namespace nothing
 		struct TestingComponent
 		{
 
-			int garbageValue = 0;
+			float garbageValue1 = 0.0;
+			float garbageValue2 = 0.0;
+			float garbageValue3 = 0.0;
 
 		};
 

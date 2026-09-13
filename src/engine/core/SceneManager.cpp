@@ -2,7 +2,7 @@
 #include <glad/glad.h>
 #include "ResourceManager.h"
 #include "InputManager.h"
-#include "../physics/PhysicsManager.h" // Raycast
+#include "../physics/PhysicsManager.h" // RaycastInternal / ctx_->physicsManager
 #include <sstream>
 #include "../utils/Log.h"
 #include "../utils/TransformsUtils.h"
@@ -19,6 +19,7 @@
 #include "../game/components/NameTag.h"
 #include "../game/components/PhysicsBody.h"
 #include "../game/components/EntityReference.h"
+#include "../game/components/EntityID.h"
 #include "../game/components/UIDebugValues.h"
 #include "../game/custom_behaviours/CameraBehaviour.h"
 #include "../game/custom_behaviours/PlayerBehaviour.h"
@@ -94,6 +95,10 @@ void nothing::SceneManager::Shutdown()
 {
 	// ...
 }
+
+
+// =================================================
+
 
 void nothing::SceneManager::InitServices()
 {
@@ -206,7 +211,7 @@ void nothing::SceneManager::LoadScene(const std::string& mapName)
 
 		for (int i = 0; i < objectsCount; i++)
 		{
-
+			
 			uint32_t objIDByte;
 			mapFileStream.read(reinterpret_cast<char*>(&objIDByte), 4);
 
@@ -215,12 +220,32 @@ void nothing::SceneManager::LoadScene(const std::string& mapName)
 			{
 
 			case 0x01:
-				ReadPlaneDataFromFile(mapFileStream);
+				ReadCubeDataFromFile(mapFileStream);
 				break;
 
 
 			case 0x02:
+				ReadPlaneDataFromFile(mapFileStream);
+				break;
+
+
+			case 0x03:
 				ReadPropDataFromFile(mapFileStream, modelTextureMap);
+				break;
+
+
+			case 0x04:
+				ReadPlayerDataFromFile(mapFileStream);
+				break;
+
+
+			case 0x05:
+				ReadTriggerDataFromFile(mapFileStream);
+				break;
+
+
+			case 0x06:
+				ReadTestEntityDataFromFile(mapFileStream);
 				break;
 
 
@@ -231,7 +256,7 @@ void nothing::SceneManager::LoadScene(const std::string& mapName)
 
 		}
 
-
+		
 		mapFileStream.close();
 
 	}
@@ -241,88 +266,15 @@ void nothing::SceneManager::LoadScene(const std::string& mapName)
 	registry.ctx().emplace<components::UIDebugValues>();
 
 
-	CreatePlayer();
+	// Test Interactable
+	auto interactableEnt = registry.create();
+	registry.emplace<EntityID>(interactableEnt, (uint64_t)84747477821423);
+	registry.emplace<Transform>(interactableEnt, glm::vec3(0.0f, 0.0f, 0.0f), nothing::EulerToQuaternion(glm::vec3(0.0f, 0.0f, 0.0f)));
+	registry.emplace<PhysicsBody>(interactableEnt, MeshType::Cube, BodyType::Static, 1.0f, 2.0f, 1.0f, 0.0f, false, false);
+	registry.emplace<InteractableTag>(interactableEnt);
 
 
-
-
-	// Test fisica
-
-	
-	//ctx_->resourcesManager->CreateTexture(ctx_->filesystem->GetTexturePathFromName("tex_wall_bricks_1.png"));
-	SolidCubeInfo ground{};
-	ground.position      = glm::vec3(-6.0f, -1.0f, -5.0f);
-	ground.rotation      = glm::vec3(0.0f, 0.0f, 0.0f);
-	ground.width         = 10.0f;
-	ground.height        = 1.0f;
-	ground.depth         = 10.0f;
-	ground.textureID     = ctx_->resourcesManager->GetTextureIDFromName("nothing_logo");
-	ground.usePhysics    = false;
-	ground.isDoubleTiled = true;
-	ground.density       = 1.0f;
-	
-
-	CreateWorldSolidCube(ground);
-
-
-	ctx_->resourcesManager->CreateTexture(ctx_->filesystem->GetTexturePathFromName("tex_wall_bricks_1.png"));
-	SolidCubeInfo column{};
-	column.position      = glm::vec3(0.0f, 0.0f, 4.0f);
-	column.rotation      = glm::vec3(0.0f, 0.0f, 0.0f);
-	column.width         = 1.0f;
-	column.height        = 2.0f;
-	column.depth         = 1.0f;
-	column.textureID     = ctx_->resourcesManager->GetTextureIDFromName("tex_wall_bricks_1");
-	column.usePhysics    = true;
-	column.isDoubleTiled = false;
-	column.density       = 500.0f;
-
-
-	CreateWorldSolidCube(column);
-
-
-	// Test Trigger 1
-
-
-	auto testLogicEnt = registry.create();
-	auto testTriggerBeh = std::make_unique<TestCustomBehaviour>();
-	testTriggerBeh->SetRegistry(registry);
-	testTriggerBeh->SetEntity(testLogicEnt);
-	registry.emplace<CustomBehaviour>(testLogicEnt, std::move(testTriggerBeh));
-
-
-	auto triggerEnt = registry.create();
-	registry.emplace<Transform>(triggerEnt, glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	registry.emplace<PhysicsBody>(triggerEnt, MeshType::Cube, BodyType::Static, 1.0f, 2.0f, 4.0f, 0.0f, false, true);
-	registry.emplace<EntityReference>(triggerEnt, testLogicEnt);
-
-
-	/*
-	for (int i = 0; i < 100; i++)
-	{
-
-		nothing::Random::RandomizeSeed();
-		float randX = nothing::Random::Float(-5.0f, 5.0f);
-		float randY = nothing::Random::Float(-5.0f, 5.0f);
-		float randZ = nothing::Random::Float(-5.0f, 5.0f);
-
-
-		SolidCubeInfo cubePhysTest{};
-		cubePhysTest.position = glm::vec3(randX, randY + 10.0f, randZ);
-		cubePhysTest.rotation = glm::vec3(randX, randY, randZ);
-		cubePhysTest.width = 0.5f;
-		cubePhysTest.height = 0.5f;
-		cubePhysTest.depth = 0.5f;
-		cubePhysTest.textureID = ctx_->resourcesManager->GetTextureIDFromName("tex_wall_bricks_1");
-		cubePhysTest.usePhysics = true;
-		cubePhysTest.isCentered = false;
-		cubePhysTest.isDoubleTiled = true;
-
-
-		CreateWorldSolidCube(cubePhysTest);
-
-	}
-	*/
+	//-----------------------------------------------------------------------------------------------------------------
 
 
 	// Crea tutti i custom behaviours
@@ -375,6 +327,28 @@ void nothing::SceneManager::UnloadScene()
 	worldMeshes.clear();
 	registry.ctx().clear();
 	registry.clear();
+
+}
+
+
+// =================================================
+
+
+entt::entity nothing::SceneManager::ResolveEntityID(uint64_t entID)
+{
+
+	auto it = entitiesMap.find(entID);
+
+
+	if (it == entitiesMap.end())
+	{
+
+		return entt::null;
+
+	}
+
+
+	return it->second;
 
 }
 
@@ -663,6 +637,9 @@ nothing::WorldMesh nothing::SceneManager::CreatePlaneWorldMesh(float width, floa
 void nothing::SceneManager::CreateWorldSolidCube(const SolidCubeInfo& cubeInfo)
 {
 
+	using namespace nothing::components;
+
+
 	WorldMesh m{};
 
 
@@ -685,8 +662,10 @@ void nothing::SceneManager::CreateWorldSolidCube(const SolidCubeInfo& cubeInfo)
 
 
 	auto cubeEnt = registry.create();
-	registry.emplace<components::Object3D>(cubeEnt, worldMeshes.back().VAO, worldMeshes.back().numIndices, cubeInfo.textureID);
-	registry.emplace<components::Transform>(cubeEnt, cubeInfo.position, nothing::EulerToQuaternion(cubeInfo.rotation));
+	registry.emplace<EntityID>(cubeEnt, cubeInfo.ID);
+	entitiesMap.emplace(cubeInfo.ID, cubeEnt);
+	registry.emplace<Object3D>(cubeEnt, worldMeshes.back().VAO, worldMeshes.back().numIndices, cubeInfo.textureID);
+	registry.emplace<Transform>(cubeEnt, cubeInfo.position, nothing::EulerToQuaternion(cubeInfo.rotation));
 
 
 	nothing::components::BodyType physBodyType;
@@ -707,8 +686,11 @@ void nothing::SceneManager::CreateWorldSolidCube(const SolidCubeInfo& cubeInfo)
 
 
 	bool centered = cubeInfo.isCentered ? true : false;
-	registry.emplace<components::PhysicsBody>(cubeEnt, nothing::components::MeshType::Cube, physBodyType, cubeInfo.width, cubeInfo.height, cubeInfo.depth, cubeInfo.density, centered, false);
+	registry.emplace<PhysicsBody>(cubeEnt, nothing::components::MeshType::Cube, physBodyType, cubeInfo.width, cubeInfo.height, cubeInfo.depth, cubeInfo.density, centered, false);
 	//registry.emplace<components::NameTag>(cubeEnt, "This is a Cube");
+
+
+	nothing::LogInfo("Created Cube, ID: " + std::to_string(cubeInfo.ID));
 
 }
 
@@ -719,15 +701,23 @@ void nothing::SceneManager::CreateWorldSolidCube(const SolidCubeInfo& cubeInfo)
 void nothing::SceneManager::CreateWorldSolidPlane(const SolidPlaneInfo& planeInfo)
 {
 
+	using namespace nothing::components;
+
+
 	WorldMesh m = CreatePlaneWorldMesh(planeInfo.width, planeInfo.height, planeInfo.isDoubleTiled);
 	m.texture = planeInfo.textureID;
 	worldMeshes.emplace_back(m);
 
 
 	auto planeEnt = registry.create();
-	registry.emplace<components::Object3D>(planeEnt, worldMeshes.back().VAO, worldMeshes.back().numIndices, planeInfo.textureID);
-	registry.emplace<components::Transform>(planeEnt, planeInfo.position, nothing::EulerToQuaternion(planeInfo.rotation));
-	registry.emplace<components::PhysicsBody>(planeEnt, components::MeshType::Plane, components::BodyType::Static, planeInfo.width, planeInfo.height, 0.01f, 1.0f, false, false);
+	registry.emplace<EntityID>(planeEnt, planeInfo.ID);
+	entitiesMap.emplace(planeInfo.ID, planeEnt);
+	registry.emplace<Object3D>(planeEnt, worldMeshes.back().VAO, worldMeshes.back().numIndices, planeInfo.textureID);
+	registry.emplace<Transform>(planeEnt, planeInfo.position, nothing::EulerToQuaternion(planeInfo.rotation));
+	registry.emplace<PhysicsBody>(planeEnt, components::MeshType::Plane, components::BodyType::Static, planeInfo.width, planeInfo.height, 0.01f, 1.0f, false, false);
+
+
+	nothing::LogInfo("Created Plane, ID: " + std::to_string(planeInfo.ID));
 
 }
 
@@ -738,14 +728,70 @@ void nothing::SceneManager::CreateWorldSolidPlane(const SolidPlaneInfo& planeInf
 void nothing::SceneManager::CreatePropObject(const PropInfo& propInfo)
 {
 
+	using namespace nothing::components;
+
+
 	auto propEnt = registry.create();
-	registry.emplace<components::Object3D>(propEnt, propInfo.modelVAO, propInfo.modelIndicesCount, propInfo.textureID);
-	registry.emplace<components::Transform>(propEnt, propInfo.position, nothing::EulerToQuaternion(propInfo.rotation));
+	registry.emplace<EntityID>(propEnt, propInfo.ID);
+	entitiesMap.emplace(propInfo.ID, propEnt);
+	registry.emplace<Object3D>(propEnt, propInfo.modelVAO, propInfo.modelIndicesCount, propInfo.textureID);
+	registry.emplace<Transform>(propEnt, propInfo.position, nothing::EulerToQuaternion(propInfo.rotation));
+
+
+	nothing::LogInfo("Created Prop, ID: " + std::to_string(propInfo.ID));
 	
 }
 
 
 // =================================================
+
+
+void nothing::SceneManager::CreateTriggerObject(const TriggerInfo& trigInfo)
+{
+
+	using namespace nothing::components;
+
+
+	auto triggerEnt = registry.create();
+	registry.emplace<EntityID>(triggerEnt, trigInfo.ID);
+	entitiesMap.emplace(trigInfo.ID, triggerEnt);
+	registry.emplace<Transform>(triggerEnt, trigInfo.position, nothing::EulerToQuaternion(trigInfo.rotation));
+	registry.emplace<PhysicsBody>(triggerEnt, MeshType::Cube, BodyType::Static, trigInfo.width, trigInfo.height, trigInfo.depth, 0.0f, false, true);
+	registry.emplace<EntityReference>(triggerEnt, trigInfo.targetEntiyID);
+
+
+	nothing::LogInfo("Created Trigger, ID: " + std::to_string(trigInfo.ID));
+
+}
+
+
+// =================================================
+
+
+void nothing::SceneManager::CreateTestEntityObject(const TestEntityInfo& testEntInfo)
+{
+
+	using namespace nothing::components;
+
+
+	auto testEnt = registry.create();
+	entitiesMap.emplace(testEntInfo.ID, testEnt);
+	registry.emplace<EntityID>(testEnt, testEntInfo.ID);
+	registry.emplace<TestingComponent>(testEnt, testEntInfo.garbageVal1, testEntInfo.garbageVal2, testEntInfo.garbageVal3);
+
+
+	auto testBehaviour = std::make_unique<TestCustomBehaviour>();
+	testBehaviour->SetEntity(testEnt);
+	testBehaviour->SetRegistry(registry);
+	registry.emplace<CustomBehaviour>(testEnt, std::move(testBehaviour));
+
+
+	nothing::LogInfo("Created Test Entity, ID: " + std::to_string(testEntInfo.ID));
+
+}
+
+
+// ASSETS FILE======================================
 
 
 bool nothing::SceneManager::LoadAssetFile(const char* assetFile, std::vector<std::string>& allTexturesFiles, std::vector<std::string>& allModels3DFiles, std::vector<std::string>& allAudioFiles)
@@ -857,11 +903,68 @@ bool nothing::SceneManager::LoadAssetFile(const char* assetFile, std::vector<std
 }
 
 
+// HELPER PER RECORD BINARI FILE NOTMAP=============
+
+
+void nothing::SceneManager::ReadCubeDataFromFile(std::fstream& f)
+{
+
+	int64_t ID;
+	f.read(reinterpret_cast<char*>(&ID), 8);
+
+
+	float_t x, y, z, p, ya, r, w, h, d;
+	f.read(reinterpret_cast<char*>(&x), 4);
+	f.read(reinterpret_cast<char*>(&y), 4);
+	f.read(reinterpret_cast<char*>(&z), 4);
+	f.read(reinterpret_cast<char*>(&p), 4);
+	f.read(reinterpret_cast<char*>(&ya), 4);
+	f.read(reinterpret_cast<char*>(&r), 4);
+	f.read(reinterpret_cast<char*>(&w), 4);
+	f.read(reinterpret_cast<char*>(&h), 4);
+	f.read(reinterpret_cast<char*>(&d), 4);
+
+
+	uint32_t texNameLenght;
+	f.read(reinterpret_cast<char*>(&texNameLenght), 4);
+
+
+	std::string texName(texNameLenght, '\0');
+	f.read(texName.data(), texNameLenght);
+
+
+	uint32_t isDoubleTiled;
+	uint32_t usePhysics;
+	f.read(reinterpret_cast<char*>(&isDoubleTiled), 4);
+	f.read(reinterpret_cast<char*>(&usePhysics), 4);
+
+
+	SolidCubeInfo cubeInfo{};
+	cubeInfo.ID = ID;
+	cubeInfo.position = glm::vec3(x, y, z);
+	cubeInfo.rotation = glm::vec3(p, ya, r);
+	cubeInfo.width = w;
+	cubeInfo.height = h;
+	cubeInfo.depth = d;
+	cubeInfo.textureID = ctx_->resourcesManager->GetTextureIDFromName(texName);
+	cubeInfo.isDoubleTiled = isDoubleTiled ? 1 : 0;
+	cubeInfo.usePhysics = usePhysics ? 1 : 0;
+	
+
+	CreateWorldSolidCube(cubeInfo);
+
+}
+
+
 // =================================================
 
 
 void nothing::SceneManager::ReadPlaneDataFromFile(std::fstream& f)
 {
+
+	uint64_t ID;
+	f.read(reinterpret_cast<char*>(&ID), 8);
+
 
 	float_t x, y, z, p, ya, r, w, h;
 	f.read(reinterpret_cast<char*>(&x), 4);
@@ -887,6 +990,7 @@ void nothing::SceneManager::ReadPlaneDataFromFile(std::fstream& f)
 
 
 	SolidPlaneInfo spInfo{};
+	spInfo.ID = ID;
 	spInfo.position = glm::vec3(x, y, z);
 	spInfo.rotation = glm::vec3(p, ya, r);
 	spInfo.width = w;
@@ -905,6 +1009,10 @@ void nothing::SceneManager::ReadPlaneDataFromFile(std::fstream& f)
 
 void nothing::SceneManager::ReadPropDataFromFile(std::fstream& f, std::unordered_map<std::string, std::string>& modelTextureMap)
 {
+
+	uint64_t ID;
+	f.read(reinterpret_cast<char*>(&ID), 8);
+
 
 	float_t x, y, z, p, ya, r;
 	f.read(reinterpret_cast<char*>(&x), 4);
@@ -928,6 +1036,7 @@ void nothing::SceneManager::ReadPropDataFromFile(std::fstream& f, std::unordered
 
 
 	PropInfo propInfo{};
+	propInfo.ID = ID;
 	propInfo.position = glm::vec3(x, y, z);
 	propInfo.rotation = glm::vec3(p, ya, r);
 	propInfo.modelVAO = ctx_->resourcesManager->GetModel3DVAOFromName(modName);
@@ -944,7 +1053,7 @@ void nothing::SceneManager::ReadPropDataFromFile(std::fstream& f, std::unordered
 // =================================================
 
 
-void nothing::SceneManager::CreatePlayer()
+void nothing::SceneManager::ReadPlayerDataFromFile(std::fstream& f)
 {
 
 	using namespace nothing::components;
@@ -955,20 +1064,27 @@ void nothing::SceneManager::CreatePlayer()
 	ctx_->resourcesManager->CreateTexture(ctx_->filesystem->GetTexturePathFromName(martyModRef.modelTextureFileName));
 
 
-	glm::vec3 playerPosition = glm::vec3(6.0f, 0.0f, -1.0f);
-	glm::vec3 playerRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	uint64_t ID;
+	f.read(reinterpret_cast<char*>(&ID), 8);
+
+
+	float_t posX, posY, posZ, rotY;
+	f.read(reinterpret_cast<char*>(&posX), 4);
+	f.read(reinterpret_cast<char*>(&posY), 4);
+	f.read(reinterpret_cast<char*>(&posZ), 4);
+	f.read(reinterpret_cast<char*>(&rotY), 4);
+
+
+	glm::vec3 playerPosition = glm::vec3(posX, posY, posZ);
+	glm::vec3 playerRotation = glm::vec3(0.0f, rotY, 0.0f);
 
 
 	auto playerEnt = registry.create();
+	registry.emplace<EntityID>(playerEnt, ID);
 	registry.emplace<Object3D>(playerEnt, martyModRef.vao, martyModRef.indicesCount, ctx_->resourcesManager->GetTextureIDFromName(martyModRef.modelTextureFileName.erase(martyModRef.modelTextureFileName.size() - 4)));
 	registry.emplace<Transform>(playerEnt, playerPosition, nothing::EulerToQuaternion(playerRotation));
 	registry.emplace<Velocity>(playerEnt, glm::vec3(0.0f, 0.0f, 0.0f));
-
-
-	// Tutti valori di default, vengono ignorati alla creazione della fisica del player. Serve solo per impostare selfEntID
 	registry.emplace<PhysicsBody>(playerEnt);
-
-
 	registry.emplace<Camera>(playerEnt, playerPosition, glm::vec3(0.0f, 0.0f, 0.0f));
 
 
@@ -981,6 +1097,75 @@ void nothing::SceneManager::CreatePlayer()
 	registry.emplace<MainCameraTag>(playerEnt);
 	registry.emplace<PlayerTag>(playerEnt);
 	//registry.emplace<NameTag>(playerEnt, "Player");
+
+}
+
+
+// =================================================
+
+
+void nothing::SceneManager::ReadTriggerDataFromFile(std::fstream& f)
+{
+
+	uint64_t ID;
+	f.read(reinterpret_cast<char*>(&ID), 8);
+
+
+	float_t x, y, z, p, ya, r, w, h, d;
+	f.read(reinterpret_cast<char*>(&x), 4);
+	f.read(reinterpret_cast<char*>(&y), 4);
+	f.read(reinterpret_cast<char*>(&z), 4);
+	f.read(reinterpret_cast<char*>(&p), 4);
+	f.read(reinterpret_cast<char*>(&ya), 4);
+	f.read(reinterpret_cast<char*>(&r), 4);
+	f.read(reinterpret_cast<char*>(&w), 4);
+	f.read(reinterpret_cast<char*>(&h), 4);
+	f.read(reinterpret_cast<char*>(&d), 4);
+
+
+	uint64_t targetEntID;
+	f.read(reinterpret_cast<char*>(&targetEntID), 8);
+
+
+	TriggerInfo trigInfo{};
+	trigInfo.ID = ID;
+	trigInfo.position = glm::vec3(x, y, z);
+	trigInfo.rotation = glm::vec3(p, ya, r);
+	trigInfo.width = w;
+	trigInfo.height = h;
+	trigInfo.depth = d;
+	trigInfo.targetEntiyID = targetEntID;
+
+
+	CreateTriggerObject(trigInfo);
+
+}
+
+
+// =================================================
+
+
+void nothing::SceneManager::ReadTestEntityDataFromFile(std::fstream& f)
+{
+
+	uint64_t ID;
+	f.read(reinterpret_cast<char*>(&ID), 8);
+
+
+	float garbageVal1, garbageVal2, garbageVal3;
+	f.read(reinterpret_cast<char*>(&garbageVal1), 4);
+	f.read(reinterpret_cast<char*>(&garbageVal2), 4);
+	f.read(reinterpret_cast<char*>(&garbageVal3), 4);
+
+
+	TestEntityInfo testEntInfo;
+	testEntInfo.ID = ID;
+	testEntInfo.garbageVal1 = garbageVal1;
+	testEntInfo.garbageVal2 = garbageVal2;
+	testEntInfo.garbageVal3 = garbageVal3;
+
+
+	CreateTestEntityObject(testEntInfo);
 
 }
 

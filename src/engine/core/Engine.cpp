@@ -91,16 +91,27 @@ bool nothing::Engine::Init(LaunchOptions& lopts)
 	if (!lopts.mapOnLaunchName.empty())
 	{
 
-		// Inizializziamo le risorse di default ogni volta che entriamo in scena,
-		// uscendo dalla scena corrente chiamiamo resourceManager_.DeleteAll...()
-		// che rimuove tutte le risorse. Comprese quelle di default
-		resourceManager_.InitDefaults(engineContext_);
-		sceneManager_.LoadScene(lopts.mapOnLaunchName);
-		physicsManager_.InitPhysicsScene();
-		userInterface_.SwitchContext(UIContext::Gameplay);
-		windowManager_.SetMouseInvisible();
-		gameState_ = GameState::Gameplay;
-		return true;
+		if (fileSystem_.MapExists(lopts.mapOnLaunchName))
+		{
+
+			// Inizializziamo le risorse di default ogni volta che entriamo in scena,
+			// uscendo dalla scena corrente chiamiamo resourceManager_.DeleteAll...()
+			// che rimuove tutte le risorse. Comprese quelle di default
+			resourceManager_.InitDefaults(engineContext_);
+			sceneManager_.LoadScene(lopts.mapOnLaunchName);
+			physicsManager_.InitPhysicsScene();
+			userInterface_.SwitchContext(UIContext::Gameplay);
+			windowManager_.SetMouseInvisible();
+			gameState_ = GameState::Gameplay;
+			return true;
+
+		}
+		else
+		{
+
+			nothing::LogError("Cannot find map on launch: " + lopts.mapOnLaunchName);
+			
+		}
 
 	}
 
@@ -304,12 +315,25 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 	{
 
 	case UIEvent::BeginGame:
-		resourceManager_.InitDefaults(engineContext_);
-		sceneManager_   .LoadScene("testing");
-		physicsManager_ .InitPhysicsScene();
-		userInterface_  .SwitchContext(UIContext::Gameplay);
-		windowManager_  .SetMouseInvisible();
-		gameState_      = GameState::Gameplay;
+
+		if (fileSystem_.MapExists("testing"))
+		{
+
+			resourceManager_.InitDefaults(engineContext_);
+			sceneManager_.LoadScene("testing");
+			physicsManager_.InitPhysicsScene();
+			userInterface_.SwitchContext(UIContext::Gameplay);
+			windowManager_.SetMouseInvisible();
+			gameState_ = GameState::Gameplay;
+
+		}
+		else
+		{
+
+			nothing::LogError("Map 'testing' does not exist in maps folder");
+
+		}
+		
 		break;
 
 

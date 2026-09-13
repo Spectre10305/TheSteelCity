@@ -1,5 +1,5 @@
 #pragma once
-#include <entt.hpp>
+#include <stdint.h>
 
 
 namespace nothing
@@ -11,7 +11,7 @@ namespace nothing
 		struct EntityReference
 		{
 
-			entt::entity other;
+			uint64_t other;
 
 		};
 

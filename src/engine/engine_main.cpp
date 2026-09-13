@@ -19,6 +19,7 @@ void EngineMain(int args, char* argsv[])
 		if (arg == "-map" && i + 1 < args)
 		{
 
+			// NOTA: Ignora -nosplash
 			launchOpts.mapOnLaunchName = argsv[++i];
 			nothing::LogInfo("Launching with map: " + launchOpts.mapOnLaunchName);
 

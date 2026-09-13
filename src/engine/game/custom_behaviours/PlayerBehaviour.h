@@ -5,6 +5,7 @@
 #include "../components/Velocity.h"
 #include "../components/PlayerInput.h"
 #include "../components/UIDebugValues.h"
+#include "../components/Tags.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 
@@ -120,7 +121,12 @@ namespace nothing
 					if (sceneRegistry_->valid(hit.hitEntityID))
 					{
 
-						PrintInfoMessage("Entità valida.");
+						if (sceneRegistry_->any_of<InteractableTag>(hit.hitEntityID))
+						{
+
+							PrintInfoMessage("Interactable object");
+
+						}
 
 					}
 
