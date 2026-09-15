@@ -78,6 +78,21 @@ namespace nothing
 	};
 
 
+	// Sì, è un duplicato di TriggerInfo...
+	struct InteractableInfo
+	{
+
+		uint64_t    ID            = 0;
+		glm::vec3   position      = glm::vec3(0.0f, 0.0f, 0.0f);
+		glm::vec3   rotation      = glm::vec3(0.0f, 0.0f, 0.0f);
+		float       width         = 1.0f;
+		float       height        = 1.0f;
+		float       depth         = 1.0f;
+		uint64_t    targetEntiyID = 0;
+
+	};
+
+
 	struct TestEntityInfo
 	{
 
@@ -128,6 +143,7 @@ namespace nothing
 		void      CreateWorldSolidPlane(const SolidPlaneInfo& planeInfo);
 		void      CreatePropObject(const PropInfo& propInfo);
 		void      CreateTriggerObject(const TriggerInfo& trigInfo);
+		void      CreateInteractableObject(const InteractableInfo& interInfo);
 		void      CreateTestEntityObject(const TestEntityInfo& testEntInfo);
 		
 
@@ -163,6 +179,7 @@ namespace nothing
 		void ReadPropDataFromFile(std::fstream& f, std::unordered_map<std::string, std::string>& modelTextureMap);
 		void ReadPlayerDataFromFile(std::fstream& f);
 		void ReadTriggerDataFromFile(std::fstream& f);
+		void ReadInteractableDataFromFile(std::fstream& f);
 		void ReadTestEntityDataFromFile(std::fstream& f);
 
 	};

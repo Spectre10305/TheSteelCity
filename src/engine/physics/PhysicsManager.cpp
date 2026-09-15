@@ -165,84 +165,6 @@ void nothing::PhysicsManager::Update(double deltaTime)
 
 		}
 
-		/*
-		auto playerView2 = ctx_->sceneManager->registry.view<Transform, PhysicsBody, PlayerTag>();
-
-
-		for (auto [ent, tr, pBody] : playerView2.each())
-		{
-
-			// Raycast di interazione
-			if (ctx_->inputManager->IsActionTriggered(GameAction::Use))
-			{
-
-				nothing::LogInfoVector("Player position: ", tr.position.x, tr.position.y, tr.position.z);
-
-
-				// Trova il forward, la direzione in cui il personaggio guarda
-				glm::vec3 forward = glm::normalize(tr.rotation * glm::vec3(0.0f, 0.0f, 1.0f));
-
-
-				nothing::LogInfoVector("Forward vector: ", forward.x, forward.y, forward.z);
-
-
-				float       rayLenght   = 1.0f;
-				b3Vec3      rayOrigin   = B3Vec3_FromGlm(tr.position + forward * 0.1f);
-				rayOrigin.y             += 0.5f;
-				glm::vec3   translation = forward * rayLenght;
-				b3RayResult res         = b3World_CastRayClosest(worldID_, rayOrigin, B3Vec3_FromGlm(translation), b3DefaultQueryFilter());
-
-
-				if (res.hit)
-				{
-
-					nothing::LogInfo("Hit something");
-					
-
-					void* userData = b3Shape_GetUserData(res.shapeId);
-
-
-					entt::entity ent = static_cast<entt::entity>(reinterpret_cast<std::uintptr_t>(userData));
-
-
-					if (ent != entt::null)
-					{
-
-						nothing::LogInfo("We got entity!");
-
-
-						if (ctx_->sceneManager->registry.all_of<nothing::components::CustomBehaviour>(ent))
-						{
-
-							nothing::LogInfo("Entity got CustomBehaviour component");
-
-
-							auto beh = ctx_->sceneManager->registry.try_get<nothing::components::CustomBehaviour>(ent);
-
-
-							if (beh != nullptr)
-							{
-
-								beh->customBehaviour->Interact();
-
-							}
-
-						}
-
-					}
-
-				}
-
-
-				// Solo per debug
-				b3Vec3 rayEnd = rayOrigin + B3Vec3_FromGlm(translation);
-				ctx_->renderManager->DebugDrawLine(GlmVec3_FromB3(rayOrigin), GlmVec3_FromB3(rayEnd));
-
-			}
-
-		}
-		*/
-
 
 		// Debug draw
 		b3World_Draw(worldID_, &debugDraw, B3_DEFAULT_CATEGORY_BITS);
@@ -381,8 +303,6 @@ bool nothing::PhysicsManager::RaycastInternal(const glm::vec3& origin, const glm
 	{
 
 		void* userData = b3Shape_GetUserData(result.shapeId);
-
-
 		entt::entity ent = static_cast<entt::entity>(reinterpret_cast<std::uintptr_t>(userData));
 
 
@@ -392,12 +312,23 @@ bool nothing::PhysicsManager::RaycastInternal(const glm::vec3& origin, const glm
 			hitInfo.hitEntityID = ent;
 			hitInfo.hitPoint = GlmVec3_FromB3(result.point);
 
+
+			if (ctx_->sceneManager->registry.any_of<nothing::components::EntityReference>(hitInfo.hitEntityID))
+			{
+
+				auto entRef = ctx_->sceneManager->registry.get<nothing::components::EntityReference>(hitInfo.hitEntityID);
+				entt::entity targetEnt = ctx_->sceneManager->ResolveEntityID(entRef.other);
+				hitInfo.targetEntity = targetEnt;
+
+			}
+
 		}
 		else
 		{
 
 			hitInfo.hitEntityID = entt::null;
 			hitInfo.hitPoint = glm::vec3(0.0f, 0.0f, 0.0f);
+			hitInfo.targetEntity = entt::null;
 
 		}
 
@@ -429,6 +360,7 @@ void nothing::PhysicsManager::ConstructCubePhysicsBody(entt::entity entID, compo
 	
 	b3BodyDef bodyDef = b3DefaultBodyDef();
 	bodyDef.position = B3Vec3_FromGlm(tr.position);
+	bodyDef.rotation = B3Quat_FromGlm(tr.rotation);
 
 
 	switch (pBody.bodyType)
@@ -611,6 +543,23 @@ b3Vec3 nothing::PhysicsManager::B3Vec3_FromGlm(const glm::vec3& vec)
 	res.x = vec.x;
 	res.y = vec.y;
 	res.z = vec.z;
+	return res;
+
+}
+
+
+// =================================================
+
+
+b3Quat nothing::PhysicsManager::B3Quat_FromGlm(const glm::quat& quat)
+{
+
+	b3Quat res;
+	res.v.x = quat.x;
+	res.v.y = quat.y;
+	res.v.z = quat.z;
+	res.s = quat.w;
+
 	return res;
 
 }

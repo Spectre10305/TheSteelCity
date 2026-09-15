@@ -20,6 +20,21 @@ namespace nothing
 		}
 
 
+		void Interact()
+		{
+
+			using namespace nothing::components;
+
+
+			auto testComp = GetComponent<TestingComponent>();
+			PrintInfoMessage("Bravo hai interagito con me. Ora LAVATI QUELLE MANI SUDICE!!!");
+			PrintInfoMessage(std::to_string(testComp.garbageValue1));
+			PrintInfoMessage(std::to_string(testComp.garbageValue2));
+			PrintInfoMessage(std::to_string(testComp.garbageValue3));
+
+		}
+
+
 		void TriggerTouch(entt::entity other)
 		{
 

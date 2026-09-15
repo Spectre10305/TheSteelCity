@@ -245,6 +245,11 @@ void nothing::SceneManager::LoadScene(const std::string& mapName)
 
 
 			case 0x06:
+				ReadInteractableDataFromFile(mapFileStream);
+				break;
+
+
+			case 0x07:
 				ReadTestEntityDataFromFile(mapFileStream);
 				break;
 
@@ -264,14 +269,6 @@ void nothing::SceneManager::LoadScene(const std::string& mapName)
 
 	registry.ctx().emplace<components::PlayerInput>();
 	registry.ctx().emplace<components::UIDebugValues>();
-
-
-	// Test Interactable
-	auto interactableEnt = registry.create();
-	registry.emplace<EntityID>(interactableEnt, (uint64_t)84747477821423);
-	registry.emplace<Transform>(interactableEnt, glm::vec3(0.0f, 0.0f, 0.0f), nothing::EulerToQuaternion(glm::vec3(0.0f, 0.0f, 0.0f)));
-	registry.emplace<PhysicsBody>(interactableEnt, MeshType::Cube, BodyType::Static, 1.0f, 2.0f, 1.0f, 0.0f, false, false);
-	registry.emplace<InteractableTag>(interactableEnt);
 
 
 	//-----------------------------------------------------------------------------------------------------------------
@@ -768,6 +765,30 @@ void nothing::SceneManager::CreateTriggerObject(const TriggerInfo& trigInfo)
 // =================================================
 
 
+void nothing::SceneManager::CreateInteractableObject(const InteractableInfo& interInfo)
+{
+
+	using namespace nothing::components;
+
+
+	auto interactableEnt = registry.create();
+	registry.emplace<EntityID>(interactableEnt, interInfo.ID);
+	entitiesMap.emplace(interInfo.ID, interactableEnt);
+	registry.emplace<Transform>(interactableEnt, interInfo.position, nothing::EulerToQuaternion(interInfo.rotation));
+	registry.emplace<PhysicsBody>(interactableEnt, MeshType::Cube, BodyType::Static, interInfo.width, interInfo.height, interInfo.depth, 0.0f, false, false);
+	//registry.emplace<InteractableTag>(interactableEnt);
+	registry.emplace<EntityReference>(interactableEnt, interInfo.targetEntiyID);
+
+
+	nothing::LogInfo("Created Interactable Entity, ID: " + std::to_string(interInfo.ID));
+	nothing::LogInfo("Interaction Target ID: " + std::to_string(interInfo.targetEntiyID));
+
+}
+
+
+// =================================================
+
+
 void nothing::SceneManager::CreateTestEntityObject(const TestEntityInfo& testEntInfo)
 {
 
@@ -1138,6 +1159,47 @@ void nothing::SceneManager::ReadTriggerDataFromFile(std::fstream& f)
 
 
 	CreateTriggerObject(trigInfo);
+
+}
+
+
+// =================================================
+
+
+void nothing::SceneManager::ReadInteractableDataFromFile(std::fstream& f)
+{
+
+	uint64_t ID;
+	f.read(reinterpret_cast<char*>(&ID), 8);
+
+
+	float_t x, y, z, p, ya, r, w, h, d;
+	f.read(reinterpret_cast<char*>(&x), 4);
+	f.read(reinterpret_cast<char*>(&y), 4);
+	f.read(reinterpret_cast<char*>(&z), 4);
+	f.read(reinterpret_cast<char*>(&p), 4);
+	f.read(reinterpret_cast<char*>(&ya), 4);
+	f.read(reinterpret_cast<char*>(&r), 4);
+	f.read(reinterpret_cast<char*>(&w), 4);
+	f.read(reinterpret_cast<char*>(&h), 4);
+	f.read(reinterpret_cast<char*>(&d), 4);
+
+
+	uint64_t targetEntID;
+	f.read(reinterpret_cast<char*>(&targetEntID), 8);
+
+
+	InteractableInfo interInfo{};
+	interInfo.ID = ID;
+	interInfo.position = glm::vec3(x, y, z);
+	interInfo.rotation = glm::vec3(p, ya, r);
+	interInfo.width = w;
+	interInfo.height = h;
+	interInfo.depth = d;
+	interInfo.targetEntiyID = targetEntID;
+
+
+	CreateInteractableObject(interInfo);
 
 }
 

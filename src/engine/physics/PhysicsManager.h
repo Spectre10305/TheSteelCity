@@ -17,6 +17,12 @@ namespace nothing
 		glm::vec3 hitPoint;
 		entt::entity hitEntityID;
 
+
+		// Questo viene popolato se l'entità colpita posside EntityReference,
+		// ad esempio: un InteractableArea è interagibile ma punta ad un'altra
+		// entità che esegue il codice
+		entt::entity targetEntity;
+
 	};
 
 
@@ -48,6 +54,7 @@ namespace nothing
 		// Utility
 		glm::vec3 GlmVec3_FromB3(const b3Vec3& vec);
 		b3Vec3    B3Vec3_FromGlm(const glm::vec3& vec);
+		b3Quat    B3Quat_FromGlm(const glm::quat& quat);
 
 
 		b3DebugDraw debugDraw;

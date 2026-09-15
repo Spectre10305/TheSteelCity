@@ -15,12 +15,13 @@ struct Header
 // Tipo di oggetto
 enum ObjectType : u32
 {
-    Cube    = 0x01,
-    Plane   = 0x02,
-    Prop    = 0x03,
-    Player  = 0x04,
-    Trigger = 0x05,
-    TestEnt = 0x06
+    Cube     = 0x01,
+    Plane    = 0x02,
+    Prop     = 0x03,
+    Player   = 0x04,
+    Trigger  = 0x05,
+    Interact = 0x06,
+    TestEnt  = 0x07
     
 };
 
@@ -115,6 +116,24 @@ struct ObjectTriggerArea
 };
 
 
+struct ObjectInteractArea
+{
+
+    u64   ID;
+    float positionX;
+    float positionY;
+    float positionZ;
+    float rotationX;
+    float rotationY;
+    float rotationZ;
+    float width;
+    float height;
+    float depth;
+    u64   targetID;
+    
+};
+
+
 struct ObjectTestEntity
 {
 
@@ -163,6 +182,12 @@ struct Object
     {
     
         ObjectTriggerArea obj;
+        
+    }
+    else if(type == ObjectType::Interact)
+    {
+    
+        ObjectInteractArea obj;
         
     }
     else if(type == ObjectType::TestEnt)

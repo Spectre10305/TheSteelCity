@@ -95,6 +95,7 @@ namespace nothing
 
 				// Impostiamo solo la velocity, il movimento effettivo avverrà nel PhysicsManager
 				velocity.value = forward * speed * static_cast<float>(deltaTime);
+				velocity.value.y += -5.0f * deltaTime;
 
 			}
 			else
@@ -103,6 +104,9 @@ namespace nothing
 				velocity.value = glm::vec3(0.0f, 0.0f, 0.0f);
 
 			}
+
+
+			
 
 
 			if (input.useKeyPressed)
@@ -118,13 +122,16 @@ namespace nothing
 				if (Raycast(rayOrigin, forward, hit))
 				{
 
-					if (sceneRegistry_->valid(hit.hitEntityID))
+					if (sceneRegistry_->valid(hit.hitEntityID) && sceneRegistry_->valid(hit.targetEntity))
 					{
 
-						if (sceneRegistry_->any_of<InteractableTag>(hit.hitEntityID))
+						auto beh = sceneRegistry_->try_get<CustomBehaviour>(hit.targetEntity);
+
+
+						if (beh)
 						{
 
-							PrintInfoMessage("Interactable object");
+							beh->customBehaviour->Interact();
 
 						}
 
