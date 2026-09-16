@@ -133,7 +133,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)libs\SDL3\include\;$(SolutionDir)libs\GLAD\include\;$(SolutionDir)libs\GLM\;$(SolutionDir)libs\STB\;$(SolutionDir)libs\ENTT\;$(SolutionDir)libs\OBJ\;$(SolutionDIr)libs\B3D\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\SDL3\include\;$(SolutionDir)libs\GLAD\include\;$(SolutionDir)libs\GLM\;$(SolutionDir)libs\STB\;$(SolutionDir)libs\ENTT\;$(SolutionDir)libs\OBJ\;$(SolutionDir)libs\B3D\include\;$(SolutionDir)libs\TWEENY\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -195,6 +195,10 @@
     <ClInclude Include="game\components\UIDebugValues.h" />
     <ClInclude Include="game\components\Velocity.h" />
     <ClInclude Include="game\custom_behaviours\CameraBehaviour.h" />
+    <ClInclude Include="game\custom_behaviours\MoveEntityBehaviour.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="game\custom_behaviours\PlayerBehaviour.h">
       <SubType>
       </SubType>

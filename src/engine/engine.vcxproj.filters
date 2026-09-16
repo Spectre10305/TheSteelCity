@@ -144,6 +144,9 @@
     <ClInclude Include="game\components\EntityID.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="game\custom_behaviours\MoveEntityBehaviour.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\Engine.cpp">

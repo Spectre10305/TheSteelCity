@@ -61,26 +61,14 @@ namespace nothing
 
 
 			auto& transform = GetComponent<Transform>();
-			auto& cam       = GetComponent<Camera>();
-			auto& input     = GetContextComponent<PlayerInput>();
+			auto& cam = GetComponent<Camera>();
+			auto& input = GetContextComponent<PlayerInput>();
 			auto& UIDgbVals = GetContextComponent<UIDebugValues>();
-			auto& velocity  = GetComponent<Velocity>();
+			auto& velocity = GetComponent<Velocity>();
 
 
 			glm::quat movYaw = glm::angleAxis(glm::radians(-input.mouseXDelta), glm::vec3(0, 1, 0));
-
-
 			transform.rotation = movYaw * transform.rotation;
-
-
-			/*
-			glm::vec3 forward;
-			float yaw = glm::radians(transform.rotation.y);
-			forward.x = sin(yaw);
-			forward.y = 0.0f;
-			forward.z = cos(yaw);
-			*/
-
 			glm::vec3 forward = transform.rotation * glm::vec3(0.0f, 0.0f, 1.0f);
 
 
@@ -95,7 +83,8 @@ namespace nothing
 
 				// Impostiamo solo la velocity, il movimento effettivo avverrà nel PhysicsManager
 				velocity.value = forward * speed * static_cast<float>(deltaTime);
-				velocity.value.y += -5.0f * deltaTime;
+				velocity.value.y += -1.0f * deltaTime;
+				
 
 			}
 			else
@@ -104,9 +93,6 @@ namespace nothing
 				velocity.value = glm::vec3(0.0f, 0.0f, 0.0f);
 
 			}
-
-
-			
 
 
 			if (input.useKeyPressed)

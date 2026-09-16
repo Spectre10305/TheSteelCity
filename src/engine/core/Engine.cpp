@@ -10,6 +10,7 @@
 
 bool nothing::Engine::Init(LaunchOptions& lopts)
 {
+
 	nothing::LogInfo("Testing...");
 	nothing::LogWarning("Testing...");
 	nothing::LogError("Testing...");

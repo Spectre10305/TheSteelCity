@@ -24,6 +24,7 @@
 #include "../game/custom_behaviours/CameraBehaviour.h"
 #include "../game/custom_behaviours/PlayerBehaviour.h"
 #include "../game/custom_behaviours/TestCustomBehaviour.h"
+#include "../game//custom_behaviours/MoveEntityBehaviour.h"
 
 
 // =================================================
@@ -269,6 +270,13 @@ void nothing::SceneManager::LoadScene(const std::string& mapName)
 
 	registry.ctx().emplace<components::PlayerInput>();
 	registry.ctx().emplace<components::UIDebugValues>();
+
+
+	auto moveEnt = registry.create();
+	auto moveEntBeh = std::make_unique<MoveEntityBehaviour>();
+	moveEntBeh->SetEntity(moveEnt);
+	moveEntBeh->SetRegistry(registry);
+	// TODO: implementare entità
 
 
 	//-----------------------------------------------------------------------------------------------------------------
