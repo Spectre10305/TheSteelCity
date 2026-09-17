@@ -37,7 +37,7 @@ void nothing::SceneManager::Init(EngineContext& ctx)
 	assert(ctx_->physicsManager != nullptr);
 	engineServices_.PrintInfoMessage = nothing::LogInfo;
 	engineServices_.Raycast = std::bind(&nothing::PhysicsManager::RaycastInternal, ctx_->physicsManager, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-
+	engineServices_.ResolveEntityID = std::bind(&nothing::SceneManager::ResolveEntityID, this, std::placeholders::_1);
 
 }
 
@@ -254,6 +254,10 @@ void nothing::SceneManager::LoadScene(const std::string& mapName)
 				ReadTestEntityDataFromFile(mapFileStream);
 				break;
 
+			case 0x08:
+				ReadMoveObjectEntityDataFromFile(mapFileStream);
+				break;
+
 
 			default:
 				break;
@@ -270,13 +274,6 @@ void nothing::SceneManager::LoadScene(const std::string& mapName)
 
 	registry.ctx().emplace<components::PlayerInput>();
 	registry.ctx().emplace<components::UIDebugValues>();
-
-
-	auto moveEnt = registry.create();
-	auto moveEntBeh = std::make_unique<MoveEntityBehaviour>();
-	moveEntBeh->SetEntity(moveEnt);
-	moveEntBeh->SetRegistry(registry);
-	// TODO: implementare entità
 
 
 	//-----------------------------------------------------------------------------------------------------------------
@@ -784,7 +781,7 @@ void nothing::SceneManager::CreateInteractableObject(const InteractableInfo& int
 	entitiesMap.emplace(interInfo.ID, interactableEnt);
 	registry.emplace<Transform>(interactableEnt, interInfo.position, nothing::EulerToQuaternion(interInfo.rotation));
 	registry.emplace<PhysicsBody>(interactableEnt, MeshType::Cube, BodyType::Static, interInfo.width, interInfo.height, interInfo.depth, 0.0f, false, false);
-	//registry.emplace<InteractableTag>(interactableEnt);
+	registry.emplace<InteractableTag>(interactableEnt);
 	registry.emplace<EntityReference>(interactableEnt, interInfo.targetEntiyID);
 
 
@@ -816,6 +813,33 @@ void nothing::SceneManager::CreateTestEntityObject(const TestEntityInfo& testEnt
 
 
 	nothing::LogInfo("Created Test Entity, ID: " + std::to_string(testEntInfo.ID));
+
+}
+
+
+// =================================================
+
+
+void nothing::SceneManager::CreateMoveObjectEntityObject(const MoveObjectEntityInfo& movObjInfo)
+{
+
+	using namespace nothing::components;
+
+
+	auto moveEnt = registry.create();
+	registry.emplace<EntityID>(moveEnt, movObjInfo.ID);
+	entitiesMap.emplace(movObjInfo.ID, moveEnt);
+	auto moveEntBeh = std::make_unique<MoveEntityBehaviour>();
+	moveEntBeh->SetEntity(moveEnt);
+	moveEntBeh->SetRegistry(registry);
+	moveEntBeh->destinationPos = movObjInfo.desiredPosition;
+	moveEntBeh->entityToTransformID = movObjInfo.targetID;
+	registry.emplace<CustomBehaviour>(moveEnt, std::move(moveEntBeh));
+	//registry.emplace<EntityReference>(moveEnt, movObjInfo.targetID);
+
+
+	nothing::LogInfo("Created MoveObject Entity, ID: " + std::to_string(movObjInfo.ID));
+	nothing::LogInfo("Moving Object with ID: " + std::to_string(movObjInfo.targetID));
 
 }
 
@@ -1222,13 +1246,13 @@ void nothing::SceneManager::ReadTestEntityDataFromFile(std::fstream& f)
 	f.read(reinterpret_cast<char*>(&ID), 8);
 
 
-	float garbageVal1, garbageVal2, garbageVal3;
+	float_t garbageVal1, garbageVal2, garbageVal3;
 	f.read(reinterpret_cast<char*>(&garbageVal1), 4);
 	f.read(reinterpret_cast<char*>(&garbageVal2), 4);
 	f.read(reinterpret_cast<char*>(&garbageVal3), 4);
 
 
-	TestEntityInfo testEntInfo;
+	TestEntityInfo testEntInfo{};
 	testEntInfo.ID = ID;
 	testEntInfo.garbageVal1 = garbageVal1;
 	testEntInfo.garbageVal2 = garbageVal2;
@@ -1236,6 +1260,42 @@ void nothing::SceneManager::ReadTestEntityDataFromFile(std::fstream& f)
 
 
 	CreateTestEntityObject(testEntInfo);
+
+}
+
+
+// =================================================
+
+
+void nothing::SceneManager::ReadMoveObjectEntityDataFromFile(std::fstream& f)
+{
+
+	uint64_t ID;
+	f.read(reinterpret_cast<char*>(&ID), 8);
+
+
+	uint64_t targetID;
+	f.read(reinterpret_cast<char*>(&targetID), 8);
+
+
+	float_t desiredPosX, desiredPosY, desiredPosZ;
+	f.read(reinterpret_cast<char*>(&desiredPosX), 4);
+	f.read(reinterpret_cast<char*>(&desiredPosY), 4);
+	f.read(reinterpret_cast<char*>(&desiredPosZ), 4);
+
+
+	uint32_t ignoreY;
+	f.read(reinterpret_cast<char*>(&ignoreY), 4);
+
+
+	MoveObjectEntityInfo moveObjEntInfo{};
+	moveObjEntInfo.ID = ID;
+	moveObjEntInfo.targetID = targetID;
+	moveObjEntInfo.desiredPosition = glm::vec3(desiredPosX, desiredPosY, desiredPosZ);
+	moveObjEntInfo.ignoreY = ignoreY ? 1 : 0;
+
+
+	CreateMoveObjectEntityObject(moveObjEntInfo);
 
 }
 

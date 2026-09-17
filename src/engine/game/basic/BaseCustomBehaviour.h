@@ -16,6 +16,7 @@ namespace nothing
 		void (*PrintInfoMessage)(const std::string&);
 		//bool (*Raycast)(const glm::vec3&, const glm::vec3&, RaycastHit&);
 		std::function<bool(const glm::vec3&, const glm::vec3&, RaycastHit&)> Raycast;
+		std::function<entt::entity(uint64_t)> ResolveEntityID;
 
 	};
 
@@ -74,9 +75,9 @@ namespace nothing
 		}
 
 
-		void PrintInfoMessage(const std::string& message) { engineServices_->PrintInfoMessage(message); }
-		bool Raycast(const glm::vec3& origin, const glm::vec3& direction, RaycastHit& outRay) { return engineServices_->Raycast(origin, direction, outRay); }
-
+		void         PrintInfoMessage(const std::string& message)                                     { engineServices_->PrintInfoMessage(message); }
+		bool         Raycast(const glm::vec3& origin, const glm::vec3& direction, RaycastHit& outRay) { return engineServices_->Raycast(origin, direction, outRay); }
+		entt::entity ResolveEntityID(uint64_t entID)                                                  { return engineServices_->ResolveEntityID(entID); }
 
 		void SetRegistry(entt::registry& r) { sceneRegistry_ = &r; }
 		void SetEntity(entt::entity e) { self_ = e; }

@@ -15,13 +15,15 @@ struct Header
 // Tipo di oggetto
 enum ObjectType : u32
 {
+
     Cube     = 0x01,
     Plane    = 0x02,
     Prop     = 0x03,
     Player   = 0x04,
     Trigger  = 0x05,
     Interact = 0x06,
-    TestEnt  = 0x07
+    TestEnt  = 0x07,
+    MoveObj  = 0x08
     
 };
 
@@ -145,6 +147,17 @@ struct ObjectTestEntity
 };
 
 
+struct ObjectMoveEntity
+{
+    u64 ID;
+    u64 targetID;
+    float desiredPosX;
+    float desidedPosY;
+    float desiredPosZ;
+    u32 ignoreY;
+};
+
+
 //=======BASE OGGETTO===================================
 
 
@@ -194,6 +207,12 @@ struct Object
     {
     
         ObjectTestEntity obj;
+        
+    }
+    else if(type == ObjectType::MoveObj)
+    {
+    
+        ObjectMoveEntity obj;
         
     }
     

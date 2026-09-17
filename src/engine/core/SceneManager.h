@@ -104,6 +104,17 @@ namespace nothing
 	};
 
 
+	struct MoveObjectEntityInfo
+	{
+
+		uint64_t ID = 0;
+		uint64_t targetID = 0;
+		glm::vec3 desiredPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+		bool ignoreY = false;
+
+	};
+
+
 	// Queste sono quelle mesh generate per il mondo come cubi o piani
 	struct WorldMesh
 	{
@@ -145,6 +156,7 @@ namespace nothing
 		void      CreateTriggerObject(const TriggerInfo& trigInfo);
 		void      CreateInteractableObject(const InteractableInfo& interInfo);
 		void      CreateTestEntityObject(const TestEntityInfo& testEntInfo);
+		void      CreateMoveObjectEntityObject(const MoveObjectEntityInfo& movObjInfo);
 		
 
 
@@ -181,6 +193,7 @@ namespace nothing
 		void ReadTriggerDataFromFile(std::fstream& f);
 		void ReadInteractableDataFromFile(std::fstream& f);
 		void ReadTestEntityDataFromFile(std::fstream& f);
+		void ReadMoveObjectEntityDataFromFile(std::fstream& f);
 
 	};
 

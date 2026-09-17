@@ -108,7 +108,7 @@ namespace nothing
 				if (Raycast(rayOrigin, forward, hit))
 				{
 
-					if (sceneRegistry_->valid(hit.hitEntityID) && sceneRegistry_->valid(hit.targetEntity))
+					if (sceneRegistry_->valid(hit.hitEntityID) && sceneRegistry_->valid(hit.targetEntity) && sceneRegistry_->all_of<InteractableTag>(hit.hitEntityID))
 					{
 
 						auto beh = sceneRegistry_->try_get<CustomBehaviour>(hit.targetEntity);

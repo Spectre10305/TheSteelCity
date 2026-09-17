@@ -5,3 +5,5 @@ tex_floor_concrete_3.png
 nothing_logo.png
 tex_wall_concrete_1.png
 _MODELS3D
+props_industrial_oil_drum.obj
+props_industrial_pallet.obj
