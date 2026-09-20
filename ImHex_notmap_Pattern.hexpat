@@ -149,12 +149,14 @@ struct ObjectTestEntity
 
 struct ObjectMoveEntity
 {
-    u64 ID;
-    u64 targetID;
+    u64   ID;
+    u64   targetID;
     float desiredPosX;
     float desidedPosY;
     float desiredPosZ;
-    u32 ignoreY;
+    u32   durationMS;
+    u32   ignoreY;
+    u32   twoWays;
 };
 
 

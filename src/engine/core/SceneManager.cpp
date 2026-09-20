@@ -24,7 +24,7 @@
 #include "../game/custom_behaviours/CameraBehaviour.h"
 #include "../game/custom_behaviours/PlayerBehaviour.h"
 #include "../game/custom_behaviours/TestCustomBehaviour.h"
-#include "../game//custom_behaviours/MoveEntityBehaviour.h"
+#include "../game/custom_behaviours/MoveEntityBehaviour.h"
 
 
 // =================================================
@@ -33,11 +33,17 @@
 void nothing::SceneManager::Init(EngineContext& ctx)
 {
 
+	using namespace std::placeholders;
+
 	ctx_ = &ctx;
 	assert(ctx_->physicsManager != nullptr);
-	engineServices_.PrintInfoMessage = nothing::LogInfo;
-	engineServices_.Raycast = std::bind(&nothing::PhysicsManager::RaycastInternal, ctx_->physicsManager, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-	engineServices_.ResolveEntityID = std::bind(&nothing::SceneManager::ResolveEntityID, this, std::placeholders::_1);
+
+
+	engineServices_.PrintInfoMessage    = nothing::LogInfo;
+	engineServices_.PrintWarningMessage = nothing::LogWarning;
+	engineServices_.PrintErrorMessage   = nothing::LogError;
+	engineServices_.Raycast             = std::bind(&nothing::PhysicsManager::RaycastInternal, ctx_->physicsManager, _1, _2, _3);
+	engineServices_.ResolveEntityID     = std::bind(&nothing::SceneManager::ResolveEntityID, this, _1);
 
 }
 
@@ -355,7 +361,9 @@ entt::entity nothing::SceneManager::ResolveEntityID(uint64_t entID)
 }
 
 
+// =================================================
 // MESH MONDO=======================================
+// =================================================
 
 
 nothing::WorldMesh nothing::SceneManager::CreateCubeWorldMesh(float width, float height, float depth, bool isDoubleTiled)
@@ -633,7 +641,9 @@ nothing::WorldMesh nothing::SceneManager::CreatePlaneWorldMesh(float width, floa
 }
 
 
+// =================================================
 // OGGETTI ECS MONDO================================
+// =================================================
 
 
 void nothing::SceneManager::CreateWorldSolidCube(const SolidCubeInfo& cubeInfo)
@@ -829,13 +839,21 @@ void nothing::SceneManager::CreateMoveObjectEntityObject(const MoveObjectEntityI
 	auto moveEnt = registry.create();
 	registry.emplace<EntityID>(moveEnt, movObjInfo.ID);
 	entitiesMap.emplace(movObjInfo.ID, moveEnt);
+
+
 	auto moveEntBeh = std::make_unique<MoveEntityBehaviour>();
+
+
 	moveEntBeh->SetEntity(moveEnt);
 	moveEntBeh->SetRegistry(registry);
-	moveEntBeh->destinationPos = movObjInfo.desiredPosition;
 	moveEntBeh->entityToTransformID = movObjInfo.targetID;
+	moveEntBeh->destinationPos      = movObjInfo.desiredPosition;
+	moveEntBeh->duration            = movObjInfo.duration;
+	moveEntBeh->ignoreY             = movObjInfo.ignoreY;
+	moveEntBeh->twoWays             = movObjInfo.twoWays;
+
+
 	registry.emplace<CustomBehaviour>(moveEnt, std::move(moveEntBeh));
-	//registry.emplace<EntityReference>(moveEnt, movObjInfo.targetID);
 
 
 	nothing::LogInfo("Created MoveObject Entity, ID: " + std::to_string(movObjInfo.ID));
@@ -844,7 +862,9 @@ void nothing::SceneManager::CreateMoveObjectEntityObject(const MoveObjectEntityI
 }
 
 
+// =================================================
 // ASSETS FILE======================================
+// =================================================
 
 
 bool nothing::SceneManager::LoadAssetFile(const char* assetFile, std::vector<std::string>& allTexturesFiles, std::vector<std::string>& allModels3DFiles, std::vector<std::string>& allAudioFiles)
@@ -956,7 +976,9 @@ bool nothing::SceneManager::LoadAssetFile(const char* assetFile, std::vector<std
 }
 
 
+// =================================================
 // HELPER PER RECORD BINARI FILE NOTMAP=============
+// =================================================
 
 
 void nothing::SceneManager::ReadCubeDataFromFile(std::fstream& f)
@@ -1284,15 +1306,25 @@ void nothing::SceneManager::ReadMoveObjectEntityDataFromFile(std::fstream& f)
 	f.read(reinterpret_cast<char*>(&desiredPosZ), 4);
 
 
+	uint32_t durationMS;
+	f.read(reinterpret_cast<char*>(&durationMS), 4);
+
+
 	uint32_t ignoreY;
 	f.read(reinterpret_cast<char*>(&ignoreY), 4);
+
+
+	uint32_t twoWays;
+	f.read(reinterpret_cast<char*>(&twoWays), 4);
 
 
 	MoveObjectEntityInfo moveObjEntInfo{};
 	moveObjEntInfo.ID = ID;
 	moveObjEntInfo.targetID = targetID;
 	moveObjEntInfo.desiredPosition = glm::vec3(desiredPosX, desiredPosY, desiredPosZ);
+	moveObjEntInfo.duration = durationMS;
 	moveObjEntInfo.ignoreY = ignoreY ? 1 : 0;
+	moveObjEntInfo.twoWays = twoWays ? 1 : 0;
 
 
 	CreateMoveObjectEntityObject(moveObjEntInfo);

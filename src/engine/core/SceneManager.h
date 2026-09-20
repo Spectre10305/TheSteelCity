@@ -107,10 +107,12 @@ namespace nothing
 	struct MoveObjectEntityInfo
 	{
 
-		uint64_t ID = 0;
-		uint64_t targetID = 0;
+		uint64_t  ID              = 0;
+		uint64_t  targetID        = 0;
 		glm::vec3 desiredPosition = glm::vec3(0.0f, 0.0f, 0.0f);
-		bool ignoreY = false;
+		uint32_t  duration        = 1000;
+		bool      ignoreY         = false;
+		bool      twoWays         = false;
 
 	};
 
