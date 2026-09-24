@@ -130,6 +130,7 @@ namespace nothing
 	};
 
 
+	// SCOPO: Gestione generale delle scene di gioco
 	class SceneManager
 	{
 

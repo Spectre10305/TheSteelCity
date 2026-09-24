@@ -37,7 +37,16 @@ bool nothing::Engine::Init(LaunchOptions& lopts)
 	if (!windowManager_.Init())
 	{
 
-		nothing::LogInfo("Can't initialize WindowManager, shutting down everything...");
+		nothing::LogError("Can't initialize WindowManager, shutting down everything...");
+		return false;
+
+	}
+
+
+	if (!audioManager_.Init(engineContext_))
+	{
+
+		nothing::LogError("Can't initialize AudioManager, shutting down everything...");
 		return false;
 
 	}
@@ -168,6 +177,7 @@ void nothing::Engine::Run()
 		case GameState::Gameplay:
 			sceneManager_  .Update(deltaTime);
 			physicsManager_.Update(deltaTime);
+			audioManager_.Update();
 			renderManager_ .Update(deltaTime);
 			userInterface_ .Update();
 			break;
@@ -261,6 +271,7 @@ void nothing::Engine::Shutdown()
 	renderManager_.Shutdown();
 	physicsManager_.Shutdown();
 	sceneManager_.Shutdown();
+	audioManager_.Shutdown();
 	windowManager_.Shutdown();
 
 }

@@ -8,6 +8,7 @@
 #include "ResourceManager.h"
 #include "SceneManager.h"
 #include "Filesystem.h"
+#include "../audio/AudioManager.h"
 #include "../graphics/RenderManager.h"
 #include "../user_interface/UserInterface.h"
 #include "../physics/PhysicsManager.h"
@@ -64,6 +65,7 @@ namespace nothing
 
 		Filesystem      fileSystem_;
 		WindowManager   windowManager_;
+		AudioManager    audioManager_;
 		RenderManager   renderManager_;
 		UserInterface   userInterface_;
 		InputManager    inputManager_;

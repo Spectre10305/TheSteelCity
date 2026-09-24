@@ -147,6 +147,9 @@
     <ClInclude Include="game\custom_behaviours\MoveEntityBehaviour.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="audio\AudioManager.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\Engine.cpp">
@@ -213,6 +216,12 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="physics\PhysicsManager.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\AudioManager.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="core\impl_miniaudio.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

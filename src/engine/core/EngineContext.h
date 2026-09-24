@@ -6,6 +6,7 @@ namespace nothing
 
 	// Forward declaration per evitare dipendenze circolari
 	class WindowManager;
+	class AudioManager;
 	class ResourceManager;
 	class SceneManager;
 	class PhysicsManager;
@@ -21,6 +22,7 @@ namespace nothing
 	{
 
 		WindowManager*   windowManager    = nullptr;
+		AudioManager*    audioManager     = nullptr;
 		ResourceManager* resourcesManager = nullptr;
 		SceneManager*    sceneManager     = nullptr;
 		PhysicsManager*  physicsManager   = nullptr;
