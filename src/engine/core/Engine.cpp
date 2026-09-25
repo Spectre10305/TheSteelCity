@@ -195,6 +195,7 @@ void nothing::Engine::Run()
 			if (inputManager_.IsActionTriggered(GameAction::Jump))
 			{
 
+				audioManager_.StartMainMenuAmbientSound();
 				userInterface_.SwitchContext(UIContext::MainMenu);
 				gameState_ = GameState::MainMenu;
 
@@ -204,6 +205,7 @@ void nothing::Engine::Run()
 			if (time > 5.0)
 			{
 
+				audioManager_.StartMainMenuAmbientSound();
 				userInterface_.SwitchContext(UIContext::MainMenu);
 				gameState_ = GameState::MainMenu;
 
@@ -331,12 +333,13 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 		if (fileSystem_.MapExists("testing"))
 		{
 
+			audioManager_   .StopMainMenuAmbientSound();
 			resourceManager_.InitDefaults(engineContext_);
-			sceneManager_.LoadScene("testing");
-			physicsManager_.InitPhysicsScene();
-			userInterface_.SwitchContext(UIContext::Gameplay);
-			windowManager_.SetMouseInvisible();
-			gameState_ = GameState::Gameplay;
+			sceneManager_   .LoadScene("testing");
+			physicsManager_ .InitPhysicsScene();
+			userInterface_  .SwitchContext(UIContext::Gameplay);
+			windowManager_  .SetMouseInvisible();
+			gameState_      = GameState::Gameplay;
 
 		}
 		else
@@ -350,6 +353,7 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 
 
 	case UIEvent::ReturnToMenu:
+		audioManager_   .StartMainMenuAmbientSound();
 		physicsManager_ .DeletePhysicsScene();
 		sceneManager_   .UnloadScene();
 		resourceManager_.DeleteAllModels3D();

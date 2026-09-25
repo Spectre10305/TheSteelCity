@@ -335,6 +335,7 @@ void nothing::SceneManager::UnloadScene()
 	worldMeshes.clear();
 	registry.ctx().clear();
 	registry.clear();
+	entitiesMap.clear();
 
 }
 

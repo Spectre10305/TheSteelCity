@@ -204,6 +204,24 @@ void nothing::UserInterface::UpdateMainMenuContext()
 	if (MenuButton(">_ESCI_DAL_GIOCO", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { currentEvent = UIEvent::CloseGame; }
 
 
+	ImDrawList* dl = ImGui::GetForegroundDrawList();
+
+
+	constexpr int initAlpha = 255;
+	static int alpha = initAlpha;
+	alpha -= 3;
+
+
+	if (alpha < 0)
+	{
+
+		alpha = 0;
+
+	}
+
+	dl->AddRectFilled(ImVec2(0.0f, 0.0f), ImVec2(scrSz.x, scrSz.y), IM_COL32(0, 0, 0, alpha));
+
+
 	ImGui::End();
 	ImGui::PopStyleVar(2);
 	ImGui::PopStyleColor();
