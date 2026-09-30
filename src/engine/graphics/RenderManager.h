@@ -31,6 +31,9 @@ namespace nothing
 		void Shutdown();
 
 
+		// Lo usiamo per cancellare il buffer dello schermo diretamente all'inizio del frame
+		// senza aspettare l'update del RenderManager
+		void ClearScreen();
 		void ResizeGLViewport(int w, int h);
 		void SetBackgroundColor(float r, float g, float b);
 		void SetAspectRatio(int n, int d);

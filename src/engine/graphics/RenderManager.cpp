@@ -88,8 +88,7 @@ void nothing::RenderManager::Update(double deltaTime)
 	using namespace nothing::components;
 
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(bgR_, bgG_, bgB_, 1.0f);
+
 
 	
 	defaultShader_->Use();
@@ -180,6 +179,18 @@ void nothing::RenderManager::Shutdown()
 {
 
 	delete defaultShader_;
+
+}
+
+
+// =================================================
+
+
+void nothing::RenderManager::ClearScreen()
+{
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(bgR_, bgG_, bgB_, 1.0f);
 
 }
 

@@ -2,6 +2,13 @@
 #include <SDL3/SDL.h>
 #include <vector>
 #include <string>
+
+
+// La coppia che scoppia
+#include <optional>
+#include <tweeny/tween.h>
+
+
 #include "../graphics/IMGUI/imgui.h"
 #include "../core/EngineContext.h"
 
@@ -51,7 +58,7 @@ namespace nothing
 	public:
 
 		void Init(EngineContext& ctx);
-		void Update();
+		void Update(double deltaTime);
 		void Shutdown();
 
 
@@ -64,7 +71,7 @@ namespace nothing
 		uint32_t currentStyle = 0;
 
 
-		void     UpdateMainMenuContext();
+		void     UpdateMainMenuContext(double deltaTime);
 		void     UpdateGameContext();
 		void     UpdateSplashScreenContext();
 		void     SwitchContext(UIContext newContext);
@@ -103,9 +110,10 @@ namespace nothing
 
 
 		// Texture UI
-		uint32_t uiTexture_Logo = 0;
-		uint32_t uiTexture_Health = 0;
+		uint32_t uiTexture_Logo        = 0;
+		uint32_t uiTexture_Health      = 0;
 		uint32_t uiTexture_NothingLogo = 0;
+		uint32_t uiTexture_MenuAnim1   = 0;
 
 
 		// Font di default
@@ -119,6 +127,11 @@ namespace nothing
 
 		EngineContext* ctx_ = nullptr;
 
+
+		// Animazioni UI, immagini che scorrono sullo schermo
+		std::optional<tweeny::tween<float, int>> testUIAnim1_;
+		bool anim1Active_ = true;
+		void RunUIAnimations(ImDrawList* _dl, ImVec2& scrSz, double deltaTime);
 
 		// Dev console
 		std::vector<std::string> lines_;

@@ -55,13 +55,13 @@ bool nothing::Engine::Init(LaunchOptions& lopts)
 	//resourceManager_.InitDefaults(engineContext_);
 
 
-	sceneManager_.Init(engineContext_);
+	sceneManager_  .Init(engineContext_);
 	physicsManager_.Init(engineContext_);
-	sceneManager_.InitServices();
+	sceneManager_  .InitServices();
 
 
 	renderManager_.Init(engineContext_);
-	renderManager_.SetBackgroundColor(0.1f, 0.1f, 0.1f);
+	renderManager_.SetBackgroundColor(0.0f, 0.0f, 0.0f);
 
 
 	int wWidth = 0;
@@ -108,10 +108,10 @@ bool nothing::Engine::Init(LaunchOptions& lopts)
 			// uscendo dalla scena corrente chiamiamo resourceManager_.DeleteAll...()
 			// che rimuove tutte le risorse. Comprese quelle di default
 			resourceManager_.InitDefaults(engineContext_);
-			sceneManager_.LoadScene(lopts.mapOnLaunchName);
-			physicsManager_.InitPhysicsScene();
-			userInterface_.SwitchContext(UIContext::Gameplay);
-			windowManager_.SetMouseInvisible();
+			sceneManager_   .LoadScene(lopts.mapOnLaunchName);
+			physicsManager_ .InitPhysicsScene();
+			userInterface_  .SwitchContext(UIContext::Gameplay);
+			windowManager_  .SetMouseInvisible();
 			gameState_ = GameState::Gameplay;
 			return true;
 
@@ -166,20 +166,23 @@ void nothing::Engine::Run()
 		HandleEvents(event);
 
 
+		renderManager_.ClearScreen();
+
+
 		switch (gameState_)
 		{
 
 		case GameState::MainMenu:
-			userInterface_.Update();
+			userInterface_.Update(deltaTime);
 			break;
 
 
 		case GameState::Gameplay:
 			sceneManager_  .Update(deltaTime);
 			physicsManager_.Update(deltaTime);
-			audioManager_.Update();
+			audioManager_  .Update();
 			renderManager_ .Update(deltaTime);
-			userInterface_ .Update();
+			userInterface_ .Update(deltaTime);
 			break;
 
 
@@ -195,7 +198,7 @@ void nothing::Engine::Run()
 			if (inputManager_.IsActionTriggered(GameAction::Jump))
 			{
 
-				audioManager_.StartMainMenuAmbientSound();
+				audioManager_ .StartMainMenuAmbientSound();
 				userInterface_.SwitchContext(UIContext::MainMenu);
 				gameState_ = GameState::MainMenu;
 
@@ -205,14 +208,14 @@ void nothing::Engine::Run()
 			if (time > 5.0)
 			{
 
-				audioManager_.StartMainMenuAmbientSound();
+				audioManager_ .StartMainMenuAmbientSound();
 				userInterface_.SwitchContext(UIContext::MainMenu);
 				gameState_ = GameState::MainMenu;
 
 			}
 
 
-			userInterface_.Update();
+			userInterface_.Update(deltaTime);
 
 
 			break;
@@ -270,11 +273,11 @@ void nothing::Engine::Shutdown()
 	}
 
 
-	renderManager_.Shutdown();
+	renderManager_ .Shutdown();
 	physicsManager_.Shutdown();
-	sceneManager_.Shutdown();
-	audioManager_.Shutdown();
-	windowManager_.Shutdown();
+	sceneManager_  .Shutdown();
+	audioManager_  .Shutdown();
+	windowManager_ .Shutdown();
 
 }
 
@@ -301,9 +304,9 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 
 		case SDL_EVENT_WINDOW_RESIZED:
 			int w, h;
-			windowManager_.   GetWindowSize(w, h);
+			windowManager_.GetWindowSize(w, h);
 			renderManager_.ResizeGLViewport(w, h);
-			renderManager_.  SetAspectRatio(w, h);
+			renderManager_.SetAspectRatio(w, h);
 			nothing::LogInfo("Window resized to: " + std::to_string(w) + " X " + std::to_string(h));
 			break;
 

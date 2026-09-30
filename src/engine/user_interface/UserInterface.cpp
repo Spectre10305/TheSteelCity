@@ -13,6 +13,7 @@
 #include "../core/SceneManager.h"
 #include "../game/components/UIDebugValues.h"
 #include <string>
+#include <tweeny/tweeny.h>
 
 
 //=============================================================
@@ -96,9 +97,32 @@ void nothing::UserInterface::Init(EngineContext& ctx)
 
 
 	// Texture UI
-	uiTexture_Logo = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_logo.png").c_str(), false);
-	uiTexture_Health = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_health_symbol.png").c_str(), false);
+	uiTexture_Logo        = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_logo.png").c_str(), false);
+	uiTexture_Health      = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_health_symbol.png").c_str(), false);
 	uiTexture_NothingLogo = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("nothing_logo.png").c_str(), true);
+	uiTexture_MenuAnim1   = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_cityscape_placeholder.png").c_str(), true);
+
+
+	// Inizializza i tween per le animazioni del menù
+	testUIAnim1_.emplace(tweeny::from(0.0f, 0)
+		.to(0.0f,   255).via(tweeny::easing::linear).during((uint32_t)1000) // Appare
+		.to(0.0f,   255).via(tweeny::easing::linear).during((uint32_t)500)  // Aspetta mezzo secondo
+		.to(500.0f, 255).via(tweeny::easing::linear).during((uint32_t)2000) // Si muove
+		.to(500.0f, 255).via(tweeny::easing::linear).during((uint32_t)1000) // Resta fermo
+		.to(500.0f,   0).via(tweeny::easing::linear).during((uint32_t)1000) // Scompare
+		.build());
+
+
+	testUIAnim1_->on(tweeny::event::complete, [&](auto& t) {
+
+		
+		nothing::LogInfo("Stopped UI Animation 1");
+		anim1Active_ = false;
+		return tweeny::event::response::ok;
+
+
+		});
+
 
 }
 
@@ -106,7 +130,7 @@ void nothing::UserInterface::Init(EngineContext& ctx)
 //=============================================================
 
 
-void nothing::UserInterface::Update()
+void nothing::UserInterface::Update(double deltaTime)
 {
 
 	ImGui_ImplOpenGL3_NewFrame();
@@ -118,7 +142,7 @@ void nothing::UserInterface::Update()
 	{
 
 	case UIContext::MainMenu:
-		UpdateMainMenuContext();
+		UpdateMainMenuContext(deltaTime);
 		break;
 
 
@@ -166,7 +190,7 @@ void nothing::UserInterface::Shutdown()
 //=============================================================
 
 
-void nothing::UserInterface::UpdateMainMenuContext()
+void nothing::UserInterface::UpdateMainMenuContext(double deltaTime)
 {
 
 	ImVec2 scrSz = ImGui::GetIO().DisplaySize;
@@ -176,13 +200,13 @@ void nothing::UserInterface::UpdateMainMenuContext()
 	style.FontScaleMain = fontScaleBase;
 
 
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
-
+	
 	ImGui::SetNextWindowPos(ImVec2(0, 0));
 	ImGui::SetNextWindowSize(ImVec2(scrSz.x, scrSz.y));
 	ImGui::Begin("MainMenuPanel", nullptr, flags);
@@ -203,19 +227,19 @@ void nothing::UserInterface::UpdateMainMenuContext()
 	buttonSpacingY += buttonHeight + buttonSpacingOffset;
 	if (MenuButton(">_ESCI_DAL_GIOCO", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { currentEvent = UIEvent::CloseGame; }
 
-
+	
 	ImDrawList* dl = ImGui::GetForegroundDrawList();
+	ImDrawList* bgDl = ImGui::GetBackgroundDrawList();
 
-
-	constexpr int initAlpha = 255;
-	static int alpha = initAlpha;
+	static int alpha = 255;
 	alpha -= 3;
 
-
+	
 	if (alpha < 0)
 	{
 
 		alpha = 0;
+		RunUIAnimations(bgDl, scrSz, deltaTime);
 
 	}
 
@@ -589,9 +613,8 @@ void nothing::UserInterface::CenteredText(const char* text)
 //=============================================================
 
 
-/* "bool flipVert" serve per flippare verticalmente la texture al caricamento(stbi_set_flip_vertically_on_load(true)).
-*	Per qualche motivo alcune texture si vedono bene anche se stbi_set_flip_vertically_on_load è FALSO, altre no
-*/
+// "bool flipVert" serve per flippare verticalmente la texture al caricamento(stbi_set_flip_vertically_on_load(true)).
+// Per qualche motivo alcune texture si vedono bene anche se stbi_set_flip_vertically_on_load è FALSO, altre no
 uint32_t nothing::UserInterface::CreateUITexture(const char* texturePath, bool flipVert)
 {
 
@@ -1109,6 +1132,32 @@ void nothing::UserInterface::ShowDevConsole(ImVec2& scrSz)
 
 
 		ImGui::End();
+
+	}
+
+}
+
+
+//=============================================================
+
+
+void nothing::UserInterface::RunUIAnimations(ImDrawList* _dl, ImVec2& scrSz, double deltaTime)
+{
+
+	if (anim1Active_)
+	{
+
+		int32_t step = static_cast<int>(static_cast<float>(deltaTime) * 1000);
+
+
+		testUIAnim1_->step(step);
+
+
+		auto [posX, alpha] = testUIAnim1_->peek();
+
+
+		float imgScaleFac = std::min(scrSz.x / 1920, scrSz.y / 1080) * 1.5f;
+		_dl->AddImage(uiTexture_MenuAnim1, ImVec2((0.0f - posX) * imgScaleFac, -100.0f * imgScaleFac), ImVec2((1920.0f - posX) * imgScaleFac, 1080.0f * imgScaleFac), ImVec2(0, 1), ImVec2(1, 0), IM_COL32(255, 255, 255, alpha));
 
 	}
 
