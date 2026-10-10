@@ -87,9 +87,6 @@ void nothing::RenderManager::Update(double deltaTime)
 
 	using namespace nothing::components;
 
-
-
-
 	
 	defaultShader_->Use();
 	defaultShader_->SetUniform("tex", 0);
@@ -160,13 +157,6 @@ void nothing::RenderManager::Update(double deltaTime)
 	glDrawArrays(GL_LINES, 0, allDebugVertices_.size());
 
 
-	// Aggiunge il debug della fisica
-	//glBufferData(GL_ARRAY_BUFFER, debugDraw.m_allRP3DTris.size() * sizeof(DebugVertex), debugDraw.m_allRP3DTris.data(), GL_DYNAMIC_DRAW);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wireframe
-	//glDrawArrays(GL_TRIANGLES, 0, debugDraw.m_allRP3DTris.size());
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // No wireframe
-
-
 	allDebugVertices_.clear();
 
 }
@@ -190,7 +180,7 @@ void nothing::RenderManager::ClearScreen()
 {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(bgR_, bgG_, bgB_, 1.0f);
+	//glClearColor(bgR_, bgG_, bgB_, 1.0f);
 
 }
 

@@ -226,6 +226,7 @@
     <ClInclude Include="user_interface\UIStyleHelper.h" />
     <ClInclude Include="user_interface\UserInterface.h" />
     <ClInclude Include="utils\Log.h" />
+    <ClInclude Include="utils\Map.h" />
     <ClInclude Include="utils\MemCheck.h" />
     <ClInclude Include="utils\RandomGen.h" />
     <ClInclude Include="utils\Time.h" />

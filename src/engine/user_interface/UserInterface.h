@@ -31,6 +31,7 @@ namespace nothing
 
 		None,
 		BeginGame,
+		SwitchToGameContext,
 		ReturnToMenu,
 		CloseGame,
 		ApplyOptions,
@@ -45,7 +46,8 @@ namespace nothing
 		None,
 		MainMenu,
 		Gameplay,
-		SplashScreen
+		SplashScreen,
+		LoadingScreen
 
 	};
 
@@ -71,14 +73,22 @@ namespace nothing
 		uint32_t currentStyle = 0;
 
 
+		// Qesto diventa VERO per evitare che LoadingScreenContext
+		// dia sempre un evento BeginGame al fade in dello schermo nero
+		bool isGameLoaded = false;
+
+
 		void     UpdateMainMenuContext(double deltaTime);
 		void     UpdateGameContext();
 		void     UpdateSplashScreenContext();
+		void     UpdateLoadingScreenContext();
+		void     UpdateLoadingScreenBarValue(int val); // Valore in percentuale 0 - 100%
+		void     SetIsGameLoaded(bool val); // Questo imposta isGameLoaded
 		void     SwitchContext(UIContext newContext);
 		void     ClearEvent();
 		bool     MenuButton(const char* text, ImVec2 pos, ImVec2 size, int textYTolerance);
 		void     CenteredText(const char* text); // Helper per testo centrato
-		uint32_t CreateUITexture(const char* texturePath, bool flipVert);
+		uint32_t CreateUITexture(const char* texturePath, bool flipVert, int32_t filter);
 
 
 		void ShowNewGamePanel(ImVec2& scrSz);
@@ -97,12 +107,10 @@ namespace nothing
 		int   toleranceY          = 10;
 
 
-		bool showNewGamePanel  = false;
-		bool showLoadGamePanel = false;
-		bool showOptionsPanel  = false;
-
-
-		bool showPauseMenu = false;
+		bool showNewGamePanel      = false;
+		bool showLoadGamePanel     = false;
+		bool showOptionsPanel      = false;
+		bool showPauseMenu         = false;
 		bool showBackToMenuWarning = false;
 
 
@@ -129,15 +137,23 @@ namespace nothing
 
 
 		// Animazioni UI, immagini che scorrono sullo schermo
-		std::optional<tweeny::tween<float, int>> testUIAnim1_;
+		bool  doFadePanelOut_     = true;
+		bool  doFadePanelIn_      = false;
+		bool  canRunUIAnimations_ = false;
+		int   fadePanelAlpha_     = 255;
+		int   fadeSpeed_          = 1;
+		float loadingBarWidth_    = 0.0f;
+
+
 		bool anim1Active_ = true;
+		std::optional<tweeny::tween<float, int>> testUIAnim1_;
 		void RunUIAnimations(ImDrawList* _dl, ImVec2& scrSz, double deltaTime);
+
 
 		// Dev console
 		std::vector<std::string> lines_;
 		char buf_[32];
 		ImFont* consoleFont = nullptr;
-
 
 	};
 

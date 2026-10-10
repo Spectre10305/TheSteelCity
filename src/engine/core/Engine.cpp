@@ -3,6 +3,7 @@
 #include "../utils/Time.h"
 #include "../utils/MemCheck.h"
 #include "../graphics/IMGUI/imgui_impl_sdl3.h" // ImGui_ImplSDL3_ProcessEvent() in HandleEvents()
+#include <thread> // Test
 
 
 // =================================================
@@ -25,6 +26,7 @@ bool nothing::Engine::Init(LaunchOptions& lopts)
 	engineContext_.resourcesManager = &resourceManager_;
 	engineContext_.sceneManager     = &sceneManager_;
 	engineContext_.physicsManager   = &physicsManager_;
+	engineContext_.audioManager     = &audioManager_;
 	engineContext_.inputManager     = &inputManager_;
 	engineContext_.renderManager    = &renderManager_;
 	engineContext_.userInterface    = &userInterface_;
@@ -297,7 +299,7 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 
 
 		inputManager_.ProcessEvent(event);
-
+		
 
 		switch (event.type)
 		{
@@ -335,23 +337,48 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 
 		if (fileSystem_.MapExists("testing"))
 		{
-
-			audioManager_   .StopMainMenuAmbientSound();
+			
 			resourceManager_.InitDefaults(engineContext_);
+			userInterface_.UpdateLoadingScreenBarValue(10);
+			renderManager_.ClearScreen();
+			userInterface_.Update(CalcDeltaTime());
+			windowManager_.SwapBuffers();
+			nothing::LogInfo("Loading 10%");
+
+
 			sceneManager_   .LoadScene("testing");
+			userInterface_.UpdateLoadingScreenBarValue(55);
+			renderManager_.ClearScreen();
+			userInterface_.Update(CalcDeltaTime());
+			windowManager_.SwapBuffers();
+			nothing::LogInfo("Loading 20%");
+
+			
 			physicsManager_ .InitPhysicsScene();
-			userInterface_  .SwitchContext(UIContext::Gameplay);
-			windowManager_  .SetMouseInvisible();
-			gameState_      = GameState::Gameplay;
+			userInterface_.UpdateLoadingScreenBarValue(100);
+			renderManager_.ClearScreen();
+			userInterface_.Update(CalcDeltaTime());
+			windowManager_.SwapBuffers();
+			nothing::LogInfo("Loading 45%");
+
+
+			userInterface_.SetIsGameLoaded(true);
 
 		}
 		else
 		{
-
+			
 			nothing::LogError("Map 'testing' does not exist in maps folder");
 
 		}
-		
+		break;
+
+
+	case UIEvent::SwitchToGameContext:
+		userInterface_.SwitchContext(UIContext::Gameplay);
+		windowManager_  .SetMouseInvisible();
+		gameState_ = GameState::Gameplay;
+		nothing::LogInfo("INIT GAME");
 		break;
 
 

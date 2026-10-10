@@ -150,6 +150,9 @@
     <ClInclude Include="audio\AudioManager.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="utils\Map.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\Engine.cpp">

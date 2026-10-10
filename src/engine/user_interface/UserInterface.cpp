@@ -4,6 +4,7 @@
 #include "../graphics/IMGUI/imgui_impl_opengl3.h"
 #include "../utils/Log.h"
 #include "../utils/MemCheck.h"
+#include "../utils/Map.h"
 #include "UIStyleHelper.h"
 #include <glad/glad.h>
 #include <stb_image.h>
@@ -11,6 +12,7 @@
 #include "../core/InputManager.h"
 #include "../core/Filesystem.h"
 #include "../core/SceneManager.h"
+#include "../audio/AudioManager.h"
 #include "../game/components/UIDebugValues.h"
 #include <string>
 #include <tweeny/tweeny.h>
@@ -97,16 +99,16 @@ void nothing::UserInterface::Init(EngineContext& ctx)
 
 
 	// Texture UI
-	uiTexture_Logo        = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_logo.png").c_str(), false);
-	uiTexture_Health      = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_health_symbol.png").c_str(), false);
-	uiTexture_NothingLogo = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("nothing_logo.png").c_str(), true);
-	uiTexture_MenuAnim1   = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_cityscape_placeholder.png").c_str(), true);
+	uiTexture_Logo        = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_logo.png").c_str(),          false, GL_LINEAR);
+	uiTexture_Health      = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_health_symbol.png").c_str(), false, GL_LINEAR);
+	uiTexture_NothingLogo = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("nothing_logo.png").c_str(),         true,  GL_LINEAR);
+	uiTexture_MenuAnim1   = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_landscape_1.png").c_str(),   true,  GL_NEAREST);
 
 
 	// Inizializza i tween per le animazioni del menù
 	testUIAnim1_.emplace(tweeny::from(0.0f, 0)
 		.to(0.0f,   255).via(tweeny::easing::linear).during((uint32_t)1000) // Appare
-		.to(0.0f,   255).via(tweeny::easing::linear).during((uint32_t)500)  // Aspetta mezzo secondo
+		.to(0.0f,   255).via(tweeny::easing::linear).during((uint32_t)1000) // Aspetta un secondo
 		.to(500.0f, 255).via(tweeny::easing::linear).during((uint32_t)2000) // Si muove
 		.to(500.0f, 255).via(tweeny::easing::linear).during((uint32_t)1000) // Resta fermo
 		.to(500.0f,   0).via(tweeny::easing::linear).during((uint32_t)1000) // Scompare
@@ -118,6 +120,7 @@ void nothing::UserInterface::Init(EngineContext& ctx)
 		
 		nothing::LogInfo("Stopped UI Animation 1");
 		anim1Active_ = false;
+		testUIAnim1_->seek(0);
 		return tweeny::event::response::ok;
 
 
@@ -153,6 +156,11 @@ void nothing::UserInterface::Update(double deltaTime)
 
 	case UIContext::SplashScreen:
 		UpdateSplashScreenContext();
+		break;
+
+
+	case UIContext::LoadingScreen:
+		UpdateLoadingScreenContext();
 		break;
 
 
@@ -231,19 +239,54 @@ void nothing::UserInterface::UpdateMainMenuContext(double deltaTime)
 	ImDrawList* dl = ImGui::GetForegroundDrawList();
 	ImDrawList* bgDl = ImGui::GetBackgroundDrawList();
 
-	static int alpha = 255;
-	alpha -= 3;
 
-	
-	if (alpha < 0)
+	if (doFadePanelOut_)
 	{
 
-		alpha = 0;
+		fadePanelAlpha_ -= fadeSpeed_;
+
+
+		if (fadePanelAlpha_ < 0)
+		{
+
+			doFadePanelOut_ = false;
+			fadePanelAlpha_ = 0;
+			canRunUIAnimations_ = true;
+
+		}
+
+	}
+	
+
+	if (doFadePanelIn_)
+	{
+
+		fadePanelAlpha_ += fadeSpeed_;
+
+
+		if (fadePanelAlpha_ > 255)
+		{
+
+			doFadePanelIn_ = false;
+			fadePanelAlpha_ = 255;
+			canRunUIAnimations_ = false;
+			nothing::LogInfo("Completely faded panel in");
+			SwitchContext(UIContext::LoadingScreen);
+
+		}
+
+	}
+
+
+	if (canRunUIAnimations_)
+	{
+
 		RunUIAnimations(bgDl, scrSz, deltaTime);
 
 	}
 
-	dl->AddRectFilled(ImVec2(0.0f, 0.0f), ImVec2(scrSz.x, scrSz.y), IM_COL32(0, 0, 0, alpha));
+
+	dl->AddRectFilled(ImVec2(0.0f, 0.0f), ImVec2(scrSz.x, scrSz.y), IM_COL32(0, 0, 0, fadePanelAlpha_));
 
 
 	ImGui::End();
@@ -303,7 +346,7 @@ void nothing::UserInterface::UpdateGameContext()
 
 	// Usiamo questi flags perchè altrimenti quelli di default interferiscono
 	// con l'interazione dei pulsanti
-	ImGuiWindowFlags mainHUDFlags =
+	ImGuiWindowFlags mainHUDflags =
 		ImGuiWindowFlags_NoTitleBar |
 		ImGuiWindowFlags_NoResize |
 		ImGuiWindowFlags_NoMove |
@@ -317,7 +360,7 @@ void nothing::UserInterface::UpdateGameContext()
 		ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoFocusOnAppearing;
 
 
-	ImGui::Begin("GameHUDPanel", nullptr, mainHUDFlags);
+	ImGui::Begin("GameHUDPanel", nullptr, mainHUDflags);
 
 
 	ImDrawList* dl = ImGui::GetForegroundDrawList();
@@ -429,17 +472,6 @@ void nothing::UserInterface::UpdateGameContext()
 
 	}
 
-
-	/*
-	ImGui::Begin("sasd");
-	ImGui::SliderFloat("X", &x, 0.0f, scrSz.x);
-	ImGui::SliderFloat("Y", &y, 0.0f, scrSz.y);
-	ImGui::SliderFloat("Width", &width, 0.0f, scrSz.x);
-	ImGui::SliderFloat("Width2", &width2, 125.0f, 520.0f);
-	ImGui::SliderFloat("Height", &height, 0.0f, scrSz.y);
-	ImGui::End();
-	*/
-
 }
 
 
@@ -463,9 +495,7 @@ void nothing::UserInterface::UpdateSplashScreenContext()
 	ImGui::SetNextWindowSize(ImVec2(scrSz.x, scrSz.y));
 
 
-	// Usiamo questi flags perchè altrimenti quelli di default interferiscono
-	// con l'interazione dei pulsanti
-	ImGuiWindowFlags mainHUDFlags =
+	ImGuiWindowFlags ssFlags =
 		ImGuiWindowFlags_NoTitleBar |
 		ImGuiWindowFlags_NoResize |
 		ImGuiWindowFlags_NoMove |
@@ -479,7 +509,7 @@ void nothing::UserInterface::UpdateSplashScreenContext()
 		ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoFocusOnAppearing;
 
 
-	ImGui::Begin("SplashScreen", nullptr, mainHUDFlags);
+	ImGui::Begin("SplashScreen", nullptr, ssFlags);
 
 
 	ImDrawList* dl = ImGui::GetForegroundDrawList();
@@ -507,6 +537,132 @@ void nothing::UserInterface::UpdateSplashScreenContext()
 //=============================================================
 
 
+void nothing::UserInterface::UpdateLoadingScreenContext()
+{
+
+	ImVec2 scrSz = ImGui::GetIO().DisplaySize;
+
+
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+
+	ImGui::SetNextWindowPos(ImVec2(0, 0));
+	ImGui::SetNextWindowSize(ImVec2(scrSz.x, scrSz.y));
+
+
+	ImGuiWindowFlags ldfFlags =
+		ImGuiWindowFlags_NoTitleBar |
+		ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoScrollbar |
+		ImGuiWindowFlags_NoScrollWithMouse |
+		ImGuiWindowFlags_NoCollapse |
+		ImGuiWindowFlags_NoBringToFrontOnFocus |
+		ImGuiWindowFlags_NoNavFocus |
+		ImGuiWindowFlags_NoDecoration |
+		ImGuiWindowFlags_NoInputs |
+		ImGuiWindowFlags_NoFocusOnAppearing;
+
+
+	ImGui::Begin("LoadingScreen", nullptr, ldfFlags);
+
+
+	ImDrawList* dl = ImGui::GetForegroundDrawList();
+
+
+	// BG Barra caricamento
+	float barWidth = 90.0f;
+	float barHeight = 20.0f;
+
+
+	ImVec2 centerScr      = ImVec2(scrSz.x / 2.0f, scrSz.y / 2.0f);
+	ImVec2 loadingBarBGP1 = ImVec2(centerScr.x - barWidth, centerScr.y - barHeight);
+	ImVec2 loadingBarBGP2 = ImVec2(centerScr.x + barWidth, centerScr.y + barHeight);
+	ImVec2 loadingBarP2   = ImVec2(loadingBarBGP1.x + loadingBarWidth_, centerScr.y + barHeight);
+
+
+	dl->AddRectFilled(loadingBarBGP1, loadingBarBGP2, IM_COL32(50, 50, 50, 255)); // BG
+	dl->AddRectFilled(loadingBarBGP1, loadingBarP2, IM_COL32(0, 255, 255, 255));  // Bar
+
+
+	static int alpha = 255;
+	
+
+
+	if (!isGameLoaded)
+	{
+
+		alpha -= fadeSpeed_;
+
+
+		if (alpha < 0)
+		{
+
+			alpha = 0;
+			currentEvent = UIEvent::BeginGame;
+
+		}
+
+	}
+	else
+	{
+
+		alpha += fadeSpeed_;
+
+		
+		if (alpha > 255)
+		{
+
+			alpha = 255;
+			currentEvent = UIEvent::SwitchToGameContext;
+
+		}
+
+	}
+
+
+	// Screen fade
+	dl->AddRectFilled(ImVec2(0.0f, 0.0f), scrSz, IM_COL32(0, 0, 0, alpha));
+
+
+	ImGui::End();
+	ImGui::PopStyleVar(2);
+	ImGui::PopStyleColor();
+
+}
+
+
+//=============================================================
+
+
+void nothing::UserInterface::UpdateLoadingScreenBarValue(int val)
+{
+
+	//loadingBarWidth_ = nothing::Map<float>(loadingBarWidth_, 0.0f, static_cast<float>(val), 0.0f, 90.0f);
+	loadingBarWidth_ = nothing::Map<float>(static_cast<float>(val), 0.0f, 100.0f, 0.0f, 180.0f);
+	nothing::LogInfo("Bar val: " + std::to_string(loadingBarWidth_));
+
+}
+
+
+//=============================================================
+
+
+void nothing::UserInterface::SetIsGameLoaded(bool val)
+{
+
+	isGameLoaded = val;
+
+}
+
+
+//=============================================================
+
+
 void nothing::UserInterface::SwitchContext(UIContext newContext)
 {
 
@@ -520,6 +676,14 @@ void nothing::UserInterface::SwitchContext(UIContext newContext)
 
 void nothing::UserInterface::ClearEvent()
 {
+
+	if (currentEvent != UIEvent::None)
+	{
+
+		nothing::LogInfo("Cleared UI event");
+
+	}
+
 
 	currentEvent = UIEvent::None;
 
@@ -615,7 +779,7 @@ void nothing::UserInterface::CenteredText(const char* text)
 
 // "bool flipVert" serve per flippare verticalmente la texture al caricamento(stbi_set_flip_vertically_on_load(true)).
 // Per qualche motivo alcune texture si vedono bene anche se stbi_set_flip_vertically_on_load è FALSO, altre no
-uint32_t nothing::UserInterface::CreateUITexture(const char* texturePath, bool flipVert)
+uint32_t nothing::UserInterface::CreateUITexture(const char* texturePath, bool flipVert, int32_t filter)
 {
 
 	uint32_t res;
@@ -629,8 +793,8 @@ uint32_t nothing::UserInterface::CreateUITexture(const char* texturePath, bool f
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)filter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)filter);
 
 
 	int width, height, nrChannels;
@@ -709,7 +873,23 @@ void nothing::UserInterface::ShowNewGamePanel(ImVec2& scrSz)
 		ImGui::Separator();
 		CenteredText("Atto I - Lo Ierofante");
 		ImGui::Separator();
-		if (ImGui::Button("Scena 1 - L'edificio fantasma", ImVec2(winSz.x, 0))) { showNewGamePanel = false; showLoadGamePanel = false; showOptionsPanel = false; currentEvent = UIEvent::BeginGame; }
+
+
+		if (ImGui::Button("Scena 1 - L'edificio fantasma", ImVec2(winSz.x, 0)))
+		{
+
+			UpdateLoadingScreenBarValue(0);
+			doFadePanelIn_ = true;
+			ctx_->audioManager->StopMainMenuAmbientSound();
+			//fadeInPanel = false;
+			showNewGamePanel = false;
+			showLoadGamePanel = false;
+			showOptionsPanel = false;
+			//currentEvent = UIEvent::BeginGame;
+
+		}
+		
+		
 		ImGui::Button("Scena 2 - La Città d'Acciaio", ImVec2(winSz.x, 0));
 		ImGui::Button("Scena 3 - Attività illecita", ImVec2(winSz.x, 0));
 		ImGui::Separator();
@@ -1155,7 +1335,7 @@ void nothing::UserInterface::RunUIAnimations(ImDrawList* _dl, ImVec2& scrSz, dou
 
 		auto [posX, alpha] = testUIAnim1_->peek();
 
-
+		
 		float imgScaleFac = std::min(scrSz.x / 1920, scrSz.y / 1080) * 1.5f;
 		_dl->AddImage(uiTexture_MenuAnim1, ImVec2((0.0f - posX) * imgScaleFac, -100.0f * imgScaleFac), ImVec2((1920.0f - posX) * imgScaleFac, 1080.0f * imgScaleFac), ImVec2(0, 1), ImVec2(1, 0), IM_COL32(255, 255, 255, alpha));
 
