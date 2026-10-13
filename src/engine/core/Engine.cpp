@@ -131,6 +131,7 @@ bool nothing::Engine::Init(LaunchOptions& lopts)
 	if (lopts.noSplash == true)
 	{
 
+		audioManager_.StartMainMenuAmbientSound();
 		gameState_ = GameState::MainMenu;
 		userInterface_.SwitchContext(UIContext::MainMenu);
 
@@ -389,8 +390,11 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 		resourceManager_.DeleteAllModels3D();
 		resourceManager_.DeleteAllTextures();
 		userInterface_  .SwitchContext(UIContext::MainMenu);
+		userInterface_  .SetIsGameLoaded(false);
+		windowManager_  .SetMouseVisible(true);
 		gameState_      = GameState::MainMenu;
 		nothing::InterrogateMemoryStatus();
+		nothing::LogInfo("Cleared scene");
 		break;
 
 

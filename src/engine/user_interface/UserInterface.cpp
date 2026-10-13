@@ -249,9 +249,10 @@ void nothing::UserInterface::UpdateMainMenuContext(double deltaTime)
 		if (fadePanelAlpha_ < 0)
 		{
 
-			doFadePanelOut_ = false;
-			fadePanelAlpha_ = 0;
-			canRunUIAnimations_ = true;
+			doFadePanelOut_      = false;
+			fadePanelAlpha_      = 0;
+			canRunUIAnimations_  = true;
+			canPressMenuButtons_ = true;
 
 		}
 
@@ -267,9 +268,11 @@ void nothing::UserInterface::UpdateMainMenuContext(double deltaTime)
 		if (fadePanelAlpha_ > 255)
 		{
 
-			doFadePanelIn_ = false;
-			fadePanelAlpha_ = 255;
+			doFadePanelIn_      = false;
+			fadePanelAlpha_     = 255;
 			canRunUIAnimations_ = false;
+
+
 			nothing::LogInfo("Completely faded panel in");
 			SwitchContext(UIContext::LoadingScreen);
 
@@ -376,9 +379,9 @@ void nothing::UserInterface::UpdateGameContext()
 	dl->AddImage(uiTexture_Health, ImVec2(10, scrSz.y - 10), ImVec2(letterboxHeight - 10, (scrSz.y - letterboxHeight) + 10));
 
 
-	static float x = 60;
-	static float y = 60;
-	static float width = 520;
+	static float x      = 60;
+	static float y      = 60;
+	static float width  = 520;
 	static float width2 = 520;
 	static float height = 10;
 	dl->AddRectFilled(ImVec2(x, scrSz.y - letterboxHeight + y), ImVec2(width, scrSz.y - height), IM_COL32(90, 90, 90, 255));
@@ -408,6 +411,53 @@ void nothing::UserInterface::UpdateGameContext()
 	dl->AddRectFilled(ImVec2(scrSz.x - 100.0, scrSz.y - 100), ImVec2(scrSz.x - 20.0, scrSz.y - 10), IM_COL32(20, 194, 224, 150));
 
 
+	if (doFadePanelOut_)
+	{
+
+		fadePanelAlpha_ -= fadeSpeed_;
+
+
+		if (fadePanelAlpha_ < 0)
+		{
+
+			fadePanelAlpha_      = 0;
+			doFadePanelOut_      = false;
+			canPressMenuButtons_ = true;
+
+		}
+
+	}
+
+
+	// SICURAMENTE c'è un metodo migliore per questo ma sognu pigru wangù
+	if (doFadePanelIn_)
+	{
+
+		fadePanelAlpha_ += fadeSpeed_;
+
+
+		if (fadePanelAlpha_ > 255)
+		{
+
+			fadePanelAlpha_      = 255;
+			doFadePanelIn_       = false;
+			doFadePanelOut_      = true; // Reimposta per quando si ritorna al contesto menù
+			canPressMenuButtons_ = true;
+
+			// Reimposta le animazioni UI
+			testUIAnim1_->seek(0);
+
+			nothing::LogInfo("Returning to main menu...");
+			currentEvent = UIEvent::ReturnToMenu;
+
+		}
+
+	}
+
+
+	dl->AddRectFilled(ImVec2(0.0f, 0.0f), ImVec2(scrSz.x, scrSz.y), IM_COL32(0, 0, 0, fadePanelAlpha_));
+
+
 	ImGui::End();
 	ImGui::PopStyleVar(2);
 	ImGui::PopStyleColor();
@@ -425,13 +475,19 @@ void nothing::UserInterface::UpdateGameContext()
 	if (ctx_->inputManager->IsActionTriggered(GameAction::Exit))
 	{
 
-		showPauseMenu = true;
-		ctx_->windowManager->SetMouseVisible(true);
-		ctx_->isGamePaused = true;
+		// Riciclare sempre le variabili!
+		if (canPressMenuButtons_)
+		{
+
+			ctx_->windowManager->SetMouseVisible(true);
+			ctx_->isGamePaused = true;
+			showPauseMenu = true;
+
+		}
 
 	}
 
-
+	
 	if (showPauseMenu)
 	{
 
@@ -592,7 +648,6 @@ void nothing::UserInterface::UpdateLoadingScreenContext()
 	static int alpha = 255;
 	
 
-
 	if (!isGameLoaded)
 	{
 
@@ -619,6 +674,7 @@ void nothing::UserInterface::UpdateLoadingScreenContext()
 
 			alpha = 255;
 			currentEvent = UIEvent::SwitchToGameContext;
+			doFadePanelOut_ = true;
 
 		}
 
@@ -745,7 +801,7 @@ bool nothing::UserInterface::MenuButton(const char* text, ImVec2 pos, ImVec2 siz
 	draw->AddText(ImVec2(pos.x + 20, pos.y + size.y - (size.y / 2) - textYTolerance), IM_COL32(255, 255, 255, 255), text);
 
 
-	if (clicked)
+	if (clicked && canPressMenuButtons_)
 	{
 
 		return true;
@@ -885,6 +941,7 @@ void nothing::UserInterface::ShowNewGamePanel(ImVec2& scrSz)
 			showNewGamePanel = false;
 			showLoadGamePanel = false;
 			showOptionsPanel = false;
+			canPressMenuButtons_ = false;
 			//currentEvent = UIEvent::BeginGame;
 
 		}
@@ -1180,6 +1237,10 @@ void nothing::UserInterface::ShowBackToMenuWarning(ImVec2& scrSz)
 		CenteredText("(I progressi non salvati andranno PERSI!)");
 
 
+		ImGui::Separator();
+		ImGui::Spacing();
+
+
 		if (ImGui::Button("Sì", ImVec2(50.0f, 0.0f)))
 		{
 
@@ -1196,7 +1257,13 @@ void nothing::UserInterface::ShowBackToMenuWarning(ImVec2& scrSz)
 			showBackToMenuWarning = false;
 
 
-			currentEvent = UIEvent::ReturnToMenu;
+			ctx_->windowManager->SetMouseInvisible();
+
+
+			doFadePanelIn_ = true;
+			canPressMenuButtons_ = false;
+			
+			//currentEvent = UIEvent::ReturnToMenu;
 
 		}
 

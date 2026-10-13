@@ -19,8 +19,8 @@
 #define LOAD_GAME_PANEL_HEIGHT      350.0f
 #define OPTIONS_PANEL_WIDTH         800.0f
 #define OPTIONS_PANEL_HEIGHT        450.0f
-#define BACK_TO_MENU_WARNING_WIDTH  500.0f
-#define BACK_TO_MENU_WARNING_HEIGHT 120.0f
+#define BACK_TO_MENU_WARNING_WIDTH  590.0f
+#define BACK_TO_MENU_WARNING_HEIGHT 160.0f
 
 
 namespace nothing
@@ -140,9 +140,16 @@ namespace nothing
 		bool  doFadePanelOut_     = true;
 		bool  doFadePanelIn_      = false;
 		bool  canRunUIAnimations_ = false;
-		int   fadePanelAlpha_     = 255;
-		int   fadeSpeed_          = 1;
-		float loadingBarWidth_    = 0.0f;
+
+
+		// Questo è FALSO quando il fade panel è in movimento,
+		// evita che il giocatore usi i tasti del menù per non
+		// causare un softlock quando il pannello non è completamente
+		// scuro o trasparente
+		bool  canPressMenuButtons_ = false;
+		int   fadePanelAlpha_      = 255;
+		int   fadeSpeed_           = 3;
+		float loadingBarWidth_     = 0.0f;
 
 
 		bool anim1Active_ = true;
