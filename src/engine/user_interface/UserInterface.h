@@ -2,6 +2,7 @@
 #include <SDL3/SDL.h>
 #include <vector>
 #include <string>
+#include <memory>
 
 
 // La coppia che scoppia
@@ -11,6 +12,9 @@
 
 #include "../graphics/IMGUI/imgui.h"
 #include "../core/EngineContext.h"
+
+
+#include "contexts/BaseUIContext.h"
 
 
 #define NEW_GAME_PANEL_WIDTH        550.0f
@@ -31,7 +35,6 @@ namespace nothing
 
 		None,
 		BeginGame,
-		SwitchToGameContext,
 		ReturnToMenu,
 		CloseGame,
 		ApplyOptions,
@@ -73,17 +76,9 @@ namespace nothing
 		uint32_t currentStyle = 0;
 
 
-		// Qesto diventa VERO per evitare che LoadingScreenContext
-		// dia sempre un evento BeginGame al fade in dello schermo nero
-		bool isGameLoaded = false;
-
-
 		void     UpdateMainMenuContext(double deltaTime);
 		void     UpdateGameContext();
 		void     UpdateSplashScreenContext();
-		void     UpdateLoadingScreenContext();
-		void     UpdateLoadingScreenBarValue(int val); // Valore in percentuale 0 - 100%
-		void     SetIsGameLoaded(bool val); // Questo imposta isGameLoaded
 		void     SwitchContext(UIContext newContext);
 		void     ClearEvent();
 		bool     MenuButton(const char* text, ImVec2 pos, ImVec2 size, int textYTolerance);
@@ -137,19 +132,7 @@ namespace nothing
 
 
 		// Animazioni UI, immagini che scorrono sullo schermo
-		bool  doFadePanelOut_     = true;
-		bool  doFadePanelIn_      = false;
 		bool  canRunUIAnimations_ = false;
-
-
-		// Questo è FALSO quando il fade panel è in movimento,
-		// evita che il giocatore usi i tasti del menù per non
-		// causare un softlock quando il pannello non è completamente
-		// scuro o trasparente
-		bool  canPressMenuButtons_ = false;
-		int   fadePanelAlpha_      = 255;
-		int   fadeSpeed_           = 3;
-		float loadingBarWidth_     = 0.0f;
 
 
 		bool anim1Active_ = true;

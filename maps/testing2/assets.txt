@@ -1,0 +1,5 @@
+_TEXTURES
+tex_floor_concrete_3.png
+tex_wall_plaster_2.png
+nothing_logo.png
+_MODELS3D

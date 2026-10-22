@@ -182,6 +182,7 @@
     <ClInclude Include="core\WindowManager.h" />
     <ClInclude Include="core\Filesystem.h" />
     <ClInclude Include="game\basic\BaseCustomBehaviour.h" />
+    <ClInclude Include="game\basic\GameEvents.h" />
     <ClInclude Include="game\components\Camera.h" />
     <ClInclude Include="game\components\CustomBehaviour.h" />
     <ClInclude Include="game\components\EntityID.h" />
@@ -196,6 +197,10 @@
     <ClInclude Include="game\components\UIDebugValues.h" />
     <ClInclude Include="game\components\Velocity.h" />
     <ClInclude Include="game\custom_behaviours\CameraBehaviour.h" />
+    <ClInclude Include="game\custom_behaviours\MapChangeBehaviour.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="game\custom_behaviours\MoveEntityBehaviour.h">
       <SubType>
       </SubType>
@@ -222,7 +227,9 @@
     <ClInclude Include="core\InputManager.h" />
     <ClInclude Include="core\ResourceManager.h" />
     <ClInclude Include="core\SceneManager.h" />
+    <ClInclude Include="user_interface\contexts\MainMenuUIContext.h" />
     <ClInclude Include="physics\PhysicsManager.h" />
+    <ClInclude Include="user_interface\contexts\BaseUIContext.h" />
     <ClInclude Include="user_interface\UIStyleHelper.h" />
     <ClInclude Include="user_interface\UserInterface.h" />
     <ClInclude Include="utils\Log.h" />
@@ -254,6 +261,7 @@
     <ClCompile Include="core\InputManager.cpp" />
     <ClCompile Include="core\ResourceManager.cpp" />
     <ClCompile Include="core\SceneManager.cpp" />
+    <ClCompile Include="user_interface\contexts\MainMenuUIContext.cpp" />
     <ClCompile Include="physics\PhysicsManager.cpp" />
     <ClCompile Include="user_interface\UIStyleHelper.cpp" />
     <ClCompile Include="user_interface\UserInterface.cpp" />

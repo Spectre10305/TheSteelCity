@@ -16,14 +16,15 @@ struct Header
 enum ObjectType : u32
 {
 
-    Cube     = 0x01,
-    Plane    = 0x02,
-    Prop     = 0x03,
-    Player   = 0x04,
-    Trigger  = 0x05,
-    Interact = 0x06,
-    TestEnt  = 0x07,
-    MoveObj  = 0x08
+    Cube      = 0x01,
+    Plane     = 0x02,
+    Prop      = 0x03,
+    Player    = 0x04,
+    Trigger   = 0x05,
+    Interact  = 0x06,
+    TestEnt   = 0x07,
+    MoveObj   = 0x08,
+    MapChange = 0x09
     
 };
 
@@ -160,6 +161,16 @@ struct ObjectMoveEntity
 };
 
 
+struct ObjectMapChangeEntity
+{
+
+    u64  ID;
+    u32  mapNameLenght;
+    char mapName[mapNameLenght];
+    
+};
+
+
 //=======BASE OGGETTO===================================
 
 
@@ -215,6 +226,12 @@ struct Object
     {
     
         ObjectMoveEntity obj;
+        
+    }
+    else if(type == ObjectType::MapChange)
+    {
+    
+        ObjectMapChangeEntity obj;
         
     }
     

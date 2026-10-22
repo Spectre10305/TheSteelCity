@@ -340,30 +340,11 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 		{
 			
 			resourceManager_.InitDefaults(engineContext_);
-			userInterface_.UpdateLoadingScreenBarValue(10);
-			renderManager_.ClearScreen();
-			userInterface_.Update(CalcDeltaTime());
-			windowManager_.SwapBuffers();
-			nothing::LogInfo("Loading 10%");
-
-
-			sceneManager_   .LoadScene("testing");
-			userInterface_.UpdateLoadingScreenBarValue(55);
-			renderManager_.ClearScreen();
-			userInterface_.Update(CalcDeltaTime());
-			windowManager_.SwapBuffers();
-			nothing::LogInfo("Loading 20%");
-
-			
-			physicsManager_ .InitPhysicsScene();
-			userInterface_.UpdateLoadingScreenBarValue(100);
-			renderManager_.ClearScreen();
-			userInterface_.Update(CalcDeltaTime());
-			windowManager_.SwapBuffers();
-			nothing::LogInfo("Loading 45%");
-
-
-			userInterface_.SetIsGameLoaded(true);
+			sceneManager_.LoadScene("testing");
+			physicsManager_.InitPhysicsScene();
+			userInterface_.SwitchContext(UIContext::Gameplay);
+			windowManager_.SetMouseInvisible();
+			gameState_ = GameState::Gameplay;
 
 		}
 		else
@@ -375,14 +356,6 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 		break;
 
 
-	case UIEvent::SwitchToGameContext:
-		userInterface_.SwitchContext(UIContext::Gameplay);
-		windowManager_  .SetMouseInvisible();
-		gameState_ = GameState::Gameplay;
-		nothing::LogInfo("INIT GAME");
-		break;
-
-
 	case UIEvent::ReturnToMenu:
 		audioManager_   .StartMainMenuAmbientSound();
 		physicsManager_ .DeletePhysicsScene();
@@ -390,11 +363,9 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 		resourceManager_.DeleteAllModels3D();
 		resourceManager_.DeleteAllTextures();
 		userInterface_  .SwitchContext(UIContext::MainMenu);
-		userInterface_  .SetIsGameLoaded(false);
 		windowManager_  .SetMouseVisible(true);
 		gameState_      = GameState::MainMenu;
 		nothing::InterrogateMemoryStatus();
-		nothing::LogInfo("Cleared scene");
 		break;
 
 
@@ -415,6 +386,9 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 		break;
 
 	}
+
+
+	sceneManager_.eventDispacher.update();
 
 
 	// Cancella gli eventi UI

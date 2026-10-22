@@ -43,8 +43,9 @@ namespace nothing
 		EngineServices* engineServices_ = nullptr;
 
 
-		entt::registry* sceneRegistry_ = nullptr;
-		entt::entity self_ = entt::null;
+		entt::registry*   sceneRegistry_        = nullptr;
+		entt::dispatcher* sceneEventDispatcher_ = nullptr;
+		entt::entity      self_                 = entt::null;
 
 
 		double localTimer_ = 0.0;
@@ -83,12 +84,13 @@ namespace nothing
 		bool         Raycast(const glm::vec3& origin, const glm::vec3& direction, RaycastHit& outRay) { return engineServices_->Raycast(origin, direction, outRay); }
 		entt::entity ResolveEntityID(uint64_t entID)                                                  { return engineServices_->ResolveEntityID(entID); } // Recupera l'entità EnTT tramite ID
 
-		void SetRegistry(entt::registry& r) { sceneRegistry_ = &r; }
-		void SetEntity(entt::entity e) { self_ = e; }
+
+		void SetRegistry(entt::registry& r)     { sceneRegistry_        = &r; }
+		void SetDispatcher(entt::dispatcher& d) { sceneEventDispatcher_ = &d; }
+		void SetEntity(entt::entity e)          { self_                 = e;  }
 
 
 		friend class SceneManager;
-		friend class GameContext;
 
 	};
 

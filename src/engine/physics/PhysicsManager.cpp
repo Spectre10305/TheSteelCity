@@ -132,16 +132,25 @@ void nothing::PhysicsManager::Update(double deltaTime)
 		}
 
 
-		auto bodyIDsView = ctx_->sceneManager->registry.view<PhysicsBody, Transform>();
+		auto bodyIDsView = ctx_->sceneManager->registry.view<PhysicsBody, Transform>(entt::exclude<PlayerTag>);
 
 
 		for (auto [ent, physB, tr] : bodyIDsView.each())
 		{
-
-			// Salta gli oggetti statici
+			
 			if (physB.bodyType == BodyType::Static)
+			{
+
+				// Invece di applicare la trasformazione in base al corpo fisico, facciamo il contrario
+				b3Vec3 pos = B3Vec3_FromGlm(tr.position);
+				b3Quat rot = B3Quat_FromGlm(tr.rotation);
+				b3Body_SetTransform(physB.bodyID, pos, rot);
+
+
 				continue;
 
+			}
+				
 
 			b3Vec3 pos = b3Body_GetPosition(physB.bodyID);
 			b3Quat rot = b3Body_GetRotation(physB.bodyID);

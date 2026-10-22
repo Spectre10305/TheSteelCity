@@ -14,6 +14,7 @@
 #include "../core/SceneManager.h"
 #include "../audio/AudioManager.h"
 #include "../game/components/UIDebugValues.h"
+#include "contexts/MainMenuUIContext.h"
 #include <string>
 #include <tweeny/tweeny.h>
 
@@ -126,7 +127,6 @@ void nothing::UserInterface::Init(EngineContext& ctx)
 
 		});
 
-
 }
 
 
@@ -156,11 +156,6 @@ void nothing::UserInterface::Update(double deltaTime)
 
 	case UIContext::SplashScreen:
 		UpdateSplashScreenContext();
-		break;
-
-
-	case UIContext::LoadingScreen:
-		UpdateLoadingScreenContext();
 		break;
 
 
@@ -220,6 +215,7 @@ void nothing::UserInterface::UpdateMainMenuContext(double deltaTime)
 	ImGui::Begin("MainMenuPanel", nullptr, flags);
 
 
+	// Logo del gioco
 	float logoScaleFac = std::min(scrSz.x / 1920, scrSz.y / 1080);
 	ImGui::Image(uiTexture_Logo, ImVec2(900 * logoScaleFac, 700 * logoScaleFac));
 
@@ -236,60 +232,10 @@ void nothing::UserInterface::UpdateMainMenuContext(double deltaTime)
 	if (MenuButton(">_ESCI_DAL_GIOCO", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { currentEvent = UIEvent::CloseGame; }
 
 	
-	ImDrawList* dl = ImGui::GetForegroundDrawList();
 	ImDrawList* bgDl = ImGui::GetBackgroundDrawList();
 
 
-	if (doFadePanelOut_)
-	{
-
-		fadePanelAlpha_ -= fadeSpeed_;
-
-
-		if (fadePanelAlpha_ < 0)
-		{
-
-			doFadePanelOut_      = false;
-			fadePanelAlpha_      = 0;
-			canRunUIAnimations_  = true;
-			canPressMenuButtons_ = true;
-
-		}
-
-	}
-	
-
-	if (doFadePanelIn_)
-	{
-
-		fadePanelAlpha_ += fadeSpeed_;
-
-
-		if (fadePanelAlpha_ > 255)
-		{
-
-			doFadePanelIn_      = false;
-			fadePanelAlpha_     = 255;
-			canRunUIAnimations_ = false;
-
-
-			nothing::LogInfo("Completely faded panel in");
-			SwitchContext(UIContext::LoadingScreen);
-
-		}
-
-	}
-
-
-	if (canRunUIAnimations_)
-	{
-
-		RunUIAnimations(bgDl, scrSz, deltaTime);
-
-	}
-
-
-	dl->AddRectFilled(ImVec2(0.0f, 0.0f), ImVec2(scrSz.x, scrSz.y), IM_COL32(0, 0, 0, fadePanelAlpha_));
+	RunUIAnimations(bgDl, scrSz, deltaTime);
 
 
 	ImGui::End();
@@ -411,58 +357,12 @@ void nothing::UserInterface::UpdateGameContext()
 	dl->AddRectFilled(ImVec2(scrSz.x - 100.0, scrSz.y - 100), ImVec2(scrSz.x - 20.0, scrSz.y - 10), IM_COL32(20, 194, 224, 150));
 
 
-	if (doFadePanelOut_)
-	{
-
-		fadePanelAlpha_ -= fadeSpeed_;
-
-
-		if (fadePanelAlpha_ < 0)
-		{
-
-			fadePanelAlpha_      = 0;
-			doFadePanelOut_      = false;
-			canPressMenuButtons_ = true;
-
-		}
-
-	}
-
-
-	// SICURAMENTE c'è un metodo migliore per questo ma sognu pigru wangù
-	if (doFadePanelIn_)
-	{
-
-		fadePanelAlpha_ += fadeSpeed_;
-
-
-		if (fadePanelAlpha_ > 255)
-		{
-
-			fadePanelAlpha_      = 255;
-			doFadePanelIn_       = false;
-			doFadePanelOut_      = true; // Reimposta per quando si ritorna al contesto menù
-			canPressMenuButtons_ = true;
-
-			// Reimposta le animazioni UI
-			testUIAnim1_->seek(0);
-
-			nothing::LogInfo("Returning to main menu...");
-			currentEvent = UIEvent::ReturnToMenu;
-
-		}
-
-	}
-
-
-	dl->AddRectFilled(ImVec2(0.0f, 0.0f), ImVec2(scrSz.x, scrSz.y), IM_COL32(0, 0, 0, fadePanelAlpha_));
-
-
 	ImGui::End();
 	ImGui::PopStyleVar(2);
 	ImGui::PopStyleColor();
 
 
+	ImGui::SetNextWindowPos(ImVec2(30, 30), ImGuiCond_FirstUseEver);
 	ImGui::Begin("UI Debug values");
 	auto& uiDbgVals = ctx_->sceneManager->registry.ctx().get<nothing::components::UIDebugValues>();
 	ImGui::SetNextItemWidth(100.0f);
@@ -475,15 +375,9 @@ void nothing::UserInterface::UpdateGameContext()
 	if (ctx_->inputManager->IsActionTriggered(GameAction::Exit))
 	{
 
-		// Riciclare sempre le variabili!
-		if (canPressMenuButtons_)
-		{
-
-			ctx_->windowManager->SetMouseVisible(true);
-			ctx_->isGamePaused = true;
-			showPauseMenu = true;
-
-		}
+		ctx_->windowManager->SetMouseVisible(true);
+		ctx_->isGamePaused = true;
+		showPauseMenu = true;
 
 	}
 
@@ -593,132 +487,6 @@ void nothing::UserInterface::UpdateSplashScreenContext()
 //=============================================================
 
 
-void nothing::UserInterface::UpdateLoadingScreenContext()
-{
-
-	ImVec2 scrSz = ImGui::GetIO().DisplaySize;
-
-
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-
-
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-
-
-	ImGui::SetNextWindowPos(ImVec2(0, 0));
-	ImGui::SetNextWindowSize(ImVec2(scrSz.x, scrSz.y));
-
-
-	ImGuiWindowFlags ldfFlags =
-		ImGuiWindowFlags_NoTitleBar |
-		ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoScrollbar |
-		ImGuiWindowFlags_NoScrollWithMouse |
-		ImGuiWindowFlags_NoCollapse |
-		ImGuiWindowFlags_NoBringToFrontOnFocus |
-		ImGuiWindowFlags_NoNavFocus |
-		ImGuiWindowFlags_NoDecoration |
-		ImGuiWindowFlags_NoInputs |
-		ImGuiWindowFlags_NoFocusOnAppearing;
-
-
-	ImGui::Begin("LoadingScreen", nullptr, ldfFlags);
-
-
-	ImDrawList* dl = ImGui::GetForegroundDrawList();
-
-
-	// BG Barra caricamento
-	float barWidth = 90.0f;
-	float barHeight = 20.0f;
-
-
-	ImVec2 centerScr      = ImVec2(scrSz.x / 2.0f, scrSz.y / 2.0f);
-	ImVec2 loadingBarBGP1 = ImVec2(centerScr.x - barWidth, centerScr.y - barHeight);
-	ImVec2 loadingBarBGP2 = ImVec2(centerScr.x + barWidth, centerScr.y + barHeight);
-	ImVec2 loadingBarP2   = ImVec2(loadingBarBGP1.x + loadingBarWidth_, centerScr.y + barHeight);
-
-
-	dl->AddRectFilled(loadingBarBGP1, loadingBarBGP2, IM_COL32(50, 50, 50, 255)); // BG
-	dl->AddRectFilled(loadingBarBGP1, loadingBarP2, IM_COL32(0, 255, 255, 255));  // Bar
-
-
-	static int alpha = 255;
-	
-
-	if (!isGameLoaded)
-	{
-
-		alpha -= fadeSpeed_;
-
-
-		if (alpha < 0)
-		{
-
-			alpha = 0;
-			currentEvent = UIEvent::BeginGame;
-
-		}
-
-	}
-	else
-	{
-
-		alpha += fadeSpeed_;
-
-		
-		if (alpha > 255)
-		{
-
-			alpha = 255;
-			currentEvent = UIEvent::SwitchToGameContext;
-			doFadePanelOut_ = true;
-
-		}
-
-	}
-
-
-	// Screen fade
-	dl->AddRectFilled(ImVec2(0.0f, 0.0f), scrSz, IM_COL32(0, 0, 0, alpha));
-
-
-	ImGui::End();
-	ImGui::PopStyleVar(2);
-	ImGui::PopStyleColor();
-
-}
-
-
-//=============================================================
-
-
-void nothing::UserInterface::UpdateLoadingScreenBarValue(int val)
-{
-
-	//loadingBarWidth_ = nothing::Map<float>(loadingBarWidth_, 0.0f, static_cast<float>(val), 0.0f, 90.0f);
-	loadingBarWidth_ = nothing::Map<float>(static_cast<float>(val), 0.0f, 100.0f, 0.0f, 180.0f);
-	nothing::LogInfo("Bar val: " + std::to_string(loadingBarWidth_));
-
-}
-
-
-//=============================================================
-
-
-void nothing::UserInterface::SetIsGameLoaded(bool val)
-{
-
-	isGameLoaded = val;
-
-}
-
-
-//=============================================================
-
-
 void nothing::UserInterface::SwitchContext(UIContext newContext)
 {
 
@@ -801,7 +569,7 @@ bool nothing::UserInterface::MenuButton(const char* text, ImVec2 pos, ImVec2 siz
 	draw->AddText(ImVec2(pos.x + 20, pos.y + size.y - (size.y / 2) - textYTolerance), IM_COL32(255, 255, 255, 255), text);
 
 
-	if (clicked && canPressMenuButtons_)
+	if (clicked)
 	{
 
 		return true;
@@ -934,15 +702,11 @@ void nothing::UserInterface::ShowNewGamePanel(ImVec2& scrSz)
 		if (ImGui::Button("Scena 1 - L'edificio fantasma", ImVec2(winSz.x, 0)))
 		{
 
-			UpdateLoadingScreenBarValue(0);
-			doFadePanelIn_ = true;
 			ctx_->audioManager->StopMainMenuAmbientSound();
-			//fadeInPanel = false;
 			showNewGamePanel = false;
 			showLoadGamePanel = false;
 			showOptionsPanel = false;
-			canPressMenuButtons_ = false;
-			//currentEvent = UIEvent::BeginGame;
+			currentEvent = UIEvent::BeginGame;
 
 		}
 		
@@ -1255,15 +1019,7 @@ void nothing::UserInterface::ShowBackToMenuWarning(ImVec2& scrSz)
 			showOptionsPanel      = false;
 			showPauseMenu         = false;
 			showBackToMenuWarning = false;
-
-
-			ctx_->windowManager->SetMouseInvisible();
-
-
-			doFadePanelIn_ = true;
-			canPressMenuButtons_ = false;
-			
-			//currentEvent = UIEvent::ReturnToMenu;
+			currentEvent          = UIEvent::ReturnToMenu;
 
 		}
 

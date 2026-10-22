@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 #include "EngineContext.h"
 #include "../game/basic/BaseCustomBehaviour.h" // EngineServices
+#include "../game/basic/GameEvents.h"
 
 
 namespace nothing
@@ -117,6 +118,15 @@ namespace nothing
 	};
 
 
+	struct MapChangeEntityInfo
+	{
+
+		uint64_t    ID          = 0;
+		std::string nextMapName = "";
+
+	};
+
+
 	// Queste sono quelle mesh generate per il mondo come cubi o piani
 	struct WorldMesh
 	{
@@ -147,6 +157,7 @@ namespace nothing
 		// NOTA: "mapName" deve essere il solo nome della mappa, niente ".notmap" o percorsi
 		void LoadScene(const std::string& mapName);
 		void UnloadScene();
+		void OnChangeSceneRequest(const GameEvent_ChangeMap& changeMapEvent);
 		entt::entity ResolveEntityID(uint64_t entID);
 
 
@@ -160,6 +171,7 @@ namespace nothing
 		void      CreateInteractableObject(const InteractableInfo& interInfo);
 		void      CreateTestEntityObject(const TestEntityInfo& testEntInfo);
 		void      CreateMoveObjectEntityObject(const MoveObjectEntityInfo& movObjInfo);
+		void      CreateMapChangeEntityObject(const MapChangeEntityInfo& mapChangeInfo);
 		
 
 
@@ -174,6 +186,7 @@ namespace nothing
 
 
 		entt::registry registry;
+		entt::dispatcher eventDispacher;
 
 
 		std::vector<WorldMesh> worldMeshes;
@@ -197,6 +210,7 @@ namespace nothing
 		void ReadInteractableDataFromFile(std::fstream& f);
 		void ReadTestEntityDataFromFile(std::fstream& f);
 		void ReadMoveObjectEntityDataFromFile(std::fstream& f);
+		void ReadMapChangeEntityDataFromFile(std::fstream& f);
 
 	};
 

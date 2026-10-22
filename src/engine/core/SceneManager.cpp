@@ -25,6 +25,7 @@
 #include "../game/custom_behaviours/PlayerBehaviour.h"
 #include "../game/custom_behaviours/TestCustomBehaviour.h"
 #include "../game/custom_behaviours/MoveEntityBehaviour.h"
+#include "../game/custom_behaviours/MapChangeBehaviour.h"
 
 
 // =================================================
@@ -44,6 +45,9 @@ void nothing::SceneManager::Init(EngineContext& ctx)
 	engineServices_.PrintErrorMessage   = nothing::LogError;
 	engineServices_.Raycast             = std::bind(&nothing::PhysicsManager::RaycastInternal, ctx_->physicsManager, _1, _2, _3);
 	engineServices_.ResolveEntityID     = std::bind(&nothing::SceneManager::ResolveEntityID, this, _1);
+
+
+	eventDispacher.sink<GameEvent_ChangeMap>().connect<&nothing::SceneManager::OnChangeSceneRequest>(this);
 
 }
 
@@ -216,7 +220,7 @@ void nothing::SceneManager::LoadScene(const std::string& mapName)
 #pragma endregion
 
 
-		for (int i = 0; i < objectsCount; i++)
+		for (uint32_t i = 0; i < objectsCount; i++)
 		{
 			
 			uint32_t objIDByte;
@@ -260,8 +264,14 @@ void nothing::SceneManager::LoadScene(const std::string& mapName)
 				ReadTestEntityDataFromFile(mapFileStream);
 				break;
 
+
 			case 0x08:
 				ReadMoveObjectEntityDataFromFile(mapFileStream);
+				break;
+
+
+			case 0x09:
+				ReadMapChangeEntityDataFromFile(mapFileStream);
 				break;
 
 
@@ -336,6 +346,37 @@ void nothing::SceneManager::UnloadScene()
 	registry.ctx().clear();
 	registry.clear();
 	entitiesMap.clear();
+
+}
+
+
+// =================================================
+
+
+void nothing::SceneManager::OnChangeSceneRequest(const GameEvent_ChangeMap& changeMapEvent)
+{
+
+	nothing::LogInfo("Change map event triggered in SceneManager: " + changeMapEvent.nextMapName);
+
+
+
+	ctx_->physicsManager->  DeletePhysicsScene();
+	ctx_->sceneManager->    UnloadScene();
+	ctx_->resourcesManager->DeleteAllModels3D();
+	ctx_->resourcesManager->DeleteAllTextures();
+
+
+	ctx_->resourcesManager->InitDefaults(*ctx_);
+	ctx_->sceneManager->LoadScene(changeMapEvent.nextMapName);
+	ctx_->physicsManager->InitPhysicsScene();
+
+
+
+
+	//ctx_->physicsManager->DeletePhysicsScene();
+	//UnloadScene();
+	//LoadScene(changeMapEvent.nextMapName);
+	//ctx_->physicsManager->InitPhysicsScene();
 
 }
 
@@ -864,6 +905,32 @@ void nothing::SceneManager::CreateMoveObjectEntityObject(const MoveObjectEntityI
 
 
 // =================================================
+
+
+void nothing::SceneManager::CreateMapChangeEntityObject(const MapChangeEntityInfo& mapChangeInfo)
+{
+
+	using namespace nothing::components;
+
+
+	auto mapEnt = registry.create();
+	registry.emplace<EntityID>(mapEnt, mapChangeInfo.ID);
+	entitiesMap.emplace(mapChangeInfo.ID, mapEnt);
+
+
+	auto mapChangeBeh = std::make_unique<MapChangeBehaviour>();
+	mapChangeBeh->SetEntity(mapEnt);
+	mapChangeBeh->SetRegistry(registry);
+	mapChangeBeh->SetDispatcher(eventDispacher);
+	mapChangeBeh->nextMapName = mapChangeInfo.nextMapName;
+
+
+	registry.emplace<CustomBehaviour>(mapEnt, std::move(mapChangeBeh));
+
+}
+
+
+// =================================================
 // ASSETS FILE======================================
 // =================================================
 
@@ -1329,6 +1396,34 @@ void nothing::SceneManager::ReadMoveObjectEntityDataFromFile(std::fstream& f)
 
 
 	CreateMoveObjectEntityObject(moveObjEntInfo);
+
+}
+
+
+// =================================================
+
+
+void nothing::SceneManager::ReadMapChangeEntityDataFromFile(std::fstream& f)
+{
+
+	uint64_t ID;
+	f.read(reinterpret_cast<char*>(&ID), 8);
+
+
+	uint32_t mapNameLenght;
+	f.read(reinterpret_cast<char*>(&mapNameLenght), 4);
+
+
+	std::string mapName(mapNameLenght, '\0');
+	f.read(mapName.data(), mapNameLenght);
+
+
+	MapChangeEntityInfo mapChangeInfo{};
+	mapChangeInfo.ID = ID;
+	mapChangeInfo.nextMapName = mapName;
+
+
+	CreateMapChangeEntityObject(mapChangeInfo);
 
 }
 
