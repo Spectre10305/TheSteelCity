@@ -9,6 +9,7 @@
 #include "../components/Tags.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
+#include "../../utils/Map.h"
 
 
 namespace nothing
@@ -58,6 +59,7 @@ namespace nothing
 			auto& UIDgbVals = GetContextComponent<UIDebugValues>();
 			UIDgbVals.playerWalkSpeed = walkSpeed;
 			UIDgbVals.playerRunSpeed = runSpeed;
+			UIDgbVals.playerHealth = health;
 
 		}
 
@@ -68,9 +70,17 @@ namespace nothing
 			using namespace nothing::components;
 
 
+			auto& transform    = GetComponent<Transform>();
+			auto& cam          = GetComponent<Camera>();
+			auto& velocity     = GetComponent<Velocity>();
+
+
+			auto& input        = GetContextComponent<PlayerInput>();
+			auto& UIDgbVals    = GetContextComponent<UIDebugValues>();
 			auto& uiSharedVals = GetContextComponent<UISharedValues>();
 
 
+			// Fade out del pannello nero all'inizio della scena
 			if (doPanelFadeOut)
 			{
 
@@ -88,13 +98,11 @@ namespace nothing
 			}
 
 
-			auto& transform = GetComponent<Transform>();
-			auto& cam = GetComponent<Camera>();
-			auto& input = GetContextComponent<PlayerInput>();
-			auto& UIDgbVals = GetContextComponent<UIDebugValues>();
-			auto& velocity = GetComponent<Velocity>();
+			// Aggiornamento salute giocatore
+			uiSharedVals.healthBarValue = nothing::Map<float>(static_cast<float>(UIDgbVals.playerHealth), 0.0f, 100.0f, 1.0f, 520.0f);
 
 
+			// Movimento e rotazione giocatore
 			glm::quat movYaw = glm::angleAxis(glm::radians(-input.mouseXDelta), glm::vec3(0, 1, 0));
 			transform.rotation = movYaw * transform.rotation;
 			glm::vec3 forward = transform.rotation * glm::vec3(0.0f, 0.0f, 1.0f);
@@ -123,6 +131,7 @@ namespace nothing
 			}
 
 
+			// Interazione col mondo di gioco
 			if (input.useKeyPressed)
 			{
 

@@ -29,10 +29,10 @@ namespace nothing
 		// =================================================
 
 
-		static int Int(int min, int max)
+		static int32_t Int32(int32_t min, int32_t max)
 		{
 
-			std::uniform_int_distribution<int> distr(min, max);
+			std::uniform_int_distribution<int32_t> distr(min, max);
 			return distr(gRng);
 
 		}
@@ -41,10 +41,22 @@ namespace nothing
 		// =================================================
 
 
-		static float Float(float min, float max)
+		static uint64_t Int64(uint64_t min, uint64_t max)
 		{
 
-			std::uniform_real_distribution<float> distr(min, max);
+			std::uniform_int_distribution<uint64_t> distr(min, max);
+			return distr(gRng);
+
+		}
+
+
+		// =================================================
+
+
+		static float_t Float(float_t min, float_t max)
+		{
+
+			std::uniform_real_distribution<float_t> distr(min, max);
 			return distr(gRng);
 
 		}

@@ -27,6 +27,7 @@
 #include "../game/custom_behaviours/TestCustomBehaviour.h"
 #include "../game/custom_behaviours/MoveEntityBehaviour.h"
 #include "../game/custom_behaviours/MapChangeBehaviour.h"
+#include "../game/custom_behaviours/DialogueGenericBehaviour.h"
 
 
 // =================================================
@@ -293,6 +294,44 @@ void nothing::SceneManager::LoadScene(const std::string& mapName)
 		mapFileStream.close();
 
 	}
+
+
+	// Sezione-per-creare-gli-oggetti-di-gioco-a-mano-5000(TM)
+
+
+	nothing::DialogueGenericEntityInfo dialogueInfo{};
+	dialogueInfo.ID = nothing::Random::Int64(0, UINT64_MAX);
+	dialogueInfo.dialogueTexts[0] = "Testamento.";
+	dialogueInfo.dialogueTexts[1] = "Ahh, testamento...";
+	dialogueInfo.dialogueTexts[2] = "*svita la penna*";
+	dialogueInfo.dialogueTexts[3] = "Bene, cominciamo.";
+
+
+	auto testDialogueEntity = registry.create();
+
+
+	auto testDialogueBeh = std::make_unique<DialogueGenericBehaviour>();
+	testDialogueBeh->SetEntity(testDialogueEntity);
+	testDialogueBeh->SetRegistry(registry);
+	testDialogueBeh->dialogueLines.assign(std::begin(dialogueInfo.dialogueTexts), std::end(dialogueInfo.dialogueTexts));
+
+
+	registry.emplace<EntityID>(testDialogueEntity, dialogueInfo.ID);
+	entitiesMap.emplace(dialogueInfo.ID, testDialogueEntity);
+	registry.emplace<CustomBehaviour>(testDialogueEntity, std::move(testDialogueBeh));
+
+
+	InteractableInfo testDialogueInteractInfo{};
+	testDialogueInteractInfo.ID = nothing::Random::Int64(0, UINT64_MAX);
+	testDialogueInteractInfo.position = glm::vec3(0.0f, 0.0f, 0.0f);
+	testDialogueInteractInfo.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	testDialogueInteractInfo.width = 1.0f;
+	testDialogueInteractInfo.height = 2.0f;
+	testDialogueInteractInfo.depth = 1.0f;
+	testDialogueInteractInfo.targetEntiyID = dialogueInfo.ID;
+
+
+	CreateInteractableObject(testDialogueInteractInfo);
 
 
 	//-----------------------------------------------------------------------------------------------------------------

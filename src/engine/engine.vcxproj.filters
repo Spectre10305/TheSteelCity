@@ -153,12 +153,6 @@
     <ClInclude Include="utils\Map.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="user_interface\contexts\BaseUIContext.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="user_interface\contexts\MainMenuUIContext.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
     <ClInclude Include="game\custom_behaviours\MapChangeBehaviour.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
@@ -166,6 +160,9 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="game\components\UISharedValues.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="game\custom_behaviours\DialogueGenericBehaviour.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>
@@ -240,9 +237,6 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="core\impl_miniaudio.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="user_interface\contexts\MainMenuUIContext.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

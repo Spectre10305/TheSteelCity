@@ -127,6 +127,13 @@ namespace nothing
 	};
 
 
+	struct DialogueGenericEntityInfo
+	{
+		uint64_t ID = 0;
+		std::string dialogueTexts[8] = {};
+	};
+
+
 	// Queste sono quelle mesh generate per il mondo come cubi o piani
 	struct WorldMesh
 	{

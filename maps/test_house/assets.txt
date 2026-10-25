@@ -1,0 +1,8 @@
+_TEXTURES
+tex_floor_wood_2.png
+tex_wall_plaster_8.png
+_MODELS3D
+props_interior_couch_1.obj
+props_interior_armchair_1.obj
+props_interior_table_1.obj
+props_interior_table_2.obj

@@ -14,9 +14,6 @@
 #include "../core/EngineContext.h"
 
 
-#include "contexts/BaseUIContext.h"
-
-
 #define NEW_GAME_PANEL_WIDTH        550.0f
 #define NEW_GAME_PANEL_HEIGHT       350.0f
 #define LOAD_GAME_PANEL_WIDTH       500.0f
