@@ -165,6 +165,9 @@
     <ClInclude Include="game\basic\GameEvents.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="game\components\UISharedValues.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\Engine.cpp">

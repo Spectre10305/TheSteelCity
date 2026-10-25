@@ -12,7 +12,8 @@ namespace nothing
 		{
 
 			float playerWalkSpeed = 0.0f;
-			float playerRunSpeed = 0.0f;
+			float playerRunSpeed  = 0.0f;
+			int   playerHealth    = 0;
 
 		};
 

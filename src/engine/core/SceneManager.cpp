@@ -21,6 +21,7 @@
 #include "../game/components/EntityReference.h"
 #include "../game/components/EntityID.h"
 #include "../game/components/UIDebugValues.h"
+#include "../game/components/UISharedValues.h"
 #include "../game/custom_behaviours/CameraBehaviour.h"
 #include "../game/custom_behaviours/PlayerBehaviour.h"
 #include "../game/custom_behaviours/TestCustomBehaviour.h"
@@ -35,6 +36,7 @@ void nothing::SceneManager::Init(EngineContext& ctx)
 {
 
 	using namespace std::placeholders;
+	using namespace nothing::components;
 
 	ctx_ = &ctx;
 	assert(ctx_->physicsManager != nullptr);
@@ -48,6 +50,11 @@ void nothing::SceneManager::Init(EngineContext& ctx)
 
 
 	eventDispacher.sink<GameEvent_ChangeMap>().connect<&nothing::SceneManager::OnChangeSceneRequest>(this);
+
+
+	registry.ctx().emplace<PlayerInput>();
+	registry.ctx().emplace<UIDebugValues>();
+	registry.ctx().emplace<UISharedValues>();
 
 }
 
@@ -288,10 +295,6 @@ void nothing::SceneManager::LoadScene(const std::string& mapName)
 	}
 
 
-	registry.ctx().emplace<components::PlayerInput>();
-	registry.ctx().emplace<components::UIDebugValues>();
-
-
 	//-----------------------------------------------------------------------------------------------------------------
 
 
@@ -343,7 +346,7 @@ void nothing::SceneManager::UnloadScene()
 
 
 	worldMeshes.clear();
-	registry.ctx().clear();
+	//registry.ctx().clear();
 	registry.clear();
 	entitiesMap.clear();
 

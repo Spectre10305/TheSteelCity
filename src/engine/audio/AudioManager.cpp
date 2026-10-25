@@ -96,7 +96,7 @@ void nothing::AudioManager::StartMainMenuAmbientSound()
 	ma_sound_seek_to_pcm_frame(testAmbianceMainMenu_.get(), 0);
 	ma_sound_reset_stop_time_and_fade(testAmbianceMainMenu_.get());
 	ma_sound_set_volume(testAmbianceMainMenu_.get(), 0.35f);
-	ma_sound_set_fade_in_milliseconds(testAmbianceMainMenu_.get(), 0.0f, 0.35f, 2000);
+	ma_sound_set_fade_in_milliseconds(testAmbianceMainMenu_.get(), 0.0f, 0.35f, mainMenuAmbientSoundFadeTimeMS);
 	ma_sound_start(testAmbianceMainMenu_.get());
 
 }
@@ -110,7 +110,7 @@ void nothing::AudioManager::StopMainMenuAmbientSound()
 
 	//ma_sound_set_fade_in_milliseconds(testAmbianceMainMenu_.get(), -1.0f, 0.0f, 2000);
 	//ma_sound_stop(testAmbianceMainMenu_.get());
-	ma_sound_stop_with_fade_in_milliseconds(testAmbianceMainMenu_.get(), 2000);
+	ma_sound_stop_with_fade_in_milliseconds(testAmbianceMainMenu_.get(), mainMenuAmbientSoundFadeTimeMS);
 
 }
 

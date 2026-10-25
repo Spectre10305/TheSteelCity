@@ -5,6 +5,7 @@
 #include "../components/Velocity.h"
 #include "../components/PlayerInput.h"
 #include "../components/UIDebugValues.h"
+#include "../components/UISharedValues.h"
 #include "../components/Tags.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
@@ -16,6 +17,10 @@ namespace nothing
 	class PlayerBehaviour : public BaseCustomBehaviour
 	{
 
+	private:
+
+		bool doPanelFadeOut = true;
+
 	public:
 
 		glm::vec3 cameraOffset = glm::vec3(-3.0f, 6.0f, 3.0f);
@@ -25,6 +30,9 @@ namespace nothing
 
 		float walkSpeed = 1.5f;
 		float runSpeed = 2.0f;
+
+
+		int health = 100;
 
 
 		void Create()
@@ -58,6 +66,26 @@ namespace nothing
 		{
 
 			using namespace nothing::components;
+
+
+			auto& uiSharedVals = GetContextComponent<UISharedValues>();
+
+
+			if (doPanelFadeOut)
+			{
+
+				uiSharedVals.fadeScreenAlpha -= 1;
+
+
+				if (uiSharedVals.fadeScreenAlpha < 0)
+				{
+
+					uiSharedVals.fadeScreenAlpha = 0;
+					doPanelFadeOut = false;
+
+				}
+
+			}
 
 
 			auto& transform = GetComponent<Transform>();

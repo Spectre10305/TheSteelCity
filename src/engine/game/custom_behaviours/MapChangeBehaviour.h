@@ -3,6 +3,7 @@
 #include "../basic/BaseCustomBehaviour.h"
 #include "../basic/GameEvents.h"
 #include "../components/Tags.h"
+#include "../components/UISharedValues.h"
 
 
 namespace nothing
@@ -13,7 +14,37 @@ namespace nothing
 
 	public:
 
+
 		std::string nextMapName;
+
+
+		void Update(double deltaTime)
+		{
+
+			using namespace nothing::components;
+
+
+			if (doPanelFadeIn)
+			{
+
+				auto& uiSharedVals = GetContextComponent<UISharedValues>();
+
+
+				uiSharedVals.fadeScreenAlpha += 3;
+
+
+				if (uiSharedVals.fadeScreenAlpha > 255)
+				{
+
+					uiSharedVals.fadeScreenAlpha = 255;
+					sceneEventDispatcher_->enqueue<nothing::GameEvent_ChangeMap>(nextMapName);
+					doPanelFadeIn = false;
+
+				}
+
+			}
+
+		}
 
 
 		void TriggerTouch(entt::entity visitor)
@@ -22,14 +53,26 @@ namespace nothing
 			using namespace nothing::components;
 
 
-			if (sceneRegistry_->all_of<PlayerTag>(visitor))
+			if (sceneRegistry_->all_of<PlayerTag>(visitor) && !inTransition)
 			{
 
-				sceneEventDispatcher_->enqueue<nothing::GameEvent_ChangeMap>(nextMapName);
+				doPanelFadeIn = true;
+				inTransition = true;
+
+			}
+			else
+			{
+
+				PrintInfoMessage("Already in transition.");
 
 			}
 
 		}
+
+	private:
+
+		bool doPanelFadeIn = false;
+		bool inTransition = false;
 
 	};
 

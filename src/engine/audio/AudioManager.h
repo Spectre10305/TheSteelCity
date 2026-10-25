@@ -12,6 +12,10 @@ namespace nothing
 	{
 	public:
 
+		// Long ahh variable name :pray:
+		short mainMenuAmbientSoundFadeTimeMS = 1000;
+
+
 		bool Init(EngineContext& ctx);
 		void Update();
 		void Shutdown();

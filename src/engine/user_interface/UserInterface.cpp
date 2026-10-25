@@ -14,6 +14,7 @@
 #include "../core/SceneManager.h"
 #include "../audio/AudioManager.h"
 #include "../game/components/UIDebugValues.h"
+#include "../game/components/UISharedValues.h"
 #include "contexts/MainMenuUIContext.h"
 #include <string>
 #include <tweeny/tweeny.h>
@@ -280,6 +281,7 @@ void nothing::UserInterface::UpdateGameContext()
 {
 
 	ImVec2 scrSz = ImGui::GetIO().DisplaySize;
+	auto& uiSharedVals = ctx_->sceneManager->GetCompFromCtx<nothing::components::UISharedValues>();
 
 
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -325,10 +327,11 @@ void nothing::UserInterface::UpdateGameContext()
 	dl->AddImage(uiTexture_Health, ImVec2(10, scrSz.y - 10), ImVec2(letterboxHeight - 10, (scrSz.y - letterboxHeight) + 10));
 
 
+	// Barra della vita
 	static float x      = 60;
 	static float y      = 60;
 	static float width  = 520;
-	static float width2 = 520;
+	static float width2 = 420;
 	static float height = 10;
 	dl->AddRectFilled(ImVec2(x, scrSz.y - letterboxHeight + y), ImVec2(width, scrSz.y - height), IM_COL32(90, 90, 90, 255));
 
@@ -352,9 +355,12 @@ void nothing::UserInterface::UpdateGameContext()
 	}
 
 
-	// Letterbox
 	dl->AddRectFilled(ImVec2(x, scrSz.y - letterboxHeight + y), ImVec2(width2, scrSz.y - height), barColor);
 	dl->AddRectFilled(ImVec2(scrSz.x - 100.0, scrSz.y - 100), ImVec2(scrSz.x - 20.0, scrSz.y - 10), IM_COL32(20, 194, 224, 150));
+
+
+	// Fade screen
+	dl->AddRectFilled(ImVec2(0, 0), scrSz, IM_COL32(0, 0, 0, uiSharedVals.fadeScreenAlpha));
 
 
 	ImGui::End();
@@ -362,14 +368,18 @@ void nothing::UserInterface::UpdateGameContext()
 	ImGui::PopStyleColor();
 
 
-	ImGui::SetNextWindowPos(ImVec2(30, 30), ImGuiCond_FirstUseEver);
+#pragma region DEBUG VALUES
+	ImGui::SetNextWindowPos(ImVec2(30, 90), ImGuiCond_FirstUseEver);
 	ImGui::Begin("UI Debug values");
 	auto& uiDbgVals = ctx_->sceneManager->registry.ctx().get<nothing::components::UIDebugValues>();
 	ImGui::SetNextItemWidth(100.0f);
 	ImGui::SliderFloat("Player Walk Speed", &uiDbgVals.playerWalkSpeed, 0.1f, 5.0f);
 	ImGui::SetNextItemWidth(100.0f);
 	ImGui::SliderFloat("Player Run Speed", &uiDbgVals.playerRunSpeed, 0.1f, 5.0f);
+	ImGui::SetNextItemWidth(100.0f);
+	ImGui::SliderInt("Player Health", &uiDbgVals.playerHealth, 0.1f, 5.0f);
 	ImGui::End();
+#pragma endregion
 
 
 	if (ctx_->inputManager->IsActionTriggered(GameAction::Exit))
