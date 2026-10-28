@@ -315,16 +315,17 @@ void nothing::UserInterface::UpdateGameContext()
 
 
 	ImDrawList* dl = ImGui::GetForegroundDrawList();
+	ImDrawList* bdl = ImGui::GetBackgroundDrawList();
 
 
 	// Letterbox
 	static float letterboxHeight = 90.0f;
-	dl->AddRectFilled(ImVec2(0, -1), ImVec2(scrSz.x, letterboxHeight), IM_COL32(0, 0, 0, 255));
-	dl->AddRectFilled(ImVec2(0, scrSz.y), ImVec2(scrSz.x, scrSz.y - letterboxHeight), IM_COL32(0, 0, 0, 255));
+	bdl->AddRectFilled(ImVec2(0, -1), ImVec2(scrSz.x, letterboxHeight), IM_COL32(0, 0, 0, 255));
+	bdl->AddRectFilled(ImVec2(0, scrSz.y), ImVec2(scrSz.x, scrSz.y - letterboxHeight), IM_COL32(0, 0, 0, 255));
 
 
 	// Simbolo vita ("+")
-	dl->AddImage(uiTexture_Health, ImVec2(10, scrSz.y - 10), ImVec2(letterboxHeight - 10, (scrSz.y - letterboxHeight) + 10));
+	bdl->AddImage(uiTexture_Health, ImVec2(10, scrSz.y - 10), ImVec2(letterboxHeight - 10, (scrSz.y - letterboxHeight) + 10));
 
 
 	// Barra della vita
@@ -332,7 +333,7 @@ void nothing::UserInterface::UpdateGameContext()
 	static float y      = 60;
 	static float width  = 520;
 	static float height = 10;
-	dl->AddRectFilled(ImVec2(x, scrSz.y - letterboxHeight + y), ImVec2(width, scrSz.y - height), IM_COL32(90, 90, 90, 255));
+	bdl->AddRectFilled(ImVec2(x, scrSz.y - letterboxHeight + y), ImVec2(width, scrSz.y - height), IM_COL32(90, 90, 90, 255));
 
 
 	ImU32 barColor = IM_COL32(0, 250, 250, 255);
@@ -354,8 +355,25 @@ void nothing::UserInterface::UpdateGameContext()
 	}
 
 
-	dl->AddRectFilled(ImVec2(x, scrSz.y - letterboxHeight + y), ImVec2(uiSharedVals.healthBarValue, scrSz.y - height), barColor);
-	dl->AddRectFilled(ImVec2(scrSz.x - 100.0, scrSz.y - 100), ImVec2(scrSz.x - 20.0, scrSz.y - 10), IM_COL32(20, 194, 224, 150));
+	bdl->AddRectFilled(ImVec2(x, scrSz.y - letterboxHeight + y), ImVec2(uiSharedVals.healthBarValue, scrSz.y - height), barColor);
+	bdl->AddRectFilled(ImVec2(scrSz.x - 100.0, scrSz.y - 100), ImVec2(scrSz.x - 20.0, scrSz.y - 10), IM_COL32(20, 194, 224, 150));
+
+
+	// Box di dialogo
+	static float dialogueBoxWidth = 395.0f;
+	static float dialogueBoxHeight = 120.0f;
+	static ImVec4 dialogueBoxColor = ImVec4(0.205f, 0.205f, 0.205f, 1.0f);
+	bdl->AddRectFilled(ImVec2((scrSz.x / 2) - dialogueBoxWidth, (scrSz.y / 2) - dialogueBoxHeight + uiSharedVals.dialogueBoxYOffset), ImVec2((scrSz.x / 2) + dialogueBoxWidth, (scrSz.y / 2) + dialogueBoxHeight + uiSharedVals.dialogueBoxYOffset), ImGui::ColorConvertFloat4ToU32(dialogueBoxColor), 10.0f);
+	
+
+	// Controlliamo se la stringa è vuota altrimenti dialogueBoxLine.back() tira un'eccezione,
+	// dato che tentiamo di ottenre un puntatore ad un carattere che non esiste
+	if (!uiSharedVals.dialogueBoxLine.empty())
+	{
+
+		bdl->AddText(ImVec2((scrSz.x / 2) - dialogueBoxWidth, (scrSz.y / 2) - dialogueBoxHeight + uiSharedVals.dialogueBoxYOffset), IM_COL32(255, 255, 255, 255), &uiSharedVals.dialogueBoxLine.front(), &uiSharedVals.dialogueBoxLine.back());
+
+	}
 
 
 	// Fade screen
@@ -365,19 +383,6 @@ void nothing::UserInterface::UpdateGameContext()
 	ImGui::End();
 	ImGui::PopStyleVar(2);
 	ImGui::PopStyleColor();
-
-
-#pragma region DEBUG VALUES
-	ImGui::SetNextWindowPos(ImVec2(30, 90), ImGuiCond_FirstUseEver);
-	ImGui::Begin("UI Debug values");
-	ImGui::SetNextItemWidth(100.0f);
-	ImGui::SliderFloat("Player Walk Speed", &uiDbgVals.playerWalkSpeed, 0.1f, 5.0f);
-	ImGui::SetNextItemWidth(100.0f);
-	ImGui::SliderFloat("Player Run Speed", &uiDbgVals.playerRunSpeed, 0.1f, 5.0f);
-	ImGui::SetNextItemWidth(100.0f);
-	ImGui::SliderInt("Player Health", &uiDbgVals.playerHealth, 0, 100);
-	ImGui::End();
-#pragma endregion
 
 
 	if (ctx_->inputManager->IsActionTriggered(GameAction::Exit))
@@ -429,6 +434,23 @@ void nothing::UserInterface::UpdateGameContext()
 		ShowBackToMenuWarning(scrSz);
 
 	}
+
+
+#pragma region DEBUG VALUES
+	ImGui::SetNextWindowPos(ImVec2(30, 90), ImGuiCond_FirstUseEver);
+	ImGui::Begin("UI Debug values");
+	ImGui::SetNextItemWidth(100.0f);
+	ImGui::SliderFloat("Player Walk Speed", &uiDbgVals.playerWalkSpeed, 0.1f, 5.0f);
+	ImGui::SetNextItemWidth(100.0f);
+	ImGui::SliderFloat("Player Run Speed", &uiDbgVals.playerRunSpeed, 0.1f, 5.0f);
+	ImGui::SetNextItemWidth(100.0f);
+	ImGui::SliderInt("Player Health", &uiDbgVals.playerHealth, 0, 100);
+	//ImGui::SliderFloat("DialogueBoxYOffset", &dialogueBoxYOffset, 0.0f, scrSz.y);
+	//ImGui::SliderFloat("DialogueBoxWidth", &dialogueBoxWidth, 1.0f, 1000.0f);
+	//ImGui::SliderFloat("DialogueBoxHeight", &dialogueBoxHeight, 1.0f, 1000.0f);
+	//ImGui::ColorEdit4("DialogueBoxColor", &dialogueBoxColor.x, ImGuiColorEditFlags_Float);
+	ImGui::End();
+#pragma endregion
 
 }
 

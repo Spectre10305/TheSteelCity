@@ -313,8 +313,16 @@ void nothing::SceneManager::LoadScene(const std::string& mapName)
 	auto testDialogueBeh = std::make_unique<DialogueGenericBehaviour>();
 	testDialogueBeh->SetEntity(testDialogueEntity);
 	testDialogueBeh->SetRegistry(registry);
-	testDialogueBeh->dialogueLines.assign(std::begin(dialogueInfo.dialogueTexts), std::end(dialogueInfo.dialogueTexts));
+	//testDialogueBeh->dialogueLines.assign(std::begin(dialogueInfo.dialogueTexts), std::end(dialogueInfo.dialogueTexts));
 
+
+	std::string* beg          = std::begin(dialogueInfo.dialogueTexts);
+	std::string* end          = std::end(dialogueInfo.dialogueTexts);
+	auto         backInserter = std::back_inserter(testDialogueBeh->dialogueLines);
+
+
+	std::copy_if(beg, end, backInserter, [](std::string& s) {return s != ""; });
+	
 
 	registry.emplace<EntityID>(testDialogueEntity, dialogueInfo.ID);
 	entitiesMap.emplace(dialogueInfo.ID, testDialogueEntity);
