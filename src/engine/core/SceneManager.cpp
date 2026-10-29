@@ -301,10 +301,10 @@ void nothing::SceneManager::LoadScene(const std::string& mapName)
 
 	nothing::DialogueGenericEntityInfo dialogueInfo{};
 	dialogueInfo.ID = nothing::Random::Int64(0, UINT64_MAX);
-	dialogueInfo.dialogueTexts[0] = "Testamento.";
-	dialogueInfo.dialogueTexts[1] = "Ahh, testamento...";
+	dialogueInfo.dialogueTexts[0] = "Testamento, eh?";
+	dialogueInfo.dialogueTexts[1] = "Ah, testamento...";
 	dialogueInfo.dialogueTexts[2] = "*svita la penna*";
-	dialogueInfo.dialogueTexts[3] = "Bene, cominciamo.";
+	dialogueInfo.dialogueTexts[3] = "Bene, chi sono i beneficiari?.";
 
 
 	auto testDialogueEntity = registry.create();

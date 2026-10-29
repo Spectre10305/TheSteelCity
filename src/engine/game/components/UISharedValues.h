@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
-#define NOTHING_DBOX_LOWEST 630.0f
-#define NOTHING_DBOX_HIGHEST 280.0f
+#define NOTHING_DBOX_LOWEST 560.0f
+#define NOTHING_DBOX_HIGHEST 160.0f
 
 
 namespace nothing

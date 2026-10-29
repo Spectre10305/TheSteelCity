@@ -130,7 +130,7 @@ namespace nothing
 	struct DialogueGenericEntityInfo
 	{
 		uint64_t ID = 0;
-		std::string dialogueTexts[8] = {};
+		std::string dialogueTexts[16] = {};
 	};
 
 

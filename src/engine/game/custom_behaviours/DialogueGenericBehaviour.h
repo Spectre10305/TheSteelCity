@@ -29,6 +29,7 @@ namespace nothing
 		int currentLineIndex = 0;
 		int currentCharacterIndex = 0;
 		bool dialogueState = true; // VERO se il box di dialogo è SU, FALSE se GIU'
+		bool canInteract = true;
 
 
 		void Create()
@@ -61,6 +62,9 @@ namespace nothing
 			if (isRisingDialogueBox)
 			{
 
+				canInteract = false;
+
+
 				int32_t step = static_cast<int>(static_cast<float>(deltaTime) * 1000.0f);
 				riseDialogueBoxTween->step(step);
 
@@ -72,6 +76,9 @@ namespace nothing
 
 			if (isLoweringDialogueBox)
 			{
+
+				canInteract = false;
+
 
 				int32_t step = static_cast<int>(static_cast<float>(deltaTime) * 1000.0f);
 				riseDialogueBoxTween->step(-step);
@@ -116,9 +123,19 @@ namespace nothing
 		void Interact()
 		{
 
+			if (!canInteract)
+			{
+
+				PrintInfoMessage("Wait...");
+				return;
+
+			}
+
+
 			if (!isInDialogue)
 			{
 				
+				// Fa comparire il box di dialogo
 				GetContextComponent<nothing::components::UISharedValues>().dialogueBoxLine.clear();
 				isRisingDialogueBox = true;
 
@@ -129,15 +146,20 @@ namespace nothing
 				if (currentLineIndex >= dialogueLines.size() - 1)
 				{
 
+					// Fa scomparire il box di dialogo
+					GetContextComponent<nothing::components::UISharedValues>().dialogueBoxLine.clear();
 					currentLineIndex = 0;
+					currentCharacterIndex = 0;
 					isLoweringDialogueBox = true;
+					displayLine = false;
 
 				}
 				else
 				{
 
-					currentLineIndex++;
 					GetContextComponent<nothing::components::UISharedValues>().dialogueBoxLine.clear();
+					currentLineIndex++;
+					currentCharacterIndex = 0;
 					displayLine = true;
 
 				}
@@ -168,6 +190,8 @@ namespace nothing
 
 			}
 
+
+			canInteract = true;
 			dialogueState = !dialogueState;
 
 		}

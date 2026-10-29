@@ -360,20 +360,10 @@ void nothing::UserInterface::UpdateGameContext()
 
 
 	// Box di dialogo
-	static float dialogueBoxWidth = 395.0f;
-	static float dialogueBoxHeight = 120.0f;
+	static float dialogueBoxWidth = 750.0f;
+	static float dialogueBoxHeight = 240.0f;
+	//static float dummyDialogueBoxYOffset = 160.0f; // NOTHING_DBOX_HIGHEST
 	static ImVec4 dialogueBoxColor = ImVec4(0.205f, 0.205f, 0.205f, 1.0f);
-	bdl->AddRectFilled(ImVec2((scrSz.x / 2) - dialogueBoxWidth, (scrSz.y / 2) - dialogueBoxHeight + uiSharedVals.dialogueBoxYOffset), ImVec2((scrSz.x / 2) + dialogueBoxWidth, (scrSz.y / 2) + dialogueBoxHeight + uiSharedVals.dialogueBoxYOffset), ImGui::ColorConvertFloat4ToU32(dialogueBoxColor), 10.0f);
-	
-
-	// Controlliamo se la stringa è vuota altrimenti dialogueBoxLine.back() tira un'eccezione,
-	// dato che tentiamo di ottenre un puntatore ad un carattere che non esiste
-	if (!uiSharedVals.dialogueBoxLine.empty())
-	{
-
-		bdl->AddText(ImVec2((scrSz.x / 2) - dialogueBoxWidth, (scrSz.y / 2) - dialogueBoxHeight + uiSharedVals.dialogueBoxYOffset), IM_COL32(255, 255, 255, 255), &uiSharedVals.dialogueBoxLine.front(), &uiSharedVals.dialogueBoxLine.back());
-
-	}
 
 
 	// Fade screen
@@ -383,6 +373,47 @@ void nothing::UserInterface::UpdateGameContext()
 	ImGui::End();
 	ImGui::PopStyleVar(2);
 	ImGui::PopStyleColor();
+
+
+	// Box di dialogo, separato dal contesto HUD effettivo
+	// per agevolare e migliorare la visualizzazione
+	ImGui::SetNextWindowPos(ImVec2((scrSz.x / 2) - (dialogueBoxWidth / 2), (scrSz.y / 2) + uiSharedVals.dialogueBoxYOffset));
+	ImGui::SetNextWindowSize(ImVec2(dialogueBoxWidth, dialogueBoxHeight));
+
+
+	ImGuiWindowFlags dialogueBoxWindowflags =
+		//ImGuiWindowFlags_NoTitleBar |
+		ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoScrollbar |
+		ImGuiWindowFlags_NoScrollWithMouse |
+		ImGuiWindowFlags_NoCollapse |
+		ImGuiWindowFlags_NoBringToFrontOnFocus |
+		ImGuiWindowFlags_NoNavFocus |
+		//ImGuiWindowFlags_NoDecoration |
+		ImGuiWindowFlags_NoInputs |
+		ImGuiWindowFlags_NoFocusOnAppearing;
+
+
+	static ImVec4 borderCol = ImVec4(0.145f, 0.929f, 0.970f, 1.0f);
+	static ImVec4 bgCol = ImVec4(0.108f, 0.127f, 0.131f, 0.950f);
+	static ImVec4 titleBarColor = ImVec4(0.188f, 0.329f, 0.363f, 0.942f);
+	ImGui::PushStyleColor(ImGuiCol_Border, borderCol);
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, bgCol);
+	ImGui::PushStyleColor(ImGuiCol_TitleBg, titleBarColor);
+	ImGui::Begin("Marty###DialogueBoxWindow", (bool*)0, dialogueBoxWindowflags);
+
+
+	if (!uiSharedVals.dialogueBoxLine.empty())
+	{
+
+		ImGui::TextWrapped(uiSharedVals.dialogueBoxLine.c_str());
+
+	}
+
+
+	ImGui::End();
+	ImGui::PopStyleColor(3);
 
 
 	if (ctx_->inputManager->IsActionTriggered(GameAction::Exit))
@@ -446,9 +477,19 @@ void nothing::UserInterface::UpdateGameContext()
 	ImGui::SetNextItemWidth(100.0f);
 	ImGui::SliderInt("Player Health", &uiDbgVals.playerHealth, 0, 100);
 	//ImGui::SliderFloat("DialogueBoxYOffset", &dialogueBoxYOffset, 0.0f, scrSz.y);
-	//ImGui::SliderFloat("DialogueBoxWidth", &dialogueBoxWidth, 1.0f, 1000.0f);
-	//ImGui::SliderFloat("DialogueBoxHeight", &dialogueBoxHeight, 1.0f, 1000.0f);
-	//ImGui::ColorEdit4("DialogueBoxColor", &dialogueBoxColor.x, ImGuiColorEditFlags_Float);
+	ImGui::SetNextItemWidth(100.0f);
+	ImGui::SliderFloat("DialogueBoxWidth", &dialogueBoxWidth, 1.0f, 1000.0f);
+	ImGui::SetNextItemWidth(100.0f);
+	ImGui::SliderFloat("DialogueBoxHeight", &dialogueBoxHeight, 1.0f, 1000.0f);
+
+
+	ImGui::Separator();
+
+
+	ImGui::ColorEdit4("DBOX BorderCol", &borderCol.x, ImGuiColorEditFlags_Float);
+	ImGui::ColorEdit4("DBOX BackgroundCol", &bgCol.x, ImGuiColorEditFlags_Float);
+	ImGui::ColorEdit4("DBOX TitleBarCol", &titleBarColor.x, ImGuiColorEditFlags_Float);
+	//ImGui::SliderFloat("dummyDialogueBoxYOffset", &dummyDialogueBoxYOffset, 1.0f, 1000.0f);
 	ImGui::End();
 #pragma endregion
 
