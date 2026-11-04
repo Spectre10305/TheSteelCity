@@ -5,6 +5,7 @@
 #include <stb_image.h>
 #include "../core/InputManager.h"
 #include "../core/SceneManager.h"
+#include "../core/Filesystem.h"
 #include "../game/components/Object3D.h"
 #include "../game/components/Transform.h"
 #include "../game/components/Camera.h"
@@ -33,20 +34,21 @@ void nothing::RenderManager::Init(EngineContext& ctx)
 	glFrontFace(GL_CCW);
 
 
-	// Shader di default
-	const char* defVsName = "D:\\TheSteelCity\\assets\\engine\\shaders\\default_shader_vert.glsl";
-	const char* defFsName = "D:\\TheSteelCity\\assets\\engine\\shaders\\default_shader_frag.glsl";
-	
+	auto rootPath = ctx_->filesystem->GetRootPath();
 
-	defaultShader_ = new nothing::Shader(defVsName, defFsName);
+
+	std::string defaultVSName = rootPath + "\\assets\\engine\\shaders\\default_shader_vert.glsl";
+	std::string defaultFSName = rootPath + "\\assets\\engine\\shaders\\default_shader_frag.glsl";
+	std::string debugVSName   = rootPath + "\\assets\\engine\\shaders\\debug_draw_vert.glsl";
+	std::string debugFSName   = rootPath + "\\assets\\engine\\shaders\\debug_draw_frag.glsl";
+
+
+	// Shader di default
+	defaultShader_ = new nothing::Shader(defaultVSName.c_str(), defaultFSName.c_str());
 
 
 	// Shader di debug
-	const char* debVsName = "D:\\TheSteelCity\\assets\\engine\\shaders\\debug_draw_vert.glsl";
-	const char* debFsName = "D:\\TheSteelCity\\assets\\engine\\shaders\\debug_draw_frag.glsl";
-
-
-	debugShader_ = new nothing::Shader(debVsName, debFsName);
+	debugShader_ = new nothing::Shader(debugVSName.c_str(), debugFSName.c_str());
 
 
 #pragma region DEBUG_DRAW
