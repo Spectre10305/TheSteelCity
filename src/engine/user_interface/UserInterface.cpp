@@ -12,6 +12,7 @@
 #include "../core/InputManager.h"
 #include "../core/Filesystem.h"
 #include "../core/SceneManager.h"
+#include "../core/LocalizationManager.h"
 #include "../audio/AudioManager.h"
 #include "../game/components/UIDebugValues.h"
 #include "../game/components/UISharedValues.h"
@@ -74,8 +75,10 @@ void nothing::UserInterface::Init(EngineContext& ctx)
 
 
 	ImGuiIO& io = ImGui::GetIO();
-	defaultFont = io.Fonts->AddFontFromFileTTF("D:\\TheSteelCity\\assets\\engine\\fonts\\SourceCodePro-Regular.ttf", 25.0f);
-	consoleFont = io.Fonts->AddFontFromFileTTF("D:\\TheSteelCity\\assets\\engine\\fonts\\SourceCodePro-Regular.ttf", 20.0f);
+	auto rootPath = ctx_->filesystem->GetRootPath();
+	auto fontPath = rootPath + "\\assets\\engine\\fonts\\SourceCodePro-Regular.ttf";
+	defaultFont = io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 25.0f);
+	consoleFont = io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 20.0f);
 	io.IniFilename = ""; // Togliamo il file .INI
 
 
@@ -220,16 +223,23 @@ void nothing::UserInterface::UpdateMainMenuContext(double deltaTime)
 	ImGui::Image(uiTexture_Logo, ImVec2(900 * logoScaleFac, 700 * logoScaleFac));
 
 
+	auto& newGameTxt  = ctx_->localManager->GetUIText("uiText_NewGame");
+	auto& loadGameTxt = ctx_->localManager->GetUIText("uiText_LoadGame");
+	auto& optionsTxt  = ctx_->localManager->GetUIText("uiText_Settings");
+	auto& extrasTxt   = ctx_->localManager->GetUIText("uiText_Extras");
+	auto& exitGameTxt = ctx_->localManager->GetUIText("uiText_ExitGame");
+
+
 	buttonSpacingY = 0.0f;
-	if (MenuButton(">_NUOVA_PARTITA",  ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showNewGamePanel = true;  }
+	if (MenuButton(newGameTxt.c_str(),  ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showNewGamePanel = true; }
 	buttonSpacingY += buttonHeight + buttonSpacingOffset;
-	if (MenuButton(">_CARICA_PARTITA", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showLoadGamePanel = true; }
+	if (MenuButton(loadGameTxt.c_str(), ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showLoadGamePanel = true; }
 	buttonSpacingY += buttonHeight + buttonSpacingOffset;
-	if (MenuButton(">_OPZIONI",        ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showOptionsPanel = true;  }
+	if (MenuButton(optionsTxt.c_str(),  ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showOptionsPanel = true;  }
 	buttonSpacingY += buttonHeight + buttonSpacingOffset;
-	MenuButton(">_CONTENUTI_EXTRA",    ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY);
+	MenuButton(extrasTxt.c_str(),       ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY);
 	buttonSpacingY += buttonHeight + buttonSpacingOffset;
-	if (MenuButton(">_ESCI_DAL_GIOCO", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { currentEvent = UIEvent::CloseGame; }
+	if (MenuButton(exitGameTxt.c_str(), ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { currentEvent = UIEvent::CloseGame; }
 
 	
 	ImDrawList* bgDl = ImGui::GetBackgroundDrawList();
@@ -445,14 +455,20 @@ void nothing::UserInterface::UpdateGameContext()
 		ImGui::Image(uiTexture_Logo, ImVec2(900 * logoScaleFac, 700 * logoScaleFac));
 
 
+		auto& resumeTxt     = ctx_->localManager->GetUIText("uiText_Resume");
+		auto& loadGameTxt   = ctx_->localManager->GetUIText("uiText_LoadGame");
+		auto& optionsTxt    = ctx_->localManager->GetUIText("uiText_Settings");
+		auto& backToMenuTxt = ctx_->localManager->GetUIText("uiText_BackToMainMenu");
+
+
 		buttonSpacingY = 0.0f;
-		if (MenuButton(">_RIPRENDI", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showPauseMenu = false; ctx_->windowManager->SetMouseInvisible(); ctx_->isGamePaused = false; }
+		if (MenuButton(resumeTxt.c_str(),     ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showPauseMenu = false; ctx_->windowManager->SetMouseInvisible(); ctx_->isGamePaused = false; }
 		buttonSpacingY += buttonHeight + buttonSpacingOffset;
-		if (MenuButton(">_CARICA_PARTITA", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showLoadGamePanel = true; }
+		if (MenuButton(loadGameTxt.c_str(),   ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showLoadGamePanel = true; }
 		buttonSpacingY += buttonHeight + buttonSpacingOffset;
-		if (MenuButton(">_OPZIONI", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showOptionsPanel = true; }
+		if (MenuButton(optionsTxt.c_str(),    ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showOptionsPanel = true; }
 		buttonSpacingY += buttonHeight + buttonSpacingOffset;
-		if (MenuButton(">_TORNA_AL_MENU'", ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showBackToMenuWarning = true; }
+		if (MenuButton(backToMenuTxt.c_str(), ImVec2(buttonOffsetX, (scrSz.y / 2.0f) + buttonSpacingY), ImVec2(buttonWidth, buttonHeight), toleranceY)) { showBackToMenuWarning = true; }
 
 
 		ImGui::End();
@@ -468,6 +484,7 @@ void nothing::UserInterface::UpdateGameContext()
 
 
 #pragma region DEBUG VALUES
+	/*
 	ImGui::SetNextWindowPos(ImVec2(30, 90), ImGuiCond_FirstUseEver);
 	ImGui::Begin("UI Debug values");
 	ImGui::SetNextItemWidth(100.0f);
@@ -491,6 +508,7 @@ void nothing::UserInterface::UpdateGameContext()
 	ImGui::ColorEdit4("DBOX TitleBarCol", &titleBarColor.x, ImGuiColorEditFlags_Float);
 	//ImGui::SliderFloat("dummyDialogueBoxYOffset", &dummyDialogueBoxYOffset, 1.0f, 1000.0f);
 	ImGui::End();
+	*/
 #pragma endregion
 
 }
@@ -751,12 +769,19 @@ void nothing::UserInterface::ShowNewGamePanel(ImVec2& scrSz)
 	{
 
 		nothing::UIStyleHelper::AutoPushStyle(currentStyle);
+
+
 		static ImVec2 newGamePanelPos = ImVec2(0.0f, 0.0f);
 		newGamePanelPos.x = (scrSz.x / 2.0f) - (NEW_GAME_PANEL_WIDTH / 2.0f);
 		newGamePanelPos.y = (scrSz.y / 2.0f) - (NEW_GAME_PANEL_HEIGHT / 2.0f);
+
+
 		ImGui::SetNextWindowPos(newGamePanelPos, ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowSize(ImVec2(NEW_GAME_PANEL_WIDTH, NEW_GAME_PANEL_HEIGHT), ImGuiCond_FirstUseEver);
-		ImGui::Begin("Nuova Partita", &showNewGamePanel, ImGuiWindowFlags_NoCollapse);
+
+
+		auto& winTitle = ctx_->localManager->GetUIText("uiText_NewGameTitle");
+		ImGui::Begin(winTitle.c_str(), &showNewGamePanel, ImGuiWindowFlags_NoCollapse);
 
 
 		ImVec2 winSz = ImGui::GetWindowSize();
@@ -801,7 +826,8 @@ void nothing::UserInterface::ShowNewGamePanel(ImVec2& scrSz)
 		ImGui::Separator();
 
 
-		if (ImGui::Button("Chiudi")) { showNewGamePanel = false; }
+		auto& closeBtnTxt = ctx_->localManager->GetUIText("uiText_GenericClose");
+		if (ImGui::Button(closeBtnTxt.c_str())) { showNewGamePanel = false; }
 		ImGui::End();
 		nothing::UIStyleHelper::PopStyle();
 
@@ -820,26 +846,36 @@ void nothing::UserInterface::ShowLoadGamePanel(ImVec2& scrSz)
 	{
 
 		nothing::UIStyleHelper::AutoPushStyle(currentStyle);
+
+
 		static ImVec2 loadGamePanelPos = ImVec2(0.0f, 0.0f);
 		loadGamePanelPos.x = (scrSz.x / 2.0f) - (LOAD_GAME_PANEL_WIDTH / 2.0f);
 		loadGamePanelPos.y = (scrSz.y / 2.0f) - (LOAD_GAME_PANEL_HEIGHT / 2.0f);
+
+
 		ImGui::SetNextWindowPos(loadGamePanelPos, ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowSize(ImVec2(LOAD_GAME_PANEL_WIDTH, LOAD_GAME_PANEL_HEIGHT), ImGuiCond_FirstUseEver);
-		ImGui::Begin("Carica Partita", &showLoadGamePanel, ImGuiWindowFlags_NoCollapse);
+
+
+		auto& winTitle = ctx_->localManager->GetUIText("uiText_LoadGameTitle");
+		ImGui::Begin(winTitle.c_str(), &showLoadGamePanel, ImGuiWindowFlags_NoCollapse);
+
+
+		auto& emptyTxt = ctx_->localManager->GetUIText("uiText_GenericEmpty");
 
 
 		ImGui::Button("Slot 1");
 		ImGui::SameLine();
-		ImGui::Text("<VUOTO>");
+		ImGui::Text(emptyTxt.c_str());
 		ImGui::Button("Slot 2");
 		ImGui::SameLine();
-		ImGui::Text("<VUOTO>");
+		ImGui::Text(emptyTxt.c_str());
 		ImGui::Button("Slot 3");
 		ImGui::SameLine();
-		ImGui::Text("<VUOTO>");
+		ImGui::Text(emptyTxt.c_str());
 		ImGui::Button("Slot 4");
 		ImGui::SameLine();
-		ImGui::Text("<VUOTO>");
+		ImGui::Text(emptyTxt.c_str());
 
 
 		ImGui::End();
@@ -860,12 +896,19 @@ void nothing::UserInterface::ShowOptionsPanel(ImVec2& scrSz)
 	{
 
 		nothing::UIStyleHelper::AutoPushStyle(currentStyle);
+
+
 		static ImVec2 optionsPanelPos = ImVec2(0.0f, 0.0f);
 		optionsPanelPos.x = (scrSz.x / 2.0f) - (OPTIONS_PANEL_WIDTH / 2.0f);
 		optionsPanelPos.y = (scrSz.y / 2.0f) - (OPTIONS_PANEL_HEIGHT / 2.0f);
+
+
 		ImGui::SetNextWindowPos(optionsPanelPos, ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowSize(ImVec2(OPTIONS_PANEL_WIDTH, OPTIONS_PANEL_HEIGHT), ImGuiCond_FirstUseEver);
-		ImGui::Begin("Opzioni", &showOptionsPanel, ImGuiWindowFlags_NoCollapse);
+
+
+		auto& winTitle = ctx_->localManager->GetUIText("uiText_SettingsTitle");
+		ImGui::Begin(winTitle.c_str(), &showOptionsPanel, ImGuiWindowFlags_NoCollapse);
 
 
 		// SEZIONE DI GIOCO
@@ -892,7 +935,7 @@ void nothing::UserInterface::ShowOptionsPanel(ImVec2& scrSz)
 		ImGui::Checkbox("Corsa automatica", &autoRun);
 
 
-		static const char* languageItems[] = { "Italiano", "English", "Français", "Español" };
+		static const char* languageItems[] = { "Italiano", "English" };
 		static int currentLanguageItem = 0;
 		ImGui::Combo("Lingua", &currentLanguageItem, languageItems, IM_ARRAYSIZE(languageItems));
 
@@ -1008,7 +1051,7 @@ void nothing::UserInterface::ShowOptionsPanel(ImVec2& scrSz)
 		ImGui::Text("Apri console di sviluppo");
 
 
-		// SEZIONE CONTROLLI
+		// SEZIONE ALTRO
 		CenteredText("Altro");
 		ImGui::Separator();
 
@@ -1037,9 +1080,11 @@ void nothing::UserInterface::ShowOptionsPanel(ImVec2& scrSz)
 		ImGui::Spacing();
 		ImGui::Spacing();
 		ImGui::Separator();
-		if (ImGui::Button("Applica", ImVec2(125, 0))) { currentEvent = UIEvent::ApplyOptions; }
+		auto& applyTxt = ctx_->localManager->GetUIText("uiText_GenericApply");
+		if (ImGui::Button(applyTxt.c_str(), ImVec2(125, 0))) { currentEvent = UIEvent::ApplyOptions; }
 		ImGui::SameLine();
-		if (ImGui::Button("Ripristina", ImVec2(125, 0))) { currentEvent = UIEvent::ResetOptions; }
+		auto& restoreTxt = ctx_->localManager->GetUIText("uiText_GenericRestore");
+		if (ImGui::Button(restoreTxt.c_str(), ImVec2(125, 0))) { currentEvent = UIEvent::ResetOptions; }
 		
 
 		ImGui::End();
@@ -1060,12 +1105,19 @@ void nothing::UserInterface::ShowBackToMenuWarning(ImVec2& scrSz)
 	{
 
 		nothing::UIStyleHelper::AutoPushStyle(currentStyle);
+
+
 		static ImVec2 loadGamePanelPos = ImVec2(0.0f, 0.0f);
 		loadGamePanelPos.x = (scrSz.x / 2.0f) - (BACK_TO_MENU_WARNING_WIDTH / 2.0f);
 		loadGamePanelPos.y = (scrSz.y / 2.0f) - (BACK_TO_MENU_WARNING_HEIGHT / 2.0f);
+
+
 		ImGui::SetNextWindowPos(loadGamePanelPos, ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowSize(ImVec2(BACK_TO_MENU_WARNING_WIDTH, BACK_TO_MENU_WARNING_HEIGHT), ImGuiCond_FirstUseEver);
-		ImGui::Begin("Torna al menù principale", &showLoadGamePanel, ImGuiWindowFlags_NoCollapse);
+
+
+		auto& winTitle = ctx_->localManager->GetUIText("uiText_BackToMainMenuTitle");
+		ImGui::Begin(winTitle.c_str(), &showLoadGamePanel, ImGuiWindowFlags_NoCollapse);
 
 
 		CenteredText("Sei sicuro di voler tornare al menù principale?");
@@ -1076,7 +1128,8 @@ void nothing::UserInterface::ShowBackToMenuWarning(ImVec2& scrSz)
 		ImGui::Spacing();
 
 
-		if (ImGui::Button("Sì", ImVec2(50.0f, 0.0f)))
+		auto& yesBtnText = ctx_->localManager->GetUIText("uiText_GenericYes");
+		if (ImGui::Button(yesBtnText.c_str(), ImVec2(50.0f, 0.0f)))
 		{
 
 			// Forza ctx_->isGamePaused a FALSO per evitare che resti VERO
@@ -1098,7 +1151,8 @@ void nothing::UserInterface::ShowBackToMenuWarning(ImVec2& scrSz)
 		ImGui::SameLine();
 
 
-		if (ImGui::Button("No", ImVec2(50.0f, 0.0f)))
+		auto& noBtnText = ctx_->localManager->GetUIText("uiText_GenericNo");
+		if (ImGui::Button(noBtnText.c_str(), ImVec2(50.0f, 0.0f)))
 		{
 
 			showBackToMenuWarning = false;
@@ -1125,7 +1179,8 @@ void nothing::UserInterface::ShowDevConsole(ImVec2& scrSz)
 
 		ImGui::SetNextWindowPos(ImVec2(scrSz.x - 800 - 50, 150), ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
-		ImGui::Begin("Development console", &showDevConsole);
+		auto& devConsoleTitle = ctx_->localManager->GetUIText("uiText_DevConsole");
+		ImGui::Begin(devConsoleTitle.c_str(), &showDevConsole);
 
 
 		ImGui::BeginChild("ConsoleLog", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar);

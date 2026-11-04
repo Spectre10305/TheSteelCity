@@ -90,7 +90,7 @@ namespace nothing
 		void ShowDevConsole(ImVec2& scrSz);
 
 
-		float buttonWidth         = 250.0f;
+		float buttonWidth         = 270.0f;
 		float buttonHeight        = 47.0f;
 		float buttonOffsetX       = 20.0f;
 		float buttonSpacingY      = 0.0f;

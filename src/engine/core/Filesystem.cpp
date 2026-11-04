@@ -12,7 +12,7 @@ void nothing::Filesystem::Init()
 	char buffer[MAX_PATH];
 	GetModuleFileNameA(NULL, buffer, MAX_PATH);
 	std::filesystem::path temp = buffer;
-	rootPath_ = temp.parent_path().parent_path().parent_path();
+	rootPath_ = temp.parent_path().parent_path().parent_path(); // Es. "D:\TheSteelCity"
 
 
 	texturesFolderPath_ = rootPath_ / "assets\\game\\textures\\";
@@ -26,6 +26,17 @@ void nothing::Filesystem::Init()
 	nothing::LogInfo("Models 3D path: " + models3DFolderPath_.string());
 	nothing::LogInfo("Audios path: " + audiosFolderPath_.string());
 	nothing::LogInfo("Maps path: " + mapsFolderPath_.string());
+
+}
+
+
+// =================================================
+
+
+std::string nothing::Filesystem::GetRootPath()
+{
+
+	return rootPath_.string();
 
 }
 

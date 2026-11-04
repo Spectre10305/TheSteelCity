@@ -14,6 +14,7 @@ namespace nothing
 	class RenderManager;
 	class UserInterface;
 	class Filesystem;
+	class LocalizationManager;
 
 
 	// SCOPO: Provvede l'accesso ai sistemi dell'engine sottoforma di riferimenti,
@@ -21,15 +22,16 @@ namespace nothing
 	struct EngineContext
 	{
 
-		WindowManager*   windowManager    = nullptr;
-		AudioManager*    audioManager     = nullptr;
-		ResourceManager* resourcesManager = nullptr;
-		SceneManager*    sceneManager     = nullptr;
-		PhysicsManager*  physicsManager   = nullptr;
-		InputManager*    inputManager     = nullptr;
-		RenderManager*   renderManager    = nullptr;
-		UserInterface*   userInterface    = nullptr;
-		Filesystem*      filesystem       = nullptr;
+		WindowManager*       windowManager    = nullptr;
+		AudioManager*        audioManager     = nullptr;
+		ResourceManager*     resourcesManager = nullptr;
+		SceneManager*        sceneManager     = nullptr;
+		PhysicsManager*      physicsManager   = nullptr;
+		InputManager*        inputManager     = nullptr;
+		RenderManager*       renderManager    = nullptr;
+		UserInterface*       userInterface    = nullptr;
+		Filesystem*          filesystem       = nullptr;
+		LocalizationManager* localManager     = nullptr;
 
 
 		bool isGamePaused = false;

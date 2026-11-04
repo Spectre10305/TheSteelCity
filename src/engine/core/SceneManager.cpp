@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 #include "ResourceManager.h"
 #include "InputManager.h"
+#include "LocalizationManager.h"
 #include "../physics/PhysicsManager.h" // RaycastInternal / ctx_->physicsManager
 #include <sstream>
 #include "../utils/Log.h"
@@ -301,10 +302,9 @@ void nothing::SceneManager::LoadScene(const std::string& mapName)
 
 	nothing::DialogueGenericEntityInfo dialogueInfo{};
 	dialogueInfo.ID = nothing::Random::Int64(0, UINT64_MAX);
-	dialogueInfo.dialogueTexts[0] = "Testamento, eh?";
-	dialogueInfo.dialogueTexts[1] = "Ah, testamento...";
-	dialogueInfo.dialogueTexts[2] = "*svita la penna*";
-	dialogueInfo.dialogueTexts[3] = "Bene, chi sono i beneficiari?.";
+	dialogueInfo.dialogueTexts[0] = ctx_->localManager->GetDialogueString("testDialog1");
+	dialogueInfo.dialogueTexts[1] = ctx_->localManager->GetDialogueString("testDialog2");
+	dialogueInfo.dialogueTexts[2] = ctx_->localManager->GetDialogueString("testDialog3");
 
 
 	auto testDialogueEntity = registry.create();

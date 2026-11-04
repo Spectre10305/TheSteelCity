@@ -8,6 +8,7 @@
 #include "ResourceManager.h"
 #include "SceneManager.h"
 #include "Filesystem.h"
+#include "LocalizationManager.h"
 #include "../audio/AudioManager.h"
 #include "../graphics/RenderManager.h"
 #include "../user_interface/UserInterface.h"
@@ -63,15 +64,16 @@ namespace nothing
 		EngineContext   engineContext_{};
 
 
-		Filesystem      fileSystem_;
-		WindowManager   windowManager_;
-		AudioManager    audioManager_;
-		RenderManager   renderManager_;
-		UserInterface   userInterface_;
-		InputManager    inputManager_;
-		ResourceManager resourceManager_;
-		SceneManager    sceneManager_;
-		PhysicsManager  physicsManager_;
+		Filesystem          fileSystem_;
+		LocalizationManager localizationManager_;
+		WindowManager       windowManager_;
+		AudioManager        audioManager_;
+		RenderManager       renderManager_;
+		UserInterface       userInterface_;
+		InputManager        inputManager_;
+		ResourceManager     resourceManager_;
+		SceneManager        sceneManager_;
+		PhysicsManager      physicsManager_;
 
 
 		GameState gameState_ = GameState::None;

@@ -1,0 +1,30 @@
+{
+
+    "uiText_NewGame"        : ">_NUOVA_PARTITA",
+    "uiText_LoadGame"       : ">_CARICA_PARTITA",
+    "uiText_Settings"       : ">_OPZIONI",
+    "uiText_Extras"         : ">_CONTENUTI_EXTRA",
+    "uiText_ExitGame"       : ">_ESCI_DAL_GIOCO",
+    "uiText_Resume"         : ">_RIPRENDI",
+    "uiText_BackToMainMenu" : ">_TORNA_AL_MENU'",
+
+
+    "uiText_NewGameTitle"        : "Nuova Partita",
+    "uiText_LoadGameTitle"       : "Carica Partita",
+    "uiText_SettingsTitle"       : "Opzioni",
+    "uiText_BackToMainMenuTitle" : "Torna al Menù Principale",
+
+
+    "uiText_GenericYes"     : "Sì",
+    "uiText_GenericNo"      : "No",
+    "uiText_GenericApply"   : "Applica",
+    "uiText_GenericCancel"  : "Annulla",
+    "uiText_GenericClose"   : "Chiudi",
+    "uiText_GenericBack"    : "Indietro",
+    "uiText_GenericRestore" : "Ripristina",
+    "uiText_GenericEmpty"   : "<VUOTO>",
+
+    
+    "uiText_DevConsole" : "Console Sviluppatore"
+
+}

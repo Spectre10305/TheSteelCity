@@ -1,0 +1,30 @@
+{
+
+    "uiText_NewGame"        : ">_NEW_GAME",
+    "uiText_LoadGame"       : ">_LOAD_GAME",
+    "uiText_Settings"       : ">_SETTINGS",
+    "uiText_Extras"         : ">_EXTRAS",
+    "uiText_ExitGame"       : ">_EXIT_GAME",
+    "uiText_Resume"         : ">_RESUME",
+    "uiText_BackToMainMenu" : ">_BACK_TO_MAIN_MENU",
+
+
+    "uiText_NewGameTitle"        : "New Game",
+    "uiText_LoadGameTitle"       : "Load Game",
+    "uiText_SettingsTitle"       : "Settings",
+    "uiText_BackToMainMenuTitle" : "Back to Main Menu",
+
+
+    "uiText_GenericYes"     : "Yes",
+    "uiText_GenericNo"      : "No",
+    "uiText_GenericApply"   : "Apply",
+    "uiText_GenericCancel"  : "Cancel",
+    "uiText_GenericClose"   : "Close",
+    "uiText_GenericBack"    : "Back",
+    "uiText_GenericRestore" : "Restore",
+    "uiText_GenericEmpty"   : "<EMPTY>",
+
+    
+    "uiText_DevConsole" : "Developer Console"
+
+}

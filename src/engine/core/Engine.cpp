@@ -31,9 +31,11 @@ bool nothing::Engine::Init(LaunchOptions& lopts)
 	engineContext_.renderManager    = &renderManager_;
 	engineContext_.userInterface    = &userInterface_;
 	engineContext_.filesystem       = &fileSystem_;
+	engineContext_.localManager     = &localizationManager_;
 
 
 	fileSystem_.Init();
+	localizationManager_.Init(engineContext_, Lang::EN);
 
 
 	if (!windowManager_.Init())
@@ -109,12 +111,13 @@ bool nothing::Engine::Init(LaunchOptions& lopts)
 			// Inizializziamo le risorse di default ogni volta che entriamo in scena,
 			// uscendo dalla scena corrente chiamiamo resourceManager_.DeleteAll...()
 			// che rimuove tutte le risorse. Comprese quelle di default
-			resourceManager_.InitDefaults(engineContext_);
-			sceneManager_   .LoadScene(lopts.mapOnLaunchName);
-			physicsManager_ .InitPhysicsScene();
-			userInterface_  .SwitchContext(UIContext::Gameplay);
-			windowManager_  .SetMouseInvisible();
-			gameState_ = GameState::Gameplay;
+			resourceManager_    .InitDefaults(engineContext_);
+			localizationManager_.InitMapDialogueFile();
+			sceneManager_       .LoadScene(lopts.mapOnLaunchName);
+			physicsManager_     .InitPhysicsScene();
+			userInterface_      .SwitchContext(UIContext::Gameplay);
+			windowManager_      .SetMouseInvisible();
+			gameState_          = GameState::Gameplay;
 			return true;
 
 		}
@@ -267,20 +270,22 @@ void nothing::Engine::Shutdown()
 	{
 
 		nothing::LogInfo("Quitting from game state, cleaning up resources...");
-		physicsManager_ .DeletePhysicsScene();
-		sceneManager_   .UnloadScene();
-		resourceManager_.DeleteAllModels3D();
-		resourceManager_.DeleteAllTextures();
+		physicsManager_     .DeletePhysicsScene();
+		sceneManager_       .UnloadScene();
+		localizationManager_.DeleteMapFileDialogues();
+		resourceManager_    .DeleteAllModels3D();
+		resourceManager_    .DeleteAllTextures();
 		nothing::InterrogateMemoryStatus();
 
 	}
 
 
-	renderManager_ .Shutdown();
-	physicsManager_.Shutdown();
-	sceneManager_  .Shutdown();
-	audioManager_  .Shutdown();
-	windowManager_ .Shutdown();
+	renderManager_      .Shutdown();
+	physicsManager_     .Shutdown();
+	sceneManager_       .Shutdown();
+	audioManager_       .Shutdown();
+	windowManager_      .Shutdown();
+	localizationManager_.Shutdown();
 
 }
 
@@ -339,12 +344,13 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 		if (fileSystem_.MapExists("testing"))
 		{
 			
-			resourceManager_.InitDefaults(engineContext_);
-			sceneManager_.LoadScene("testing");
-			physicsManager_.InitPhysicsScene();
-			userInterface_.SwitchContext(UIContext::Gameplay);
-			windowManager_.SetMouseInvisible();
-			gameState_ = GameState::Gameplay;
+			resourceManager_    .InitDefaults(engineContext_);
+			localizationManager_.InitMapDialogueFile();
+			sceneManager_       .LoadScene("testing");
+			physicsManager_     .InitPhysicsScene();
+			userInterface_      .SwitchContext(UIContext::Gameplay);
+			windowManager_      .SetMouseInvisible();
+			gameState_          = GameState::Gameplay;
 
 		}
 		else
@@ -357,14 +363,15 @@ void nothing::Engine::HandleEvents(SDL_Event& event)
 
 
 	case UIEvent::ReturnToMenu:
-		audioManager_   .StartMainMenuAmbientSound();
-		physicsManager_ .DeletePhysicsScene();
-		sceneManager_   .UnloadScene();
-		resourceManager_.DeleteAllModels3D();
-		resourceManager_.DeleteAllTextures();
-		userInterface_  .SwitchContext(UIContext::MainMenu);
-		windowManager_  .SetMouseVisible(true);
-		gameState_      = GameState::MainMenu;
+		audioManager_       .StartMainMenuAmbientSound();
+		physicsManager_     .DeletePhysicsScene();
+		sceneManager_       .UnloadScene();
+		localizationManager_.DeleteMapFileDialogues();
+		resourceManager_    .DeleteAllModels3D();
+		resourceManager_    .DeleteAllTextures();
+		userInterface_      .SwitchContext(UIContext::MainMenu);
+		windowManager_      .SetMouseVisible(true);
+		gameState_          = GameState::MainMenu;
 		nothing::InterrogateMemoryStatus();
 		break;
 
