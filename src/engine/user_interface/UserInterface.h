@@ -114,6 +114,9 @@ namespace nothing
 		uint32_t uiTexture_Health      = 0;
 		uint32_t uiTexture_NothingLogo = 0;
 		uint32_t uiTexture_MenuAnim1   = 0;
+		uint32_t uiTexture_MenuAnim2   = 0;
+		uint32_t uiTexture_MenuAnim3   = 0;
+		uint32_t uiTexture_MenuOverlay = 0;
 
 
 		// Font di default
@@ -132,8 +135,22 @@ namespace nothing
 		bool  canRunUIAnimations_ = false;
 
 
-		bool anim1Active_ = true;
 		std::optional<tweeny::tween<float, int>> testUIAnim1_;
+		bool anim1Active_ = false;
+
+
+		std::optional<tweeny::tween<float, int>> testUIAnim2_;
+		bool anim2Active_ = false;
+
+
+		std::optional<tweeny::tween<float, int>> testUIAnim3_;
+		bool anim3Active_ = false;
+
+
+		int activeAnimation_ = 0;
+		int lastActiveAnimation_ = 0;
+
+
 		void RunUIAnimations(ImDrawList* _dl, ImVec2& scrSz, double deltaTime);
 
 

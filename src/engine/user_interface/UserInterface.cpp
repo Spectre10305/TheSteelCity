@@ -5,6 +5,7 @@
 #include "../utils/Log.h"
 #include "../utils/MemCheck.h"
 #include "../utils/Map.h"
+#include "../utils/RandomGen.h"
 #include "UIStyleHelper.h"
 #include <glad/glad.h>
 #include <stb_image.h>
@@ -106,7 +107,12 @@ void nothing::UserInterface::Init(EngineContext& ctx)
 	uiTexture_Logo        = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_logo.png").c_str(),          false, GL_LINEAR);
 	uiTexture_Health      = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_health_symbol.png").c_str(), false, GL_LINEAR);
 	uiTexture_NothingLogo = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("nothing_logo.png").c_str(),         true,  GL_LINEAR);
-	uiTexture_MenuAnim1   = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_landscape_1.png").c_str(),   true,  GL_NEAREST);
+	uiTexture_MenuOverlay = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_menu_overlay.png").c_str(),  false,  GL_NEAREST);
+
+
+	uiTexture_MenuAnim1   = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_landscape_1.png").c_str(),             true,  GL_NEAREST);
+	uiTexture_MenuAnim2   = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_landscape_2.png").c_str(),             true,  GL_NEAREST);
+	uiTexture_MenuAnim3   = CreateUITexture(ctx_->filesystem->GetTexturePathFromName("tex_ui_cityscape_placeholder.png").c_str(),   true,  GL_NEAREST);
 
 
 	// Inizializza i tween per le animazioni del menù
@@ -119,16 +125,122 @@ void nothing::UserInterface::Init(EngineContext& ctx)
 		.build());
 
 
+	testUIAnim2_.emplace(tweeny::from(2.0f, 0)
+		.to(2.25f, 255).via(tweeny::easing::linear).during((uint32_t)2000) // Appare e si avvicina
+		.to(2.5f, 255).via(tweeny::easing::linear).during((uint32_t)2000) // Si avvicina ancora
+		.to(2.75f, 0).via(tweeny::easing::linear).during((uint32_t)2000) // Scompare
+		.build());
+
+
+	testUIAnim3_.emplace(tweeny::from(0.0f, 0)
+		.to(0.0f, 255).via(tweeny::easing::linear).during((uint32_t)1000) // Stessa cosa del primo, placeholder
+		.to(0.0f, 255).via(tweeny::easing::linear).during((uint32_t)1000)
+		.to(500.0f, 255).via(tweeny::easing::linear).during((uint32_t)2000)
+		.to(500.0f, 255).via(tweeny::easing::linear).during((uint32_t)1000)
+		.to(500.0f, 0).via(tweeny::easing::linear).during((uint32_t)1000)
+		.build());
+
+
 	testUIAnim1_->on(tweeny::event::complete, [&](auto& t) {
 
 		
 		nothing::LogInfo("Stopped UI Animation 1");
 		anim1Active_ = false;
 		testUIAnim1_->seek(0);
+
+
+		while (activeAnimation_ == lastActiveAnimation_)
+		{
+
+			activeAnimation_ = nothing::Random::Int32(0, 2);
+
+
+			nothing::LogInfo("Generating new random");
+
+
+			if (activeAnimation_ != lastActiveAnimation_)
+			{
+
+				lastActiveAnimation_ = activeAnimation_;
+				break;
+
+			}
+		}
+
+
 		return tweeny::event::response::ok;
 
 
 		});
+
+
+	testUIAnim2_->on(tweeny::event::complete, [&](auto& t) {
+
+
+		nothing::LogInfo("Stopped UI Animation 2");
+		anim2Active_ = false;
+		testUIAnim2_->seek(0);
+
+
+		while (activeAnimation_ == lastActiveAnimation_)
+		{
+
+			activeAnimation_ = nothing::Random::Int32(0, 2);
+
+
+			nothing::LogInfo("Generating new random");
+
+
+			if (activeAnimation_ != lastActiveAnimation_)
+			{
+
+				lastActiveAnimation_ = activeAnimation_;
+				break;
+
+			}
+		}
+
+
+		return tweeny::event::response::ok;
+
+
+		});
+
+
+	testUIAnim3_->on(tweeny::event::complete, [&](auto& t) {
+
+
+		nothing::LogInfo("Stopped UI Animation 3");
+		anim3Active_ = false;
+		testUIAnim3_->seek(0);
+
+		while (activeAnimation_ == lastActiveAnimation_)
+		{
+
+			activeAnimation_ = nothing::Random::Int32(0, 2);
+
+
+			nothing::LogInfo("Generating new random");
+
+
+			if (activeAnimation_ != lastActiveAnimation_)
+			{
+
+				lastActiveAnimation_ = activeAnimation_;
+				break;
+
+			}
+		}
+
+
+		return tweeny::event::response::ok;
+
+
+		});
+
+
+	activeAnimation_ = nothing::Random::Int32(0, 2);
+	lastActiveAnimation_ = activeAnimation_;
 
 }
 
@@ -246,6 +358,9 @@ void nothing::UserInterface::UpdateMainMenuContext(double deltaTime)
 
 
 	RunUIAnimations(bgDl, scrSz, deltaTime);
+
+
+	bgDl->AddImage(uiTexture_MenuOverlay, ImVec2(0.0f, 0.0f), ImVec2(scrSz.x, scrSz.y));
 
 
 	ImGui::End();
@@ -807,20 +922,20 @@ void nothing::UserInterface::ShowNewGamePanel(ImVec2& scrSz)
 		}
 		
 		
-		ImGui::Button("Scena 2 - La Città d'Acciaio", ImVec2(winSz.x, 0));
-		ImGui::Button("Scena 3 - Attività illecita", ImVec2(winSz.x, 0));
-		ImGui::Separator();
-		CenteredText("Atto II - Innaugurazione dell'Eroe");
-		ImGui::Separator();
-		ImGui::Button("Scena 1 - In buona compagnia", ImVec2(winSz.x, 0));
-		ImGui::Button("Scena 2 - La fabbrica", ImVec2(winSz.x, 0));
-		ImGui::Button("Scena 3 - La prigione", ImVec2(winSz.x, 0));
-		ImGui::Separator();
-		CenteredText("Atto III - L'ascesa dell'Impero");
-		ImGui::Separator();
-		ImGui::Button("Scena 1 - Nel cuore della cittadella", ImVec2(winSz.x, 0));
-		ImGui::Button("Scena 2 - L'altro mondo", ImVec2(winSz.x, 0));
-		ImGui::Button("Scena 3 - Silenzio radio", ImVec2(winSz.x, 0));
+		//ImGui::Button("Scena 2 - La Città d'Acciaio", ImVec2(winSz.x, 0));
+		//ImGui::Button("Scena 3 - Attività illecita", ImVec2(winSz.x, 0));
+		//ImGui::Separator();
+		//CenteredText("Atto II - Innaugurazione dell'Eroe");
+		//ImGui::Separator();
+		//ImGui::Button("Scena 1 - In buona compagnia", ImVec2(winSz.x, 0));
+		//ImGui::Button("Scena 2 - La fabbrica", ImVec2(winSz.x, 0));
+		//ImGui::Button("Scena 3 - La prigione", ImVec2(winSz.x, 0));
+		//ImGui::Separator();
+		//CenteredText("Atto III - L'ascesa dell'Impero");
+		//ImGui::Separator();
+		//ImGui::Button("Scena 1 - Nel cuore della cittadella", ImVec2(winSz.x, 0));
+		//ImGui::Button("Scena 2 - L'altro mondo", ImVec2(winSz.x, 0));
+		//ImGui::Button("Scena 3 - Silenzio radio", ImVec2(winSz.x, 0));
 
 
 		ImGui::Separator();
@@ -1180,7 +1295,7 @@ void nothing::UserInterface::ShowDevConsole(ImVec2& scrSz)
 		ImGui::SetNextWindowPos(ImVec2(scrSz.x - 800 - 50, 150), ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
 		auto& devConsoleTitle = ctx_->localManager->GetUIText("uiText_DevConsole");
-		ImGui::Begin(devConsoleTitle.c_str(), &showDevConsole);
+		ImGui::Begin(devConsoleTitle.c_str(), &showDevConsole, ImGuiWindowFlags_NoCollapse);
 
 
 		ImGui::BeginChild("ConsoleLog", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar);
@@ -1273,6 +1388,26 @@ void nothing::UserInterface::ShowDevConsole(ImVec2& scrSz)
 void nothing::UserInterface::RunUIAnimations(ImDrawList* _dl, ImVec2& scrSz, double deltaTime)
 {
 
+	switch (activeAnimation_)
+	{
+
+	case 0:
+		anim1Active_ = true;
+		break;
+
+
+	case 1:
+		anim2Active_ = true;
+		break;
+
+
+	case 2:
+		anim3Active_ = true;
+		break;
+
+	}
+
+
 	if (anim1Active_)
 	{
 
@@ -1287,6 +1422,54 @@ void nothing::UserInterface::RunUIAnimations(ImDrawList* _dl, ImVec2& scrSz, dou
 		
 		float imgScaleFac = std::min(scrSz.x / 1920, scrSz.y / 1080) * 1.5f;
 		_dl->AddImage(uiTexture_MenuAnim1, ImVec2((0.0f - posX) * imgScaleFac, -100.0f * imgScaleFac), ImVec2((1920.0f - posX) * imgScaleFac, 1080.0f * imgScaleFac), ImVec2(0, 1), ImVec2(1, 0), IM_COL32(255, 255, 255, alpha));
+
+	}
+
+
+	if (anim2Active_)
+	{
+
+		int32_t step = static_cast<int>(static_cast<float>(deltaTime) * 1000);
+
+
+		testUIAnim2_->step(step);
+
+
+		auto [scaleFac, alpha] = testUIAnim2_->peek();
+
+
+		glm::vec2 center = 0.0f + glm::vec2(scrSz.x, scrSz.y) * 0.5f;
+
+		float scale = std::min(scrSz.x / 1024.0f, scrSz.y / 1024.0f) * scaleFac;
+		glm::vec2 halfSize = glm::vec2(512.0f, 512.0f) * scale;
+
+
+		_dl->AddImage(
+			uiTexture_MenuAnim2,
+			ImVec2(center.x - halfSize.x, center.y - halfSize.y),
+			ImVec2(center.x + halfSize.x, center.y + halfSize.y),
+			ImVec2(0, 1),
+			ImVec2(1, 0),
+			IM_COL32(255, 255, 255, alpha)
+		);
+
+	}
+
+
+	if (anim3Active_)
+	{
+		
+		int32_t step = static_cast<int>(static_cast<float>(deltaTime) * 1000);
+
+
+		testUIAnim3_->step(step);
+
+
+		auto [posX, alpha] = testUIAnim3_->peek();
+
+
+		float imgScaleFac = std::min(scrSz.x / 1920, scrSz.y / 1080) * 1.5f;
+		_dl->AddImage(uiTexture_MenuAnim3, ImVec2((0.0f - posX) * imgScaleFac, -100.0f * imgScaleFac), ImVec2((1920.0f - posX) * imgScaleFac, 1080.0f * imgScaleFac), ImVec2(0, 1), ImVec2(1, 0), IM_COL32(255, 255, 255, alpha));
 
 	}
 
