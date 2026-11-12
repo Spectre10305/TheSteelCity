@@ -72,16 +72,18 @@ void nothing::SceneManager::Update(double deltaTime)
 
 #pragma region INPUT
 
-	inp.moveForward   = ctx_->inputManager->IsActionHeld(GameAction::MoveForward)  ? 1.0f : 0.0f;
-	inp.moveBackwards = ctx_->inputManager->IsActionHeld(GameAction::MoveBackward) ? 1.0f : 0.0f;
-	inp.moveLeft      = ctx_->inputManager->IsActionHeld(GameAction::MoveLeft)     ? 1.0f : 0.0f;
-	inp.moveRight     = ctx_->inputManager->IsActionHeld(GameAction::MoveRight)    ? 1.0f : 0.0f;
-	inp.rotateUp      = ctx_->inputManager->IsActionHeld(GameAction::RotateUp)     ? 1.0f : 0.0f;
-	inp.rotateDown    = ctx_->inputManager->IsActionHeld(GameAction::RotateDown)   ? 1.0f : 0.0f;
-	inp.rotateLeft    = ctx_->inputManager->IsActionHeld(GameAction::RotateLeft)   ? 1.0f : 0.0f;
-	inp.rotateRight   = ctx_->inputManager->IsActionHeld(GameAction::RotateRight)  ? 1.0f : 0.0f;
-	inp.running       = ctx_->inputManager->IsActionHeld(GameAction::Run)          ? 1.0f : 0.0f;
-	inp.useKeyPressed = ctx_->inputManager->IsActionTriggered(GameAction::Use)     ? 1.0f : 0.0f;
+	inp.moveForward   = ctx_->inputManager->IsActionHeld(GameAction::MoveForward)   ? 1.0f : 0.0f;
+	inp.moveBackwards = ctx_->inputManager->IsActionHeld(GameAction::MoveBackward)  ? 1.0f : 0.0f;
+	inp.moveLeft      = ctx_->inputManager->IsActionHeld(GameAction::MoveLeft)      ? 1.0f : 0.0f;
+	inp.moveRight     = ctx_->inputManager->IsActionHeld(GameAction::MoveRight)     ? 1.0f : 0.0f;
+	inp.rotateUp      = ctx_->inputManager->IsActionHeld(GameAction::RotateUp)      ? 1.0f : 0.0f;
+	inp.rotateDown    = ctx_->inputManager->IsActionHeld(GameAction::RotateDown)    ? 1.0f : 0.0f;
+	inp.rotateLeft    = ctx_->inputManager->IsActionHeld(GameAction::RotateLeft)    ? 1.0f : 0.0f;
+	inp.rotateRight   = ctx_->inputManager->IsActionHeld(GameAction::RotateRight)   ? 1.0f : 0.0f;
+	inp.running       = ctx_->inputManager->IsActionHeld(GameAction::Run)           ? 1.0f : 0.0f;
+	inp.debugFOVPlus  = ctx_->inputManager->IsActionHeld(GameAction::CameraFovUP)   ? 1.0f : 0.0f;
+	inp.debugFOVMinus = ctx_->inputManager->IsActionHeld(GameAction::CameraFovDOWN) ? 1.0f : 0.0f;
+	inp.useKeyPressed = ctx_->inputManager->IsActionTriggered(GameAction::Use)      ? 1.0f : 0.0f;
 
 
 	ctx_->inputManager->GetMouseDelta(inp.mouseXDelta, inp.mouseYDelta);
@@ -473,40 +475,40 @@ nothing::WorldMesh nothing::SceneManager::CreateCubeWorldMesh(float width, float
 	{
 
 		// FRONT (+Z)
-		0.0f, 0.0f, D,     0.0f * tileScale, 0.0f * tileScale,
-		W,    0.0f, D,     W    * tileScale, 0.0f * tileScale,
-		W,    H,    D,     W    * tileScale, H    * tileScale,
-		0.0f, H,    D,     0.0f * tileScale, H    * tileScale,
+		0.0f, 0.0f, D,      0.0f,  0.0f,  1.0f,   0.0f * tileScale, 0.0f * tileScale,
+		W,    0.0f, D,      0.0f,  0.0f,  1.0f,   W    * tileScale, 0.0f * tileScale,
+		W,    H,    D,      0.0f,  0.0f,  1.0f,   W    * tileScale, H    * tileScale,
+		0.0f, H,    D,      0.0f,  0.0f,  1.0f,   0.0f * tileScale, H    * tileScale,
 
 		// BACK (-Z)
-		W,    0.0f, 0.0f,  0.0f * tileScale, 0.0f * tileScale,
-		0.0f, 0.0f, 0.0f,  W    * tileScale, 0.0f * tileScale,
-		0.0f, H,    0.0f,  W    * tileScale, H    * tileScale,
-		W,    H,    0.0f,  0.0f * tileScale, H    * tileScale,
+		W,    0.0f, 0.0f,   0.0f,  0.0f, -1.0f,  0.0f * tileScale, 0.0f * tileScale,
+		0.0f, 0.0f, 0.0f,   0.0f,  0.0f, -1.0f,  W    * tileScale, 0.0f * tileScale,
+		0.0f, H,    0.0f,   0.0f,  0.0f, -1.0f,  W    * tileScale, H    * tileScale,
+		W,    H,    0.0f,   0.0f,  0.0f, -1.0f,  0.0f * tileScale, H    * tileScale,
 
 		// LEFT (-X)
-		0.0f, 0.0f, 0.0f,  0.0f * tileScale, 0.0f * tileScale,
-		0.0f, 0.0f, D,     D    * tileScale, 0.0f * tileScale,
-		0.0f, H,    D,     D    * tileScale, H    * tileScale,
-		0.0f, H,    0.0f,  0.0f * tileScale, H    * tileScale,
+		0.0f, 0.0f, 0.0f,  -1.0f,  0.0f, 0.0f,   0.0f * tileScale, 0.0f * tileScale,
+		0.0f, 0.0f, D,     -1.0f,  0.0f, 0.0f,   D    * tileScale, 0.0f * tileScale,
+		0.0f, H,    D,     -1.0f,  0.0f, 0.0f,   D    * tileScale, H    * tileScale,
+		0.0f, H,    0.0f,  -1.0f,  0.0f, 0.0f,   0.0f * tileScale, H    * tileScale,
 
 		// RIGHT (+X)
-		W,    0.0f, D,     0.0f * tileScale, 0.0f * tileScale,
-		W,    0.0f, 0.0f,  D    * tileScale, 0.0f * tileScale,
-		W,    H,    0.0f,  D    * tileScale, H    * tileScale,
-		W,    H,    D,     0.0f * tileScale, H    * tileScale,
+		W,    0.0f, D,      1.0f,  0.0f, 0.0f,   0.0f * tileScale, 0.0f * tileScale,
+		W,    0.0f, 0.0f,   1.0f,  0.0f, 0.0f,   D    * tileScale, 0.0f * tileScale,
+		W,    H,    0.0f,   1.0f,  0.0f, 0.0f,   D    * tileScale, H    * tileScale,
+		W,    H,    D,      1.0f,  0.0f, 0.0f,   0.0f * tileScale, H    * tileScale,
 
 		// TOP (+Y)
-		0.0f, H,    D,     0.0f * tileScale, 0.0f * tileScale,
-		W,    H,    D,     W    * tileScale, 0.0f * tileScale,
-		W,    H,    0.0f,  W    * tileScale, D    * tileScale,
-		0.0f, H,    0.0f,  0.0f * tileScale, D    * tileScale,
+		0.0f, H,    D,      0.0f,  1.0f, 0.0f,   0.0f * tileScale, 0.0f * tileScale,
+		W,    H,    D,      0.0f,  1.0f, 0.0f,   W    * tileScale, 0.0f * tileScale,
+		W,    H,    0.0f,   0.0f,  1.0f, 0.0f,   W    * tileScale, D    * tileScale,
+		0.0f, H,    0.0f,   0.0f,  1.0f, 0.0f,   0.0f * tileScale, D    * tileScale,
 
 		// BOTTOM (-Y)
-		0.0f, 0.0f, 0.0f,  0.0f * tileScale, 0.0f * tileScale,
-		W,    0.0f, 0.0f,  W    * tileScale, 0.0f * tileScale,
-		W,    0.0f, D,     W    * tileScale, D    * tileScale,
-		0.0f, 0.0f, D,     0.0f * tileScale, D    * tileScale
+		0.0f, 0.0f, 0.0f,   0.0f, -1.0f, 0.0f,   0.0f * tileScale, 0.0f * tileScale,
+		W,    0.0f, 0.0f,   0.0f, -1.0f, 0.0f,   W    * tileScale, 0.0f * tileScale,
+		W,    0.0f, D,      0.0f, -1.0f, 0.0f,   W    * tileScale, D    * tileScale,
+		0.0f, 0.0f, D,      0.0f, -1.0f, 0.0f,   0.0f * tileScale, D    * tileScale
 
 	};
 
@@ -537,14 +539,21 @@ nothing::WorldMesh nothing::SceneManager::CreateCubeWorldMesh(float width, float
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	// Posizione
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
 
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	// Normale
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
 
+	// Coord. texture
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
@@ -684,10 +693,10 @@ nothing::WorldMesh nothing::SceneManager::CreatePlaneWorldMesh(float width, floa
 	{
 
 		// FRONT (+Z)
-		0.0f, 0.0f, 0.0f,     0.0f * tileScale, 0.0f * tileScale,
-		W,    0.0f, 0.0f,     W    * tileScale, 0.0f * tileScale,
-		W,    H,    0.0f,     W    * tileScale, H    * tileScale,
-		0.0f, H,    0.0f,     0.0f * tileScale, H    * tileScale
+		0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f * tileScale, 0.0f * tileScale,
+		W,    0.0f, 0.0f,  0.0f, 0.0f, 1.0f,  W    * tileScale, 0.0f * tileScale,
+		W,    H,    0.0f,  0.0f, 0.0f, 1.0f,  W    * tileScale, H    * tileScale,
+		0.0f, H,    0.0f,  0.0f, 0.0f, 1.0f,  0.0f * tileScale, H    * tileScale
 
 	};
 
@@ -713,12 +722,19 @@ nothing::WorldMesh nothing::SceneManager::CreatePlaneWorldMesh(float width, floa
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	// Posizione
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
 
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	// Normale
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+
+
+	// Coord. texture
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
 
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

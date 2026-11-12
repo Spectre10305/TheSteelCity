@@ -94,8 +94,10 @@ bool nothing::Engine::Init(LaunchOptions& lopts)
 	inputManager_.BindKey(SDL_SCANCODE_DOWN,   GameAction::RotateDown);
 
 
-	inputManager_.BindKey(SDL_SCANCODE_GRAVE,  GameAction::OpenDevConsole);
-	inputManager_.BindKey(SDL_SCANCODE_ESCAPE, GameAction::Exit);
+	inputManager_.BindKey(SDL_SCANCODE_GRAVE,    GameAction::OpenDevConsole);
+	inputManager_.BindKey(SDL_SCANCODE_ESCAPE,   GameAction::Exit);
+	inputManager_.BindKey(SDL_SCANCODE_PAGEUP,   GameAction::CameraFovUP);
+	inputManager_.BindKey(SDL_SCANCODE_PAGEDOWN, GameAction::CameraFovDOWN);
 
 
 	double timeToInitialize = nothing::ElapsedMS();

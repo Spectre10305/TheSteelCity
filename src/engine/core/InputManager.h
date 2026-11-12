@@ -30,7 +30,7 @@ namespace nothing
 
 
 		CameraFovUP,
-		CamerFovDown,
+		CameraFovDOWN,
 
 
 		OpenDevConsole,

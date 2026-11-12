@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 #include <SDL3/SDL.h>
 #include "../utils/Log.h"
+#include "../utils/RandomGen.h"
 #include <stb_image.h>
 #include "../core/InputManager.h"
 #include "../core/SceneManager.h"
@@ -10,6 +11,7 @@
 #include "../game/components/Transform.h"
 #include "../game/components/Camera.h"
 #include "../game/components/Tags.h"
+#include "../game/components/UIDebugValues.h"
 
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -45,10 +47,27 @@ void nothing::RenderManager::Init(EngineContext& ctx)
 
 	// Shader di default
 	defaultShader_ = new nothing::Shader(defaultVSName.c_str(), defaultFSName.c_str());
+	defaultShader_->Use();
+	defaultShader_->SetUniform("lightsNum", 4);
 
 
 	// Shader di debug
 	debugShader_ = new nothing::Shader(debugVSName.c_str(), debugFSName.c_str());
+
+
+	for (int i = 0; i < 4; i++)
+	{
+
+		float posX = nothing::Random::Float(-3.0f, 3.0f);
+		float posZ = nothing::Random::Float(-3.0f, 3.0f);
+
+
+		Light l;
+		
+		l.Init(i, { posX, 2.0f ,posZ }, 0.05f, 0.8f, 1.0f, 1.0f, 0.35f, 0.44f);
+		testLights_.emplace_back(l);
+
+	}
 
 
 #pragma region DEBUG_DRAW
@@ -89,9 +108,34 @@ void nothing::RenderManager::Update(double deltaTime)
 
 	using namespace nothing::components;
 
+
+	glEnable(GL_FRAMEBUFFER_SRGB);
+
 	
+	auto& uiDbgVals = ctx_->sceneManager->GetCompFromCtx<UIDebugValues>();
+
+
 	defaultShader_->Use();
-	defaultShader_->SetUniform("tex", 0);
+	defaultShader_->SetUniform("mat.diffuse", 0);
+	defaultShader_->SetUniform("mat.specular", glm::vec3(uiDbgVals.gSpecularIntensity));
+	defaultShader_->SetUniform("mat.shininess", uiDbgVals.gShininess);
+
+
+
+	for (auto& lightObj : testLights_)
+	{
+
+		float ambFac = uiDbgVals.gLightAmbientFac;
+		float difFac = uiDbgVals.gLightDiffuseFac;
+		float speFac = uiDbgVals.gLightSpecularFac;
+		float cnst   = uiDbgVals.gLightConstant;
+		float lin    = uiDbgVals.gLightLinear;
+		float qua    = uiDbgVals.gLightQuadratic;
+
+
+		lightObj.Update(defaultShader_, ambFac, difFac, speFac, cnst, lin, qua);
+
+	}
 
 
 	auto mainCamView = ctx_->sceneManager->registry.view<Camera, MainCameraTag>();
@@ -100,12 +144,15 @@ void nothing::RenderManager::Update(double deltaTime)
 	for (auto [ent, cam] : mainCamView.each())
 	{
 		
-		cam.viewMatrix = glm::mat4(1.0f);
+		cam.viewMatrix       = glm::mat4(1.0f);
+		cam.viewMatrix       = glm::lookAt(cam.position, cam.position + cam.rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 		cam.projectionMatrix = glm::mat4(1.0f);
-		cam.viewMatrix = glm::lookAt(cam.position, cam.position + cam.rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 		cam.projectionMatrix = glm::perspective(glm::radians(cam.fov), aspectRatioN_ / aspectRatioD_, 0.1f, 100.0f);
+
+
 		defaultShader_->SetUniform("projection", cam.projectionMatrix);
 		defaultShader_->SetUniform("view", cam.viewMatrix);
+		defaultShader_->SetUniform("cameraPos", cam.position);
 
 		
 		debugShader_->Use();
@@ -133,6 +180,7 @@ void nothing::RenderManager::Update(double deltaTime)
 		
 
 		defaultShader_->SetUniform("model", model);
+		
 
 
 		glBindTexture(GL_TEXTURE_2D, obj3D.textureID);
@@ -161,6 +209,9 @@ void nothing::RenderManager::Update(double deltaTime)
 
 	allDebugVertices_.clear();
 
+
+	glDisable(GL_FRAMEBUFFER_SRGB);
+
 }
 
 
@@ -182,7 +233,7 @@ void nothing::RenderManager::ClearScreen()
 {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glClearColor(bgR_, bgG_, bgB_, 1.0f);
+	glClearColor(bgR_, bgG_, bgB_, 1.0f);
 
 }
 

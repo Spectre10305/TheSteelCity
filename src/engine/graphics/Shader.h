@@ -23,6 +23,7 @@ namespace nothing
 		void SetUniform(const char* unifName, int newVal);
 		void SetUniform(const char* unifName, float newVal);
 		void SetUniform(const char* unifName, double newVal);
+		void SetUniform(const char* unifName, glm::vec3 newVal);
 		void SetUniform(const char* unifName, glm::mat4 newVal);
 
 	private:

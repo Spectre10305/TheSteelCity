@@ -28,7 +28,7 @@ bool nothing::WindowManager::Init()
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
 	
@@ -87,6 +87,11 @@ bool nothing::WindowManager::Init()
 	
 
 	SDL_SetWindowPosition(window_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+
+
+	float aspectRatioMin = 4.0f / 3.0f;
+	float aspectRatioMax = 16.0f / 9.0f;
+	SDL_SetWindowAspectRatio(window_, aspectRatioMin, aspectRatioMax);
 	SDL_MaximizeWindow(window_);
 	//SDL_SetWindowFullscreen(window_, true);
 

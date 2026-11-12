@@ -29,6 +29,10 @@ namespace nothing
 
 			float useKeyPressed = 0.0f;
 
+
+			float debugFOVPlus  = 0.0f;
+			float debugFOVMinus = 0.0f;
+
 		};
 	}
 }

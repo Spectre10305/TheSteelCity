@@ -19,6 +19,7 @@
 #include "../game/components/UISharedValues.h"
 #include <string>
 #include <tweeny/tweeny.h>
+#include <glm/gtc/type_ptr.hpp> // glm::value_ptr
 
 
 //=============================================================
@@ -554,7 +555,18 @@ void nothing::UserInterface::UpdateGameContext()
 	if (showPauseMenu)
 	{
 
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.7f));
+		float pauseMenuBgAlpha = 0.0f;
+
+
+		if (!viewMode)
+		{
+
+			pauseMenuBgAlpha = 0.7f;
+
+		}
+
+
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, pauseMenuBgAlpha));
 
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -567,7 +579,14 @@ void nothing::UserInterface::UpdateGameContext()
 
 
 		float logoScaleFac = std::min(scrSz.x / 1920, scrSz.y / 1080);
-		ImGui::Image(uiTexture_Logo, ImVec2(900 * logoScaleFac, 700 * logoScaleFac));
+
+
+		if (!viewMode)
+		{
+			
+			ImGui::Image(uiTexture_Logo, ImVec2(900 * logoScaleFac, 700 * logoScaleFac));
+
+		}
 
 
 		auto& resumeTxt     = ctx_->localManager->GetUIText("uiText_Resume");
@@ -599,7 +618,8 @@ void nothing::UserInterface::UpdateGameContext()
 
 
 #pragma region DEBUG VALUES
-	/*
+	
+	ImGui::PushFont(consoleFont);
 	ImGui::SetNextWindowPos(ImVec2(30, 90), ImGuiCond_FirstUseEver);
 	ImGui::Begin("UI Debug values");
 	ImGui::SetNextItemWidth(100.0f);
@@ -621,9 +641,21 @@ void nothing::UserInterface::UpdateGameContext()
 	ImGui::ColorEdit4("DBOX BorderCol", &borderCol.x, ImGuiColorEditFlags_Float);
 	ImGui::ColorEdit4("DBOX BackgroundCol", &bgCol.x, ImGuiColorEditFlags_Float);
 	ImGui::ColorEdit4("DBOX TitleBarCol", &titleBarColor.x, ImGuiColorEditFlags_Float);
-	//ImGui::SliderFloat("dummyDialogueBoxYOffset", &dummyDialogueBoxYOffset, 1.0f, 1000.0f);
+
+
+	ImGui::Separator();
+	
+	ImGui::DragFloat("gSpecularIntensity", &uiDbgVals.gSpecularIntensity, 0.1f,   0.0f, 1000.0f);
+	ImGui::DragFloat("gShininess",         &uiDbgVals.gShininess,         0.1f,   0.0f, 1000.0f);
+	ImGui::DragFloat("gLightAmbientFac",   &uiDbgVals.gLightAmbientFac,   0.1f,   0.0f, 1000.0f);
+	ImGui::DragFloat("gLightDiffuseFac",   &uiDbgVals.gLightDiffuseFac,   0.1f,   0.0f, 1000.0f);
+	ImGui::DragFloat("gLightSpecularFac",  &uiDbgVals.gLightSpecularFac,  0.1f,   0.0f, 1000.0f);
+	ImGui::DragFloat("gLightConstant",     &uiDbgVals.gLightConstant,     0.001f, 0.0f, 1000.0f);
+	ImGui::DragFloat("gLightLinear",       &uiDbgVals.gLightLinear,       0.001f, 0.0f, 1000.0f);
+	ImGui::DragFloat("gLightQuadratic",    &uiDbgVals.gLightQuadratic,    0.001f, 0.0f, 1000.0f);
 	ImGui::End();
-	*/
+	ImGui::PopFont();
+	
 #pragma endregion
 
 }

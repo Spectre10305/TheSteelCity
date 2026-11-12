@@ -164,6 +164,25 @@ namespace nothing
 
 			}
 
+
+			// FOV +- (debug)
+			if (input.debugFOVPlus == 1.0f)
+			{
+				
+				cam.fov += 0.1f;
+				if (cam.fov > 120.0f) { cam.fov = 120.0f; }
+
+			}
+
+
+			if (input.debugFOVMinus == 1.0)
+			{
+
+				cam.fov -= 0.1f;
+				if (cam.fov < 20.0f) { cam.fov = 20.0f; }
+
+			}
+
 		}
 
 

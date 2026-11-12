@@ -148,6 +148,18 @@ void nothing::Shader::SetUniform(const char* unifName, double newVal)
 //=============================================================
 
 
+
+void nothing::Shader::SetUniform(const char* unifName, glm::vec3 newVal)
+{
+
+    glUniform3fv(glGetUniformLocation(programID_, unifName), 1, glm::value_ptr(newVal));
+
+}
+
+
+//=============================================================
+
+
 void nothing::Shader::SetUniform(const char* unifName, glm::mat4 newVal)
 {
 

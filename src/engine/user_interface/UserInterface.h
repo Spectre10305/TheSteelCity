@@ -109,6 +109,12 @@ namespace nothing
 		bool showDevConsole = false;
 
 
+		// Se VERO, toglie il logo dal menù di
+		// pausa e imposta il background con alpha
+		// a 0 per vedere meglio la scena
+		bool viewMode = true;
+
+
 		// Texture UI
 		uint32_t uiTexture_Logo        = 0;
 		uint32_t uiTexture_Health      = 0;

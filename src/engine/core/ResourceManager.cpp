@@ -283,7 +283,7 @@ bool nothing::ResourceManager::CreateModel3D(const std::string& filePath)
 			if (idx.normal_index >= 0)
 			{
 
-				/*
+				
 				v.normal =
 				{
 
@@ -292,7 +292,7 @@ bool nothing::ResourceManager::CreateModel3D(const std::string& filePath)
 					attrib.normals[3 * idx.normal_index + 2]
 
 				};
-				*/
+				
 
 			}
 
@@ -373,13 +373,13 @@ bool nothing::ResourceManager::CreateModel3D(const std::string& filePath)
 
 
 	// Normale
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex3D), (void*)offsetof(Vertex3D, texCoords));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex3D), (void*)offsetof(Vertex3D, normal));
 	glEnableVertexAttribArray(1);
 
 
 	// TexCoords
-	//glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex3D), (void*)offsetof(Vertex3D, texCoords));
-	//glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex3D), (void*)offsetof(Vertex3D, texCoords));
+	glEnableVertexAttribArray(2);
 
 
 	glBindVertexArray(0);
