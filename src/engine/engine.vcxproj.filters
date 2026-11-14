@@ -168,6 +168,9 @@
     <ClInclude Include="core\LocalizationManager.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="graphics\Framebuffer.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\Engine.cpp">
@@ -243,6 +246,9 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="core\LocalizationManager.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\Framebuffer.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

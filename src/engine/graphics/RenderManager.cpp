@@ -7,6 +7,7 @@
 #include "../core/InputManager.h"
 #include "../core/SceneManager.h"
 #include "../core/Filesystem.h"
+#include "../core/WindowManager.h"
 #include "../game/components/Object3D.h"
 #include "../game/components/Transform.h"
 #include "../game/components/Camera.h"
@@ -30,7 +31,6 @@ void nothing::RenderManager::Init(EngineContext& ctx)
 	ctx_ = &ctx;
 
 
-	glEnable(GL_DEPTH_TEST);
 	//glEnable(GL_SCISSOR_TEST);
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CCW);
@@ -43,6 +43,8 @@ void nothing::RenderManager::Init(EngineContext& ctx)
 	std::string defaultFSName = rootPath + "\\assets\\engine\\shaders\\default_shader_frag.glsl";
 	std::string debugVSName   = rootPath + "\\assets\\engine\\shaders\\debug_draw_vert.glsl";
 	std::string debugFSName   = rootPath + "\\assets\\engine\\shaders\\debug_draw_frag.glsl";
+	std::string screenVSName  = rootPath + "\\assets\\engine\\shaders\\default_screen_vert.glsl";
+	std::string screenFSName  = rootPath + "\\assets\\engine\\shaders\\default_screen_frag.glsl";
 
 
 	// Shader di default
@@ -55,6 +57,13 @@ void nothing::RenderManager::Init(EngineContext& ctx)
 	debugShader_ = new nothing::Shader(debugVSName.c_str(), debugFSName.c_str());
 
 
+	// Screen shader per framebuffer post-processing
+	screenShader_ = new nothing::Shader(screenVSName.c_str(), screenFSName.c_str());
+	screenShader_->Use();
+	screenShader_->SetUniform("screenTexture", 0);
+
+
+	// Test luci
 	for (int i = 0; i < 4; i++)
 	{
 
@@ -73,12 +82,12 @@ void nothing::RenderManager::Init(EngineContext& ctx)
 #pragma region DEBUG_DRAW
 
 
-	glGenVertexArrays(1, &m_debugVAO_);
-	glGenBuffers(1, &m_debugVBO_);
+	glGenVertexArrays(1, &debugVAO_);
+	glGenBuffers(1, &debugVBO_);
 
 
-	glBindVertexArray(m_debugVAO_);
-	glBindBuffer(GL_ARRAY_BUFFER, m_debugVBO_);
+	glBindVertexArray(debugVAO_);
+	glBindBuffer(GL_ARRAY_BUFFER, debugVBO_);
 
 
 	// Quindi si alloca un buffer vuoto con GL_DYNAMIC_DRAW, cambia ogni frame
@@ -97,6 +106,76 @@ void nothing::RenderManager::Init(EngineContext& ctx)
 
 #pragma endregion
 
+
+	int wWidth = 0;
+	int wHeight = 0;
+	ctx_->windowManager->GetWindowSize(wWidth, wHeight);
+	testPostProcessFB.Init(wWidth, wHeight);
+
+
+	/*
+	glGenFramebuffers(1, &testFrameBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, testFrameBuffer);
+
+	glGenTextures(1, &testFrameBufferTexture);
+	glBindTexture(GL_TEXTURE_2D, testFrameBufferTexture);
+
+
+	int wWidth  = 0;
+	int wHeight = 0;
+	ctx_->windowManager->GetWindowSize(wWidth, wHeight);
+
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, wWidth, wHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, testFrameBufferTexture, 0);
+
+
+	glGenRenderbuffers(1, &testFrameBufferRenderBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, testFrameBufferRenderBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, wWidth, wHeight);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, testFrameBufferRenderBuffer);
+
+
+	auto fboStats = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+
+	if (fboStats != GL_FRAMEBUFFER_COMPLETE)
+	{
+
+		nothing::LogInfo("Framebuffer err. : " + std::to_string(fboStats));
+
+	}
+	*/
+
+
+	float screenRectVerts[] =
+	{
+
+		 1.0f, -1.0f,   1.0f, 0.0f,
+		-1.0f, -1.0f,   0.0f, 0.0f,
+		-1.0f,  1.0f,   0.0f, 1.0f,
+
+		 1.0f,  1.0f,   1.0f, 1.0f,
+		 1.0f, -1.0f,   1.0f, 0.0f,
+		-1.0f,  1.0f,   0.0f, 1.0f
+
+	};
+
+
+	glGenVertexArrays(1, &testFrameBufferRectVAO);
+	glGenBuffers(1, &testFrameBufferRectVBO);
+	glBindVertexArray(testFrameBufferRectVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, testFrameBufferRectVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(screenRectVerts), &screenRectVerts, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
 }
 
 
@@ -109,6 +188,7 @@ void nothing::RenderManager::Update(double deltaTime)
 	using namespace nothing::components;
 
 
+	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_FRAMEBUFFER_SRGB);
 
 	
@@ -138,33 +218,24 @@ void nothing::RenderManager::Update(double deltaTime)
 	}
 
 
+	// Prendiamo l'entità della telecamera e poi il componente della Camera, così evitiamo un ciclo for inutile
 	auto mainCamView = ctx_->sceneManager->registry.view<Camera, MainCameraTag>();
-	
-
-	for (auto [ent, cam] : mainCamView.each())
-	{
-		
-		cam.viewMatrix       = glm::mat4(1.0f);
-		cam.viewMatrix       = glm::lookAt(cam.position, cam.position + cam.rotation, glm::vec3(0.0f, 1.0f, 0.0f));
-		cam.projectionMatrix = glm::mat4(1.0f);
-		cam.projectionMatrix = glm::perspective(glm::radians(cam.fov), aspectRatioN_ / aspectRatioD_, 0.1f, 100.0f);
+	entt::entity camEntity = mainCamView.back();
+	auto& cam = ctx_->sceneManager->registry.get<Camera>(camEntity);
 
 
-		defaultShader_->SetUniform("projection", cam.projectionMatrix);
-		defaultShader_->SetUniform("view", cam.viewMatrix);
-		defaultShader_->SetUniform("cameraPos", cam.position);
-
-		
-		debugShader_->Use();
-		debugShader_->SetUniform("projection", cam.projectionMatrix);
-		debugShader_->SetUniform("view", cam.viewMatrix);
-
-	}
+	cam.viewMatrix       = glm::mat4(1.0f);
+	cam.viewMatrix       = glm::lookAt(cam.position, cam.position + cam.rotation, glm::vec3(0.0f, 1.0f, 0.0f));
+	cam.projectionMatrix = glm::mat4(1.0f);
+	cam.projectionMatrix = glm::perspective(glm::radians(cam.fov), aspectRatioN_ / aspectRatioD_, 0.1f, 100.0f);
 
 
-	defaultShader_->Use();
+	defaultShader_->SetUniform("projection", cam.projectionMatrix);
+	defaultShader_->SetUniform("view", cam.viewMatrix);
+	defaultShader_->SetUniform("cameraPos", cam.position);
 
 
+	// Disegnamo tutti gli oggetti 3D
 	auto objtrview = ctx_->sceneManager->registry.view<nothing::components::Object3D, nothing::components::Transform>();
 
 
@@ -190,16 +261,18 @@ void nothing::RenderManager::Update(double deltaTime)
 	}
 
 
-
+	// Elementi di debug
 	debugShader_->Use();
 	debugShader_->SetUniform("model", glm::mat4(1.0f));
+	debugShader_->SetUniform("projection", cam.projectionMatrix);
+	debugShader_->SetUniform("view", cam.viewMatrix);
 
 
 	DebugDrawLine({ 0.0f, 0.0f, 0.0f }, { 0.0f, 10.0f, 0.0f });
 
 
-	glBindVertexArray(m_debugVAO_);
-	glBindBuffer(GL_ARRAY_BUFFER, m_debugVBO_);
+	glBindVertexArray(debugVAO_);
+	glBindBuffer(GL_ARRAY_BUFFER, debugVBO_);
 
 
 	// Nothing
@@ -208,6 +281,23 @@ void nothing::RenderManager::Update(double deltaTime)
 
 
 	allDebugVertices_.clear();
+
+
+	testPostProcessFB.EndRender();
+
+
+	// Disegna lo screen rect del framebuffer di post processing
+	glDisable(GL_DEPTH_TEST);
+	screenShader_->Use();
+	glBindVertexArray(testFrameBufferRectVAO);
+	glBindTexture(GL_TEXTURE_2D, testPostProcessFB.GetGeneratedTextureID());
+
+
+	// HACK: impostiamo il winding a CW, disegnamo il rettangolo e rimettiamo a CCW.
+	// Sì, solo perché non ho voglia di controllare l'ordine dei vertici lol.
+	glFrontFace(GL_CW);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glFrontFace(GL_CCW);
 
 
 	glDisable(GL_FRAMEBUFFER_SRGB);
@@ -232,6 +322,8 @@ void nothing::RenderManager::Shutdown()
 void nothing::RenderManager::ClearScreen()
 {
 
+	//glBindFramebuffer(GL_FRAMEBUFFER, testFrameBuffer);
+	testPostProcessFB.BeginRender();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(bgR_, bgG_, bgB_, 1.0f);
 

@@ -181,6 +181,7 @@
     <ClInclude Include="core\EngineContext.h" />
     <ClInclude Include="core\WindowManager.h" />
     <ClInclude Include="core\Filesystem.h" />
+    <ClInclude Include="graphics\Framebuffer.h" />
     <ClInclude Include="game\basic\BaseCustomBehaviour.h" />
     <ClInclude Include="game\basic\GameEvents.h" />
     <ClInclude Include="game\components\Camera.h" />
@@ -252,6 +253,7 @@
     <ClCompile Include="core\WindowManager.cpp" />
     <ClCompile Include="engine_main.cpp" />
     <ClCompile Include="core\Filesystem.cpp" />
+    <ClCompile Include="graphics\Framebuffer.cpp" />
     <ClCompile Include="graphics\glad.c" />
     <ClCompile Include="graphics\IMGUI\imgui.cpp" />
     <ClCompile Include="graphics\IMGUI\imgui_demo.cpp" />

@@ -2,6 +2,7 @@
 #include <cstdint> // uint32_t
 #include <vector>
 #include "Shader.h"
+#include "Framebuffer.h"
 #include <entt.hpp>
 #include <glm/glm.hpp>
 #include <string>
@@ -115,8 +116,14 @@ namespace nothing
 
 		Shader*  defaultShader_ = nullptr;
 		Shader*  debugShader_   = nullptr;
-		uint32_t m_debugVAO_    = 0;
-		uint32_t m_debugVBO_    = 0;
+		Shader*  screenShader_  = nullptr;
+		uint32_t debugVAO_      = 0;
+		uint32_t debugVBO_      = 0;
+
+
+		Framebuffer testPostProcessFB;
+		uint32_t    testFrameBufferRectVAO = 0;
+		uint32_t    testFrameBufferRectVBO = 0;
 
 
 		float bgR_ = 1.0f;
