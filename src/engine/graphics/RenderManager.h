@@ -7,6 +7,11 @@
 #include <glm/glm.hpp>
 #include <string>
 #include "../core/EngineContext.h"
+#include "../game/components/Camera.h"
+
+
+#define NOTHING_RENDER_TEX_TYPE_DEPTH 0
+#define NOTHING_RENDER_TEX_TYPE_COLOR 1
 
 
 namespace nothing
@@ -103,10 +108,11 @@ namespace nothing
 
 		// Lo usiamo per cancellare il buffer dello schermo diretamente all'inizio del frame
 		// senza aspettare l'update del RenderManager
-		void ClearScreen();
-		void ResizeGLViewport(int w, int h);
-		void SetBackgroundColor(float r, float g, float b);
-		void SetAspectRatio(int n, int d);
+		void     ClearScreen();
+		void     ResizeGLViewport(int w, int h);
+		void     SetBackgroundColor(float r, float g, float b);
+		void     SetAspectRatio(int n, int d);
+		uint32_t GetRenderTexture(int renderTextureType);
 
 
 		// Debug draw
@@ -114,14 +120,27 @@ namespace nothing
 
 	private:
 
+		void InitDebugDraw();
+		void InitPostProcessDisplayQuad();
+		void RenderScene(Shader* shader); // Wrapper per condensare il rendering della scena
+		void RenderDebugStuff(nothing::components::Camera& cam); // Roba di debug
+		void RenderScreenQuad(uint32_t displayedTexture);
+
+
 		Shader*  defaultShader_ = nullptr;
 		Shader*  debugShader_   = nullptr;
 		Shader*  screenShader_  = nullptr;
+		Shader*  depthShader_   = nullptr;
+
+
 		uint32_t debugVAO_      = 0;
 		uint32_t debugVBO_      = 0;
 
 
 		Framebuffer testPostProcessFB;
+		Framebuffer testShadowPassFB;
+
+
 		uint32_t    testFrameBufferRectVAO = 0;
 		uint32_t    testFrameBufferRectVBO = 0;
 
@@ -133,6 +152,9 @@ namespace nothing
 
 		float aspectRatioN_ = 4.0f;
 		float aspectRatioD_ = 3.0f;
+
+
+		int shadowMapResolution = 4096;
 
 
 		std::vector<DebugVertex> allDebugVertices_;

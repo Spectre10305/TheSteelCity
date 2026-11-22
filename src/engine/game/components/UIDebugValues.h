@@ -12,22 +12,22 @@ namespace nothing
 		struct UIDebugValues
 		{
 
+			float playerPosX      = 0.0f;
+			float playerPosY      = 0.0f;
+			float playerPosZ      = 0.0f;
 			float playerWalkSpeed = 0.0f;
 			float playerRunSpeed  = 0.0f;
 			int   playerHealth    = 0;
 
 
 			// RenderManager
-			float gSpecularIntensity = 1.0;
-			float gShininess         = 32.0f;
-
-
-			float gLightAmbientFac   = 0.1f;
-			float gLightDiffuseFac   = 0.8f;
-			float gLightSpecularFac  = 1.0f;
-			float gLightConstant     = 1.0f;
-			float gLightLinear       = 0.35f;
-			float gLightQuadratic    = 0.44f;
+			float gExposure       = 1.0f;
+			float gLightPosX      = -2.0f;
+			float gLightPosY      = 4.0f;
+			float gLightPosZ      = -1.0f;
+			float gDepthNear      = 0.1f;
+			float gDepthFar       = 7.5f;
+			float gDepthDimension = 10.0f;
 
 		};
 

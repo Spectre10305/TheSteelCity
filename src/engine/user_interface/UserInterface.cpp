@@ -2,6 +2,7 @@
 #include "../graphics/IMGUI/imgui.h"
 #include "../graphics/IMGUI/imgui_impl_sdl3.h"
 #include "../graphics/IMGUI/imgui_impl_opengl3.h"
+#include "../graphics/RenderManager.h"
 #include "../utils/Log.h"
 #include "../utils/MemCheck.h"
 #include "../utils/Map.h"
@@ -279,6 +280,27 @@ void nothing::UserInterface::Update(double deltaTime)
 		break;
 
 	}
+
+
+	if (ImGui::BeginMainMenuBar())
+	{
+
+		if (ImGui::BeginMenu("Debug"))
+		{
+
+			if (ImGui::MenuItem("UI Debug Values"))       { showUIDebugValues = true; }
+			if (ImGui::MenuItem("Render Texture Viewer")) { showRenderTexView = true; }
+
+
+			ImGui::EndMenu();
+
+		}
+
+
+		ImGui::EndMainMenuBar();
+
+	}
+
 
 
 	// Console di sviluppo
@@ -619,42 +641,58 @@ void nothing::UserInterface::UpdateGameContext()
 
 #pragma region DEBUG VALUES
 	
-	ImGui::PushFont(consoleFont);
-	ImGui::SetNextWindowPos(ImVec2(30, 90), ImGuiCond_FirstUseEver);
-	ImGui::Begin("UI Debug values");
-	ImGui::SetNextItemWidth(100.0f);
-	ImGui::SliderFloat("Player Walk Speed", &uiDbgVals.playerWalkSpeed, 0.1f, 5.0f);
-	ImGui::SetNextItemWidth(100.0f);
-	ImGui::SliderFloat("Player Run Speed", &uiDbgVals.playerRunSpeed, 0.1f, 5.0f);
-	ImGui::SetNextItemWidth(100.0f);
-	ImGui::SliderInt("Player Health", &uiDbgVals.playerHealth, 0, 100);
-	//ImGui::SliderFloat("DialogueBoxYOffset", &dialogueBoxYOffset, 0.0f, scrSz.y);
-	ImGui::SetNextItemWidth(100.0f);
-	ImGui::SliderFloat("DialogueBoxWidth", &dialogueBoxWidth, 1.0f, 1000.0f);
-	ImGui::SetNextItemWidth(100.0f);
-	ImGui::SliderFloat("DialogueBoxHeight", &dialogueBoxHeight, 1.0f, 1000.0f);
+
+	if (showUIDebugValues)
+	{
+
+		ImGui::PushFont(consoleFont);
+		ImGui::SetNextWindowPos(ImVec2(30, 90), ImGuiCond_FirstUseEver);
+		ImGui::Begin("UI Debug values", &showUIDebugValues);
+		ImGui::PushItemWidth(100.0f);
+		ImGui::SliderFloat("Player Walk Speed",  &uiDbgVals.playerWalkSpeed, 0.1f, 5.0f);
+		ImGui::SliderFloat("Player Run Speed",   &uiDbgVals.playerRunSpeed,  0.1f, 5.0f);
+		ImGui::SliderInt("Player Health",        &uiDbgVals.playerHealth,    0,    100);
+//      ImGui::SliderFloat("DialogueBoxYOffset", &dialogueBoxYOffset,        0.0f, scrSz.y);
+		ImGui::SliderFloat("DialogueBoxWidth",   &dialogueBoxWidth,          1.0f, 1000.0f);
+		ImGui::SliderFloat("DialogueBoxHeight",  &dialogueBoxHeight,         1.0f, 1000.0f);
+		ImGui::PopItemWidth();
 
 
-	ImGui::Separator();
+		ImGui::Separator();
 
 
-	ImGui::ColorEdit4("DBOX BorderCol", &borderCol.x, ImGuiColorEditFlags_Float);
-	ImGui::ColorEdit4("DBOX BackgroundCol", &bgCol.x, ImGuiColorEditFlags_Float);
-	ImGui::ColorEdit4("DBOX TitleBarCol", &titleBarColor.x, ImGuiColorEditFlags_Float);
+		ImGui::ColorEdit4("DBOX BorderCol", &borderCol.x, ImGuiColorEditFlags_Float);
+		ImGui::ColorEdit4("DBOX BackgroundCol", &bgCol.x, ImGuiColorEditFlags_Float);
+		ImGui::ColorEdit4("DBOX TitleBarCol", &titleBarColor.x, ImGuiColorEditFlags_Float);
 
 
-	ImGui::Separator();
+		ImGui::Separator();
+		ImGui::PushItemWidth(100.0f);
+		ImGui::DragFloat("gExposure",       &uiDbgVals.gExposure,       0.01f,  0.01f,   1000.0f);
+		ImGui::DragFloat("gLightPosX",      &uiDbgVals.gLightPosX,      0.1f,  -1000.0f, 1000.0f);
+		ImGui::DragFloat("gLightPosY",      &uiDbgVals.gLightPosY,      0.1f,  -1000.0f, 1000.0f);
+		ImGui::DragFloat("gLightPosZ",      &uiDbgVals.gLightPosZ,      0.1f,  -1000.0f, 1000.0f);
+		ImGui::DragFloat("gDepthNear",      &uiDbgVals.gDepthNear,      0.01f, -1000.0f, 1000.0f);
+		ImGui::DragFloat("gDepthFar",       &uiDbgVals.gDepthFar,       0.01f, -1000.0f, 1000.0f);
+		ImGui::DragFloat("gDepthDimension", &uiDbgVals.gDepthDimension, 0.01f, -1000.0f, 1000.0f);
+		ImGui::PopItemWidth();
+		ImGui::End();
+		ImGui::PopFont();
+
+	}
+
+
+	if (showRenderTexView)
+	{
+
+		ImGui::SetNextWindowPos(ImVec2(30, 400), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(640, 640), ImGuiCond_FirstUseEver);
+		ImGui::Begin("Render texture viewer", &showRenderTexView);
+		ImGui::Image(ctx_->renderManager->GetRenderTexture(NOTHING_RENDER_TEX_TYPE_DEPTH), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::End();
+
+	}
 	
-	ImGui::DragFloat("gSpecularIntensity", &uiDbgVals.gSpecularIntensity, 0.1f,   0.0f, 1000.0f);
-	ImGui::DragFloat("gShininess",         &uiDbgVals.gShininess,         0.1f,   0.0f, 1000.0f);
-	ImGui::DragFloat("gLightAmbientFac",   &uiDbgVals.gLightAmbientFac,   0.1f,   0.0f, 1000.0f);
-	ImGui::DragFloat("gLightDiffuseFac",   &uiDbgVals.gLightDiffuseFac,   0.1f,   0.0f, 1000.0f);
-	ImGui::DragFloat("gLightSpecularFac",  &uiDbgVals.gLightSpecularFac,  0.1f,   0.0f, 1000.0f);
-	ImGui::DragFloat("gLightConstant",     &uiDbgVals.gLightConstant,     0.001f, 0.0f, 1000.0f);
-	ImGui::DragFloat("gLightLinear",       &uiDbgVals.gLightLinear,       0.001f, 0.0f, 1000.0f);
-	ImGui::DragFloat("gLightQuadratic",    &uiDbgVals.gLightQuadratic,    0.001f, 0.0f, 1000.0f);
-	ImGui::End();
-	ImGui::PopFont();
 	
 #pragma endregion
 

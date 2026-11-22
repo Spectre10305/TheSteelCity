@@ -8,6 +8,7 @@
 #include "../game/components/NameTag.h"
 #include "../game/components/EntityReference.h"
 #include "../game/components/CustomBehaviour.h"
+#include "../game/components/UIDebugValues.h"
 #include <glm/gtc/quaternion.hpp>
 
 
@@ -55,6 +56,12 @@ void nothing::PhysicsManager::Update(double deltaTime)
 			
 
 			tr.position = GlmVec3_FromB3(pos);
+
+
+			auto& uiDbgVals = ctx_->sceneManager->GetCompFromCtx<UIDebugValues>();
+			uiDbgVals.playerPosX = pos.x;
+			uiDbgVals.playerPosY = pos.y;
+			uiDbgVals.playerPosZ = pos.z;
 
 		}
 

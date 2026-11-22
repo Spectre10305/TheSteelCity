@@ -11,7 +11,7 @@ namespace nothing
 
 	public:
 
-		void     Init(int windowWidth, int windowHeight);
+		void     Init(int genTexWidth, int genTexHeight, bool storeDepth, bool hdr);
 		void     BeginRender();
 		void     EndRender();
 		uint32_t GetGeneratedTextureID();

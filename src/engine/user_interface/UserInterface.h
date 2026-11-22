@@ -106,7 +106,9 @@ namespace nothing
 		bool showBackToMenuWarning = false;
 
 
-		bool showDevConsole = false;
+		bool showDevConsole    = false;
+		bool showUIDebugValues = false;
+		bool showRenderTexView = false;
 
 
 		// Se VERO, toglie il logo dal menù di
